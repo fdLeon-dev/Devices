@@ -5,49 +5,32 @@
 
 const fs = require('fs');
 const path = require('path');
-const cheerio = require('cheerio');
 
 const filePath = path.join(__dirname, '..', 'index.html');
+let html = fs.readFileSync(filePath, 'utf8');
 
-const html = fs.readFileSync(filePath, 'utf8');
-const $ = cheerio.load(html, { decodeEntities: false });
+// Use simple regex to find and extract sections by their id
+// Find servicios section (id="servicios" with class "services")
+const serviciosMatch = html.match(/(<section id="servicios"[^>]*>[\s\S]*?<\/section>)/);
+// Find trabajos section (id="trabajos" with class "works")
+const trabajosMatch = html.match(/(<section id="trabajos"[^>]*>[\s\S]*?<\/section>)/);
 
-// Helper to find the section that contains an H2 with the given text
-function findSectionByH2Text(text) {
-  const sections = $('section');
-  for (let i = 0; i < sections.length; i++) {
-    const sec = sections.eq(i);
-    const h2 = sec.find('h2').first();
-    if (h2 && h2.text().trim() === text) {
-      return sec;
-    }
-  }
-  return null;
-}
-
-const servicios = findSectionByH2Text('Nuestros Servicios');
-const trabajos = findSectionByH2Text('Nuestros Trabajos');
-
-if (!servicios) {
+if (!serviciosMatch) {
   console.error("No se encontró la sección 'Nuestros Servicios'");
   process.exit(1);
 }
-if (!trabajos) {
+if (!trabajosMatch) {
   console.error("No se encontró la sección 'Nuestros Trabajos'");
   process.exit(1);
 }
 
-// Swap nodes in the DOM. We'll replace each with a unique placeholder, then swap.
-const marker1 = '<!--__SWAP_MARKER_SERVICIOS__-->';
-const marker2 = '<!--__SWAP_MARKER_TRABAJOS__-->';
-servicios.before(marker1);
-trabajos.before(marker2);
-servicios.remove();
-trabajos.remove();
+const serviciosSection = serviciosMatch[1];
+const trabajosSection = trabajosMatch[1];
 
-// Replace markers: insert trabajos at servicios marker and servicios at trabajos marker
-$('body').html($('body').html().replace(marker1, trabajos.toString()).replace(marker2, servicios.toString()));
+// Perform the swap by replacing servicios with trabajos and vice versa
+let swapped = html.replace(serviciosSection, '___TEMP_SERVICIOS___');
+swapped = swapped.replace(trabajosSection, serviciosSection);
+swapped = swapped.replace('___TEMP_SERVICIOS___', trabajosSection);
 
-const out = $.html();
-fs.writeFileSync(filePath, out, 'utf8');
-console.log('Sections swapped: "Nuestros Servicios" <-> "Nuestros Trabajos"');
+fs.writeFileSync(filePath, swapped, 'utf8');
+console.log('✓ Sections swapped: "Nuestros Servicios" <-> "Nuestros Trabajos"');
