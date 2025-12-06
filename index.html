@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
+<!DOCTYPE html><html lang="es"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Devices F2 - Servicio Técnico de Computadoras</title>
-  <meta name="description"
-    content="Servicio técnico profesional de reparación y ensamblaje de computadoras. Reparaciones, upgrades, PCs personalizadas y mantenimiento.">
+  <meta name="description" content="Servicio técnico profesional de reparación y ensamblaje de computadoras. Reparaciones, upgrades, PCs personalizadas y mantenimiento.">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -30,7 +26,7 @@
   <meta name="apple-mobile-web-app-title" content="Devices F2">
 
   <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-69VRCVVGXD"></script>
+  <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-69VRCVVGXD"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
@@ -81,8 +77,7 @@
             rápidas y confiables para tu equipo.</p>
           <div class="hero-buttons">
             <a href="#cotizar" class="btn btn-primary">Cotizar Ahora</a>
-            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20técnico"
-              class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20técnico" class="btn btn-whatsapp" target="_blank" rel="noopener">
               <i class="fab fa-whatsapp"></i> WhatsApp
             </a>
             <a href="#servicios" class="btn btn-secondary">Ver Servicios</a>
@@ -90,7 +85,7 @@
         </div>
         <div class="hero-image">
           <div class="hero-graphic">
-            <video class="hero-avatar-overlay" autoplay loop muted playsinline>
+            <video class="hero-avatar-overlay" autoplay="" loop="" muted="" playsinline="">
               <source src="public/images/logos/publicaciones.mp4" type="video/mp4">
               <!-- Fallback si el video no carga -->
               <img src="public/images/avatars/avatar.png" alt="Avatar">
@@ -101,64 +96,119 @@
     </section>
 
     <!-- Servicios Section -->
-    <section id="servicios" class="services">
+    <section id="trabajos" class="works">
       <div class="container">
         <div class="section-header">
-          <h2>Nuestros Servicios</h2>
-          <p>Soluciones completas para todas tus necesidades tecnológicas</p>
+          <h2>Nuestros Trabajos</h2>
+          <p>Algunos de los proyectos que hemos realizado</p>
         </div>
-        <div class="services-grid">
-          <div class="service-card reparacion-card">
-            <div class="service-image">
-              <img src="public/images/services/reparacion.jpg" alt="Reparación de Hardware" class="reparacion-main"
-                loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-reparacion.jpg" alt="Después de la Reparación"
-                class="reparacion-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-wrench"></i>
+        <div class="works-filters">
+          <button class="filter-btn active" data-filter="all">Todos</button>
+          <button class="filter-btn" data-filter="gaming">Gaming</button>
+          <button class="filter-btn" data-filter="reparacion">Reparación</button>
+          <button class="filter-btn" data-filter="upgrade">Upgrade</button>
+          <button class="filter-btn" data-filter="ensamblaje">Ensamblaje</button>
+        </div>
+        <div class="works-grid">
+          <div class="work-card" data-category="gaming ensamblaje">
+            <div class="work-image">
+              <img src="public/images/works/pc2.jpg" alt="PC Gaming Personalizada" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Reparación</h3>
-            <p>Diagnóstico y reparación de hardware y software. Solucionamos cualquier problema de tu computadora.</p>
+            <div class="work-content">
+              <h3>PC Gaming Personalizada</h3>
+              <p>Ensamblaje completo de PC gaming personalizada con las especializaciones que el cliente solicite.</p>
+              <div class="work-tags">
+                <span class="tag">Gaming</span>
+                <span class="tag">Ensamblaje</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card upgrade-card">
-            <div class="service-image">
-              <img src="public/images/services/update.jpg" alt="Upgrade de PC" class="upgrade-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-update.jpg" alt="Después del Upgrade" class="upgrade-hover"
-                loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-arrow-up"></i>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/laptop.jpg" alt="Reparación de Laptop" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Upgrade</h3>
-            <p>Mejora el rendimiento de tu PC con las mejores piezas y componentes del mercado.</p>
+            <div class="work-content">
+              <h3>Reparación de Laptop</h3>
+              <p>Cambio de pantalla, teclado y disco duro por SSD en laptop Acer. Restauración completa del equipo.</p>
+              <div class="work-tags">
+                <span class="tag">Reparación</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Laptop</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card ensamblaje-card">
-            <div class="service-image">
-              <img src="public/images/services/ensamble.jpg" alt="Ensamblaje de PC" class="ensamblaje-main"
-                loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/gestion.jpg" alt="Gestión de Ensamblaje" class="ensamblaje-hover"
-                loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-puzzle-piece"></i>
+          <div class="work-card" data-category="upgrade">
+            <div class="work-image">
+              <img src="public/images/works/after-mantenimiento.jpg" alt="Upgrade de PC" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Ensamblaje</h3>
-            <p>PCs personalizadas desde cero. Te ayudamos a elegir los componentes perfectos para ti.</p>
+            <div class="work-content">
+              <h3>Upgrade de PC</h3>
+              <p>Actualización de GPU y RAM en PC de oficina. Mejora significativa en rendimiento.</p>
+              <div class="work-tags">
+                <span class="tag">Upgrade</span>
+                <span class="tag">GPU</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card mantenimiento-card">
-            <div class="service-image">
-              <img src="public/images/services/mantenimiento.jpg" alt="Mantenimiento de PC" class="mantenimiento-main"
-                loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-mantenimiento.jpg" alt="Después del Mantenimiento"
-                class="mantenimiento-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-shield-alt"></i>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/works/giga.jpg" alt="Mantenimiento Preventivo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Mantenimiento</h3>
-            <p>Mantenimiento preventivo y limpieza profunda para mantener tu PC en óptimas condiciones.</p>
+            <div class="work-content">
+              <h3>Mantenimiento Preventivo</h3>
+              <p>Limpieza profunda y optimización de sistema. PC funcionando como nueva.</p>
+              <div class="work-tags">
+                <span class="tag">Mantenimiento</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Limpieza</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-card" data-category="ensamblaje gaming">
+            <div class="work-image">
+              <img src="public/images/works/trabajo-ensamblaje-01.jpg" alt="PC de Trabajo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
+              </div>
+            </div>
+            <div class="work-content">
+              <h3>PC de Trabajo</h3>
+              <p>PC profesional de alto rendimiento optimizada para programación y edición de video.</p>
+              <div class="work-tags">
+                <span class="tag">Ensamblaje</span>
+                <span class="tag">Gaming</span>
+                <span class="tag">Profesional</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/works/mother.jpg" alt="Reparación de Motherboard" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
+              </div>
+            </div>
+            <div class="work-content">
+              <h3>Reparación de Motherboard</h3>
+              <p>Diagnóstico y reparación de placa madre. Restauración completa de funcionalidad.</p>
+              <div class="work-tags">
+                <span class="tag">Reparación</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Hardware</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -184,15 +234,13 @@
                     <label for="testimonial-name">
                       <i class="fas fa-user"></i> Tu nombre
                     </label>
-                    <input type="text" id="testimonial-name" name="name" placeholder="Tu nombre" required
-                      maxlength="50">
+                    <input type="text" id="testimonial-name" name="name" placeholder="Tu nombre" required="" maxlength="50">
                   </div>
 
                   <!-- Campo de imagen de perfil compacto (opcional) -->
                   <div class="form-group form-group-image">
-                    <input type="file" id="testimonial-image" name="image" accept="image/*" hidden>
-                    <button type="button" class="btn-upload-image-compact" id="btn-upload-image"
-                      title="Agregar tu foto (opcional)">
+                    <input type="file" id="testimonial-image" name="image" accept="image/*" hidden="">
+                    <button type="button" class="btn-upload-image-compact" id="btn-upload-image" title="Agregar tu foto (opcional)">
                       <div class="image-preview-compact" id="image-preview">
                         <i class="fas fa-camera"></i>
                       </div>
@@ -204,9 +252,7 @@
                   <label for="testimonial-comment">
                     <i class="fas fa-message"></i> Tu comentario
                   </label>
-                  <textarea id="testimonial-comment" name="comment" rows="3"
-                    placeholder="Cuéntanos sobre tu experiencia con nuestro servicio..." required
-                    maxlength="500"></textarea>
+                  <textarea id="testimonial-comment" name="comment" rows="3" placeholder="Cuéntanos sobre tu experiencia con nuestro servicio..." required="" maxlength="500"></textarea>
                   <div class="char-counter">
                     <span id="char-count">0</span>/500
                   </div>
@@ -231,8 +277,7 @@
                   </div>
                   <div class="testimonial-author">
                     <div class="author-avatar">
-                      <img src="public/images/clientes/izcua.jpg" alt="@franizcua" loading="lazy"
-                        onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face'">
+                      <img src="public/images/clientes/izcua.jpg" alt="@franizcua" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&amp;h=80&amp;fit=crop&amp;crop=face'">
                     </div>
                     <div class="author-info">
                       <h4>@franizcua</h4>
@@ -253,8 +298,7 @@
                   </div>
                   <div class="testimonial-author">
                     <div class="author-avatar">
-                      <img src="public/images/clientes/pablo.jpg" alt="@pabolarrechart" loading="lazy"
-                        onerror="this.src='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face'">
+                      <img src="public/images/clientes/pablo.jpg" alt="@pabolarrechart" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&amp;h=80&amp;fit=crop&amp;crop=face'">
                     </div>
                     <div class="author-info">
                       <h4>@pabolarrechart</h4>
@@ -275,8 +319,7 @@
                   </div>
                   <div class="testimonial-author">
                     <div class="author-avatar">
-                      <img src="public/images/clientes/andres.jpg" alt="@andres__figueredo" loading="lazy"
-                        onerror="this.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face'">
+                      <img src="public/images/clientes/andres.jpg" alt="@andres__figueredo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&amp;h=80&amp;fit=crop&amp;crop=face'">
                     </div>
                     <div class="author-info">
                       <h4>@andres__figueredo</h4>
@@ -345,7 +388,7 @@
           <form class="quote-form" id="quote-form">
             <div class="form-group">
               <label for="name">Nombre completo</label>
-              <input type="text" id="name" name="name" required>
+              <input type="text" id="name" name="name" required="">
             </div>
             <div class="form-group">
               <label for="email">Correo electrónico <span class="optional-field">(opcional)</span></label>
@@ -361,7 +404,7 @@
             </p>
             <div class="form-group">
               <label for="service">Tipo de servicio</label>
-              <select id="service" name="service" required>
+              <select id="service" name="service" required="">
                 <option value="">Selecciona un servicio</option>
                 <option value="reparacion">Reparación</option>
                 <option value="upgrade">Upgrade</option>
@@ -372,7 +415,7 @@
             </div>
             <div class="form-group">
               <label for="message">Describe tu problema o necesidad</label>
-              <textarea id="message" name="message" rows="4" required></textarea>
+              <textarea id="message" name="message" rows="4" required=""></textarea>
             </div>
             <button type="submit" class="btn btn-primary btn-full">Enviar Cotización</button>
           </form>
@@ -381,125 +424,56 @@
     </section>
 
     <!-- Trabajos Section -->
-    <section id="trabajos" class="works">
+    <section id="servicios" class="services">
       <div class="container">
         <div class="section-header">
-          <h2>Nuestros Trabajos</h2>
-          <p>Algunos de los proyectos que hemos realizado</p>
+          <h2>Nuestros Servicios</h2>
+          <p>Soluciones completas para todas tus necesidades tecnológicas</p>
         </div>
-        <div class="works-filters">
-          <button class="filter-btn active" data-filter="all">Todos</button>
-          <button class="filter-btn" data-filter="gaming">Gaming</button>
-          <button class="filter-btn" data-filter="reparacion">Reparación</button>
-          <button class="filter-btn" data-filter="upgrade">Upgrade</button>
-          <button class="filter-btn" data-filter="ensamblaje">Ensamblaje</button>
-        </div>
-        <div class="works-grid">
-          <div class="work-card" data-category="gaming ensamblaje">
-            <div class="work-image">
-              <img src="public/images/works/pc2.jpg" alt="PC Gaming Personalizada" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+        <div class="services-grid">
+          <div class="service-card reparacion-card">
+            <div class="service-image">
+              <img src="public/images/services/reparacion.jpg" alt="Reparación de Hardware" class="reparacion-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-reparacion.jpg" alt="Después de la Reparación" class="reparacion-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-wrench"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>PC Gaming Personalizada</h3>
-              <p>Ensamblaje completo de PC gaming personalizada con las especializaciones que el cliente solicite.</p>
-              <div class="work-tags">
-                <span class="tag">Gaming</span>
-                <span class="tag">Ensamblaje</span>
-              </div>
-            </div>
+            <h3>Reparación</h3>
+            <p>Diagnóstico y reparación de hardware y software. Solucionamos cualquier problema de tu computadora.</p>
           </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/laptop.jpg" alt="Reparación de Laptop" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card upgrade-card">
+            <div class="service-image">
+              <img src="public/images/services/update.jpg" alt="Upgrade de PC" class="upgrade-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-update.jpg" alt="Después del Upgrade" class="upgrade-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-arrow-up"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Reparación de Laptop</h3>
-              <p>Cambio de pantalla, teclado y disco duro por SSD en laptop Acer. Restauración completa del equipo.</p>
-              <div class="work-tags">
-                <span class="tag">Reparación</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Laptop</span>
-              </div>
-            </div>
+            <h3>Upgrade</h3>
+            <p>Mejora el rendimiento de tu PC con las mejores piezas y componentes del mercado.</p>
           </div>
-          <div class="work-card" data-category="upgrade">
-            <div class="work-image">
-              <img src="public/images/works/after-mantenimiento.jpg" alt="Upgrade de PC" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card ensamblaje-card">
+            <div class="service-image">
+              <img src="public/images/services/ensamble.jpg" alt="Ensamblaje de PC" class="ensamblaje-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/gestion.jpg" alt="Gestión de Ensamblaje" class="ensamblaje-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-puzzle-piece"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Upgrade de PC</h3>
-              <p>Actualización de GPU y RAM en PC de oficina. Mejora significativa en rendimiento.</p>
-              <div class="work-tags">
-                <span class="tag">Upgrade</span>
-                <span class="tag">GPU</span>
-              </div>
-            </div>
+            <h3>Ensamblaje</h3>
+            <p>PCs personalizadas desde cero. Te ayudamos a elegir los componentes perfectos para ti.</p>
           </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/works/giga.jpg" alt="Mantenimiento Preventivo" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card mantenimiento-card">
+            <div class="service-image">
+              <img src="public/images/services/mantenimiento.jpg" alt="Mantenimiento de PC" class="mantenimiento-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-mantenimiento.jpg" alt="Después del Mantenimiento" class="mantenimiento-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Mantenimiento Preventivo</h3>
-              <p>Limpieza profunda y optimización de sistema. PC funcionando como nueva.</p>
-              <div class="work-tags">
-                <span class="tag">Mantenimiento</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Limpieza</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-card" data-category="ensamblaje gaming">
-            <div class="work-image">
-              <img src="public/images/works/trabajo-ensamblaje-01.jpg" alt="PC de Trabajo" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
-              </div>
-            </div>
-            <div class="work-content">
-              <h3>PC de Trabajo</h3>
-              <p>PC profesional de alto rendimiento optimizada para programación y edición de video.</p>
-              <div class="work-tags">
-                <span class="tag">Ensamblaje</span>
-                <span class="tag">Gaming</span>
-                <span class="tag">Profesional</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/works/mother.jpg" alt="Reparación de Motherboard" loading="lazy"
-                onerror="this.src='https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=300&fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
-              </div>
-            </div>
-            <div class="work-content">
-              <h3>Reparación de Motherboard</h3>
-              <p>Diagnóstico y reparación de placa madre. Restauración completa de funcionalidad.</p>
-              <div class="work-tags">
-                <span class="tag">Reparación</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Hardware</span>
-              </div>
-            </div>
+            <h3>Mantenimiento</h3>
+            <p>Mantenimiento preventivo y limpieza profunda para mantener tu PC en óptimas condiciones.</p>
           </div>
         </div>
       </div>
@@ -516,10 +490,8 @@
           <!-- Soporte Técnico Remoto -->
           <div class="service-card remoto-card">
             <div class="service-image">
-              <img src="public/images/services/remote.avif" alt="Soporte Técnico Remoto" class="remoto-main"
-                loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-remoto.jpg" alt="Después del Soporte Remoto" class="remoto-hover"
-                loading="lazy" onerror="this.style.display='none';">
+              <img src="public/images/services/remote.avif" alt="Soporte Técnico Remoto" class="remoto-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-remoto.jpg" alt="Después del Soporte Remoto" class="remoto-hover" loading="lazy" onerror="this.style.display='none';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-laptop"></i>
               </div>
@@ -532,9 +504,7 @@
           <!-- Asesoramiento Técnico -->
           <div class="service-card asesoramiento-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&h=400&fit=crop"
-                alt="Asesoramiento Técnico" class="asesoramiento-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=600&amp;h=400&amp;fit=crop" alt="Asesoramiento Técnico" class="asesoramiento-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-user-tie"></i>
               </div>
@@ -547,9 +517,7 @@
           <!-- Instalación de Software -->
           <div class="service-card software-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&h=400&fit=crop"
-                alt="Instalación de Software" class="software-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=600&amp;h=400&amp;fit=crop" alt="Instalación de Software" class="software-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-download"></i>
               </div>
@@ -561,9 +529,7 @@
           <!-- Recuperación de Datos -->
           <div class="service-card recuperacion-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&h=400&fit=crop"
-                alt="Recuperación de Datos" class="recuperacion-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=600&amp;h=400&amp;fit=crop" alt="Recuperación de Datos" class="recuperacion-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-database"></i>
               </div>
@@ -575,9 +541,7 @@
           <!-- Configuración de Red -->
           <div class="service-card red-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1606904825846-647eb07f5be2?w=600&h=400&fit=crop"
-                alt="Configuración de Red" class="red-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1606904825846-647eb07f5be2?w=600&amp;h=400&amp;fit=crop" alt="Configuración de Red" class="red-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-wifi"></i>
               </div>
@@ -589,9 +553,7 @@
           <!-- Limpieza Profunda -->
           <div class="service-card limpieza-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600&h=400&fit=crop"
-                alt="Limpieza Profunda" class="limpieza-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1588508065123-287b28e013da?w=600&amp;h=400&amp;fit=crop" alt="Limpieza Profunda" class="limpieza-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-broom"></i>
               </div>
@@ -603,9 +565,7 @@
           <!-- Diagnóstico Completo -->
           <div class="service-card diagnostico-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&h=400&fit=crop"
-                alt="Diagnóstico Completo" class="diagnostico-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&amp;h=400&amp;fit=crop" alt="Diagnóstico Completo" class="diagnostico-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-search"></i>
               </div>
@@ -617,9 +577,7 @@
           <!-- Optimización de Sistema -->
           <div class="service-card optimizacion-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&h=400&fit=crop"
-                alt="Optimización de Sistema" class="optimizacion-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=600&amp;h=400&amp;fit=crop" alt="Optimización de Sistema" class="optimizacion-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-tachometer-alt"></i>
               </div>
@@ -631,9 +589,7 @@
           <!-- Backup de Datos -->
           <div class="service-card backup-card">
             <div class="service-image">
-              <img src="https://images.unsplash.com/photo-1633265486064-086b219458ec?w=600&h=400&fit=crop"
-                alt="Backup de Datos" class="backup-main" loading="lazy"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="https://images.unsplash.com/photo-1633265486064-086b219458ec?w=600&amp;h=400&amp;fit=crop" alt="Backup de Datos" class="backup-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
               <div class="service-icon" style="display: none;">
                 <i class="fas fa-shield-alt"></i>
               </div>
@@ -818,10 +774,7 @@
           <div class="contact-map">
             <h3>Nuestra Ubicación</h3>
             <div class="map-container">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3270.123456789!2d-54.9167!3d-34.8000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDQ4JzAwLjAiUyA1NMKwNTUnMDAuMCJX!5e0!3m2!1ses!2suy!4v1234567890"
-                width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3270.123456789!2d-54.9167!3d-34.8000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDQ4JzAwLjAiUyA1NMKwNTUnMDAuMCJX!5e0!3m2!1ses!2suy!4v1234567890" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
               </iframe>
             </div>
             <div class="map-info">
@@ -835,8 +788,7 @@
 
     <!-- WhatsApp Float Button -->
     <div class="whatsapp-container">
-      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20más%20sobre%20sus%20servicios%20técnicos"
-        class="whatsapp-float" target="_blank" rel="noopener">
+      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20más%20sobre%20sus%20servicios%20técnicos" class="whatsapp-float" target="_blank" rel="noopener">
         <i class="fab fa-whatsapp"></i>
       </a>
       <div class="whatsapp-tooltip">
@@ -854,7 +806,7 @@
           <span>Devices F2</span>
         </div>
         <div class="footer-info">
-          <p>&copy; <span id="current-year"></span> Devices F2. Todos los derechos reservados.</p>
+          <p>© <span id="current-year"></span> Devices F2. Todos los derechos reservados.</p>
           <p>Servicio técnico profesional de computadoras</p>
         </div>
       </div>
@@ -865,6 +817,6 @@
   <script src="firebase-config.js"></script>
   <script src="emailjs-config.js"></script>
   <script src="script.js"></script>
-</body>
 
-</html>
+
+</body></html>
