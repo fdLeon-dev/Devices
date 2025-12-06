@@ -96,119 +96,56 @@
     </section>
 
     <!-- Servicios Section -->
-    <section id="trabajos" class="works">
+    <section id="servicios" class="services">
       <div class="container">
         <div class="section-header">
-          <h2>Nuestros Trabajos</h2>
-          <p>Algunos de los proyectos que hemos realizado</p>
+          <h2>Nuestros Servicios</h2>
+          <p>Soluciones completas para todas tus necesidades tecnológicas</p>
         </div>
-        <div class="works-filters">
-          <button class="filter-btn active" data-filter="all">Todos</button>
-          <button class="filter-btn" data-filter="gaming">Gaming</button>
-          <button class="filter-btn" data-filter="reparacion">Reparación</button>
-          <button class="filter-btn" data-filter="upgrade">Upgrade</button>
-          <button class="filter-btn" data-filter="ensamblaje">Ensamblaje</button>
-        </div>
-        <div class="works-grid">
-          <div class="work-card" data-category="gaming ensamblaje">
-            <div class="work-image">
-              <img src="public/images/works/pc2.jpg" alt="PC Gaming Personalizada" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+        <div class="services-grid">
+          <div class="service-card reparacion-card">
+            <div class="service-image">
+              <img src="public/images/services/reparacion.jpg" alt="Reparación de Hardware" class="reparacion-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-reparacion.jpg" alt="Después de la Reparación" class="reparacion-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-wrench"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>PC Gaming Personalizada</h3>
-              <p>Ensamblaje completo de PC gaming personalizada con las especializaciones que el cliente solicite.</p>
-              <div class="work-tags">
-                <span class="tag">Gaming</span>
-                <span class="tag">Ensamblaje</span>
-              </div>
-            </div>
+            <h3>Reparación</h3>
+            <p>Diagnóstico y reparación de hardware y software. Solucionamos cualquier problema de tu computadora.</p>
           </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/laptop.jpg" alt="Reparación de Laptop" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card upgrade-card">
+            <div class="service-image">
+              <img src="public/images/services/update.jpg" alt="Upgrade de PC" class="upgrade-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-update.jpg" alt="Después del Upgrade" class="upgrade-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-arrow-up"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Reparación de Laptop</h3>
-              <p>Cambio de pantalla, teclado y disco duro por SSD en laptop Acer. Restauración completa del equipo.</p>
-              <div class="work-tags">
-                <span class="tag">Reparación</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Laptop</span>
-              </div>
-            </div>
+            <h3>Upgrade</h3>
+            <p>Mejora el rendimiento de tu PC con las mejores piezas y componentes del mercado.</p>
           </div>
-          <div class="work-card" data-category="upgrade">
-            <div class="work-image">
-              <img src="public/images/works/after-mantenimiento.jpg" alt="Upgrade de PC" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card ensamblaje-card">
+            <div class="service-image">
+              <img src="public/images/services/ensamble.jpg" alt="Ensamblaje de PC" class="ensamblaje-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/gestion.jpg" alt="Gestión de Ensamblaje" class="ensamblaje-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-puzzle-piece"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Upgrade de PC</h3>
-              <p>Actualización de GPU y RAM en PC de oficina. Mejora significativa en rendimiento.</p>
-              <div class="work-tags">
-                <span class="tag">Upgrade</span>
-                <span class="tag">GPU</span>
-              </div>
-            </div>
+            <h3>Ensamblaje</h3>
+            <p>PCs personalizadas desde cero. Te ayudamos a elegir los componentes perfectos para ti.</p>
           </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/works/giga.jpg" alt="Mantenimiento Preventivo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+          <div class="service-card mantenimiento-card">
+            <div class="service-image">
+              <img src="public/images/services/mantenimiento.jpg" alt="Mantenimiento de PC" class="mantenimiento-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <img src="public/images/services/after-mantenimiento.jpg" alt="Después del Mantenimiento" class="mantenimiento-hover" loading="lazy" onerror="this.style.display='none';">
+              <div class="service-icon" style="display: none;">
+                <i class="fas fa-shield-alt"></i>
               </div>
             </div>
-            <div class="work-content">
-              <h3>Mantenimiento Preventivo</h3>
-              <p>Limpieza profunda y optimización de sistema. PC funcionando como nueva.</p>
-              <div class="work-tags">
-                <span class="tag">Mantenimiento</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Limpieza</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-card" data-category="ensamblaje gaming">
-            <div class="work-image">
-              <img src="public/images/works/trabajo-ensamblaje-01.jpg" alt="PC de Trabajo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
-              </div>
-            </div>
-            <div class="work-content">
-              <h3>PC de Trabajo</h3>
-              <p>PC profesional de alto rendimiento optimizada para programación y edición de video.</p>
-              <div class="work-tags">
-                <span class="tag">Ensamblaje</span>
-                <span class="tag">Gaming</span>
-                <span class="tag">Profesional</span>
-              </div>
-            </div>
-          </div>
-          <div class="work-card" data-category="reparacion upgrade">
-            <div class="work-image">
-              <img src="public/images/works/mother.jpg" alt="Reparación de Motherboard" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&amp;h=300&amp;fit=crop'">
-              <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
-              </div>
-            </div>
-            <div class="work-content">
-              <h3>Reparación de Motherboard</h3>
-              <p>Diagnóstico y reparación de placa madre. Restauración completa de funcionalidad.</p>
-              <div class="work-tags">
-                <span class="tag">Reparación</span>
-                <span class="tag">Upgrade</span>
-                <span class="tag">Hardware</span>
-              </div>
-            </div>
+            <h3>Mantenimiento</h3>
+            <p>Mantenimiento preventivo y limpieza profunda para mantener tu PC en óptimas condiciones.</p>
           </div>
         </div>
       </div>
@@ -424,56 +361,119 @@
     </section>
 
     <!-- Trabajos Section -->
-    <section id="servicios" class="services">
+    <section id="trabajos" class="works">
       <div class="container">
         <div class="section-header">
-          <h2>Nuestros Servicios</h2>
-          <p>Soluciones completas para todas tus necesidades tecnológicas</p>
+          <h2>Nuestros Trabajos</h2>
+          <p>Algunos de los proyectos que hemos realizado</p>
         </div>
-        <div class="services-grid">
-          <div class="service-card reparacion-card">
-            <div class="service-image">
-              <img src="public/images/services/reparacion.jpg" alt="Reparación de Hardware" class="reparacion-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-reparacion.jpg" alt="Después de la Reparación" class="reparacion-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-wrench"></i>
+        <div class="works-filters">
+          <button class="filter-btn active" data-filter="all">Todos</button>
+          <button class="filter-btn" data-filter="gaming">Gaming</button>
+          <button class="filter-btn" data-filter="reparacion">Reparación</button>
+          <button class="filter-btn" data-filter="upgrade">Upgrade</button>
+          <button class="filter-btn" data-filter="ensamblaje">Ensamblaje</button>
+        </div>
+        <div class="works-grid">
+          <div class="work-card" data-category="gaming ensamblaje">
+            <div class="work-image">
+              <img src="public/images/works/pc2.jpg" alt="PC Gaming Personalizada" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Reparación</h3>
-            <p>Diagnóstico y reparación de hardware y software. Solucionamos cualquier problema de tu computadora.</p>
+            <div class="work-content">
+              <h3>PC Gaming Personalizada</h3>
+              <p>Ensamblaje completo de PC gaming personalizada con las especializaciones que el cliente solicite.</p>
+              <div class="work-tags">
+                <span class="tag">Gaming</span>
+                <span class="tag">Ensamblaje</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card upgrade-card">
-            <div class="service-image">
-              <img src="public/images/services/update.jpg" alt="Upgrade de PC" class="upgrade-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-update.jpg" alt="Después del Upgrade" class="upgrade-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-arrow-up"></i>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/laptop.jpg" alt="Reparación de Laptop" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Upgrade</h3>
-            <p>Mejora el rendimiento de tu PC con las mejores piezas y componentes del mercado.</p>
+            <div class="work-content">
+              <h3>Reparación de Laptop</h3>
+              <p>Cambio de pantalla, teclado y disco duro por SSD en laptop Acer. Restauración completa del equipo.</p>
+              <div class="work-tags">
+                <span class="tag">Reparación</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Laptop</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card ensamblaje-card">
-            <div class="service-image">
-              <img src="public/images/services/ensamble.jpg" alt="Ensamblaje de PC" class="ensamblaje-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/gestion.jpg" alt="Gestión de Ensamblaje" class="ensamblaje-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-puzzle-piece"></i>
+          <div class="work-card" data-category="upgrade">
+            <div class="work-image">
+              <img src="public/images/works/after-mantenimiento.jpg" alt="Upgrade de PC" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Ensamblaje</h3>
-            <p>PCs personalizadas desde cero. Te ayudamos a elegir los componentes perfectos para ti.</p>
+            <div class="work-content">
+              <h3>Upgrade de PC</h3>
+              <p>Actualización de GPU y RAM en PC de oficina. Mejora significativa en rendimiento.</p>
+              <div class="work-tags">
+                <span class="tag">Upgrade</span>
+                <span class="tag">GPU</span>
+              </div>
+            </div>
           </div>
-          <div class="service-card mantenimiento-card">
-            <div class="service-image">
-              <img src="public/images/services/mantenimiento.jpg" alt="Mantenimiento de PC" class="mantenimiento-main" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <img src="public/images/services/after-mantenimiento.jpg" alt="Después del Mantenimiento" class="mantenimiento-hover" loading="lazy" onerror="this.style.display='none';">
-              <div class="service-icon" style="display: none;">
-                <i class="fas fa-shield-alt"></i>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/works/giga.jpg" alt="Mantenimiento Preventivo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
               </div>
             </div>
-            <h3>Mantenimiento</h3>
-            <p>Mantenimiento preventivo y limpieza profunda para mantener tu PC en óptimas condiciones.</p>
+            <div class="work-content">
+              <h3>Mantenimiento Preventivo</h3>
+              <p>Limpieza profunda y optimización de sistema. PC funcionando como nueva.</p>
+              <div class="work-tags">
+                <span class="tag">Mantenimiento</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Limpieza</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-card" data-category="ensamblaje gaming">
+            <div class="work-image">
+              <img src="public/images/works/trabajo-ensamblaje-01.jpg" alt="PC de Trabajo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
+              </div>
+            </div>
+            <div class="work-content">
+              <h3>PC de Trabajo</h3>
+              <p>PC profesional de alto rendimiento optimizada para programación y edición de video.</p>
+              <div class="work-tags">
+                <span class="tag">Ensamblaje</span>
+                <span class="tag">Gaming</span>
+                <span class="tag">Profesional</span>
+              </div>
+            </div>
+          </div>
+          <div class="work-card" data-category="reparacion upgrade">
+            <div class="work-image">
+              <img src="public/images/works/mother.jpg" alt="Reparación de Motherboard" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&amp;h=300&amp;fit=crop'">
+              <div class="work-overlay">
+                <i class="fas fa-search-plus"></i>
+              </div>
+            </div>
+            <div class="work-content">
+              <h3>Reparación de Motherboard</h3>
+              <p>Diagnóstico y reparación de placa madre. Restauración completa de funcionalidad.</p>
+              <div class="work-tags">
+                <span class="tag">Reparación</span>
+                <span class="tag">Upgrade</span>
+                <span class="tag">Hardware</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
