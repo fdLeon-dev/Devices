@@ -3,14 +3,10 @@
   "version": "1.0.0",
   "description": "Landing Page para Devices F2 - Servicio Técnico de Computadoras",
   "scripts": {
-    "build": "echo 'No build needed - static site'",
-    "swap-sections": "node scripts/swap-sections.js"
+    "build": "echo 'No build needed - static site'"
   },
   "keywords": ["landing-page", "html", "css", "javascript"],
   "author": "Devices F2",
-  "license": "MIT",
-  "devDependencies": {
-    "cheerio": "^1.0.0-rc.12"
-  }
+  "license": "MIT"
 }
 
