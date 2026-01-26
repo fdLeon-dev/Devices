@@ -1057,17 +1057,59 @@ function clearEditState() {
 function viewModule(id, data) {
   document.getElementById('module-title').textContent = data.title || 'Módulo';
   document.getElementById('module-desc').textContent = data.description || '';
-  const objDiv = document.getElementById('module-objectives'); objDiv.innerHTML = ''; if (data.objectives && data.objectives.length) { const ul = document.createElement('ul'); data.objectives.forEach(o => { const li = document.createElement('li'); li.textContent = o; ul.appendChild(li); }); objDiv.appendChild(ul); }
-  const resDiv = document.getElementById('module-resources'); resDiv.innerHTML = ''; if (data.resources && data.resources.length) { const h = document.createElement('div'); h.textContent='Recursos:'; resDiv.appendChild(h); const ul = document.createElement('ul'); data.resources.forEach(r => { const li = document.createElement('li'); const a = document.createElement('a'); a.href = r; a.textContent = r; a.target='_blank'; a.rel='noopener'; li.appendChild(a); ul.appendChild(li); }); resDiv.appendChild(ul); }
+
+  const objDiv = document.getElementById('module-objectives');
+  objDiv.innerHTML = '';
+  if (data.objectives && data.objectives.length) {
+    const ul = document.createElement('ul');
+    data.objectives.forEach(o => {
+      const li = document.createElement('li');
+      li.textContent = o;
+      ul.appendChild(li);
+    });
+    objDiv.appendChild(ul);
+  }
+
+  const resDiv = document.getElementById('module-resources');
+  resDiv.innerHTML = '';
+  if (data.resources && data.resources.length) {
+    const h = document.createElement('div');
+    h.textContent = 'Recursos:';
+    resDiv.appendChild(h);
+    const ul = document.createElement('ul');
+    data.resources.forEach(r => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = r;
+      a.textContent = r;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      li.appendChild(a);
+      ul.appendChild(li);
+    });
+    resDiv.appendChild(ul);
+  }
+
   // PDF preview if a resource points to a PDF in public/
-  const pdfRes = (data.resources||[]).find(r => r.toLowerCase().endsWith('.pdf') || r.toLowerCase().includes('.pdf#'));
+  const pdfRes = (data.resources || []).find(r =>
+    r.toLowerCase().endsWith('.pdf') || r.toLowerCase().includes('.pdf#')
+  );
   if (pdfRes) {
-    const pdfUrl = encodeURI(pdfRes.replace(/^\//,'')); // remove leading slash if present
-    const iframeWrap = document.createElement('div'); iframeWrap.style.marginTop='12px';
-    const iframe = document.createElement('iframe'); iframe.src = '/' + pdfUrl; iframe.style.width='100%'; iframe.style.height='480px'; iframe.title='PDF preview'; iframe.loading='lazy'; iframeWrap.appendChild(iframe);
+    const pdfUrl = encodeURI(pdfRes.replace(/^\//, '')); // remove leading slash if present
+    const iframeWrap = document.createElement('div');
+    iframeWrap.style.marginTop = '12px';
+    const iframe = document.createElement('iframe');
+    iframe.src = '/' + pdfUrl;
+    iframe.style.width = '100%';
+    iframe.style.height = '480px';
+    iframe.title = 'PDF preview';
+    iframe.loading = 'lazy';
+    iframeWrap.appendChild(iframe);
     resDiv.appendChild(iframeWrap);
   }
-  const markBtn = document.getElementById('module-mark-complete'); if (markBtn) markBtn.dataset.moduleId = id;
+
+  const markBtn = document.getElementById('module-mark-complete');
+  if (markBtn) markBtn.dataset.moduleId = id;
   document.getElementById('module-modal').style.display = 'flex';
 }
 
@@ -1118,8 +1160,6 @@ async function loadModulesForUser(uid) {
         }
       });
     }
-    return;
-  }
     // If empty and current user is admin, seed sample modules for demo
     const currentUser = firebase.auth().currentUser;
     if (currentUser) {
@@ -1144,8 +1184,6 @@ async function loadModulesForUser(uid) {
         console.warn('No se pudo verificar claims para seeding:', e);
       }
     }
-    modulesList.textContent = '';
-    const p = document.createElement('p'); p.textContent = 'No hay módulos aún. Pide al admin que agregue módulos.'; modulesList.appendChild(p);
     return;
   }
 
