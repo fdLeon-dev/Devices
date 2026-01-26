@@ -1,0 +1,10 @@
+{
+  "live": {
+    "meetUrl": "https://meet.google.com/your-meet-link",
+    "dayOfWeek": "Wednesday",
+    "time": "20:00"
+  },
+  "adminEmails": [
+    "facudeleon92@gmail.com"
+  ]
+}

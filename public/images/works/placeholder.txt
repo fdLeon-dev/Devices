@@ -11,7 +11,7 @@ Ejemplos:
 - trabajo-gaming-01.jpg
 - trabajo-reparacion-01.jpg
 - trabajo-upgrade-01.jpg
-- trabajo-ensamblaje-01.jpg
+- trabajo-ensamblaje-01.svg
 - trabajo-mantenimiento-01.jpg
 
 Nota: Usa fotos de alta calidad que muestren claramente el trabajo realizado.

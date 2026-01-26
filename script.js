@@ -14,6 +14,9 @@ const filterBtns = document.querySelectorAll('.filter-btn');
 const workCards = document.querySelectorAll('.work-card');
 const statNumbers = document.querySelectorAll('.stat-number');
 
+// Global variables for quiz editor
+let currentQuiz = [];
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
   initializeApp();
@@ -454,6 +457,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .then(function (registration) {
         console.log('ServiceWorker registration successful');
+        console.warn('If you still see 404s for images that were renamed, try unregistering the Service Worker (DevTools > Application > Service Workers) and hard-reload the page to bypass cached assets.');
       })
       .catch(function (err) {
         console.log('ServiceWorker registration failed');
@@ -476,6 +480,765 @@ if (quoteForm) {
     });
   });
 }
+
+// ==============================
+// Auth + Cursos (Experimental)
+// ==============================
+
+let siteConfig = { live: {}, adminEmails: [] };
+
+async function loadSiteConfig() {
+  try {
+    const res = await fetch('/public/config.json');
+    if (!res.ok) throw new Error('No config');
+    siteConfig = await res.json();
+  } catch (err) {
+    console.warn('No public/config.json found or failed to load. Using defaults.');
+    siteConfig = { live: { meetUrl: '#', dayOfWeek: '-', time: '-' }, adminEmails: [] };
+  }
+}
+
+function showAuthModal() {
+  document.getElementById('auth-modal').style.display = 'flex';
+  // Allow closing with Escape key while modal is open
+  document.addEventListener('keydown', authModalEscClose);
+}
+function hideAuthModal() {
+  document.getElementById('auth-modal').style.display = 'none';
+  document.removeEventListener('keydown', authModalEscClose);
+}
+function authModalEscClose(e) {
+  if (e.key === 'Escape') hideAuthModal();
+}
+
+function showAuthMessage(msgEl, text, color) {
+  if (!msgEl) return;
+  msgEl.style.color = color || '';
+  // Clear children safely
+  msgEl.textContent = text || '';
+}
+
+function renderLiveInfo() {
+  const sched = `${siteConfig.live.dayOfWeek || '-'} ${siteConfig.live.time || ''}`;
+  const el = document.getElementById('live-schedule'); if (el) el.textContent = sched;
+  const join = document.getElementById('btn-join-live'); if (join) join.href = siteConfig.live.meetUrl || '#';
+}
+
+async function initAuthAndCourses() {
+  await loadSiteConfig();
+  renderLiveInfo();
+
+  // Init Firebase if available
+  const firebaseInitialized = typeof initFirebase === 'function' ? initFirebase() : false;
+
+  // UI hooks
+  const btnOpenAuth = document.getElementById('btn-open-auth');
+  const authClose = document.getElementById('auth-close');
+  const showRegister = document.getElementById('show-register');
+  const showLogin = document.getElementById('show-login');
+  const btnRegister = document.getElementById('btn-register');
+  const btnLogin = document.getElementById('btn-login');
+  const btnLogout = document.getElementById('btn-logout');
+  const btnLogoutTop = document.getElementById('btn-logout-top');
+
+  if (btnOpenAuth) btnOpenAuth.addEventListener('click', showAuthModal);
+  if (btnOpenAuth) {
+    // Diagnostic helper: log clicks and verify modal opens
+    btnOpenAuth.addEventListener('click', () => {
+      console.log('DEBUG: btn-open-auth clicked');
+      setTimeout(() => {
+        const modal = document.getElementById('auth-modal');
+        if (modal && getComputedStyle(modal).display !== 'flex') {
+          console.warn('DEBUG: auth-modal did not open after click. Modal display:', getComputedStyle(modal).display);
+          // Show a small inline hint for the user
+          try {
+            const hint = document.getElementById('auth-click-hint') || (function(){ const d = document.createElement('div'); d.id='auth-click-hint'; d.style.color='#c00'; d.style.marginTop='6px'; d.textContent = 'Detectado clic, pero el modal no se abrió. Revisa la consola para más detalles.'; const parent = document.getElementById('user-info') || document.body; parent.appendChild(d); return d; })();
+          } catch (e) { /* ignore DOM errors */ }
+        }
+      }, 250);
+    });
+  }
+  if (authClose) authClose.addEventListener('click', hideAuthModal);
+  if (showRegister) showRegister.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; document.getElementById('auth-title').textContent='Registrarse'; });
+  if (showLogin) showLogin.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('login-form').style.display='block'; document.getElementById('register-form').style.display='none'; document.getElementById('auth-title').textContent='Acceder'; });
+
+  if (!firebaseInitialized) {
+    // If no Firebase, show simple message
+    if (btnOpenAuth) btnOpenAuth.addEventListener('click', () => alert('Firebase no configurado. Por favor configura firebase-config.js'));
+    return;
+  }
+
+  // Auth handlers
+  if (btnRegister) btnRegister.addEventListener('click', async () => {
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-password').value;
+    const msg = document.getElementById('auth-message');
+    // Basic client-side validation
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { showAuthMessage(msg, 'Email inválido', 'red'); return; }
+    if (!pass || pass.length < 6) { showAuthMessage(msg, 'Contraseña debe tener al menos 6 caracteres', 'red'); return; }
+    btnRegister.disabled = true;
+    try {
+      const userCred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+      const user = userCred.user;
+
+      // Create user document in Firestore
+      await db.collection('users').doc(user.uid).set({
+        email: user.email,
+        displayName: user.displayName || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        completedModules: [],
+        enrolledCourses: []
+      });
+
+      // Send email verification
+      try {
+        await user.sendEmailVerification();
+        showAuthMessage(msg, 'Registro exitoso. Se envió un email de verificación, por favor revísalo antes de iniciar sesión.', 'green');
+        // Sign out so user must verify before accessing dashboard
+        await firebase.auth().signOut();
+      } catch (verErr) {
+        console.warn('Error enviando verificación:', verErr);
+        showAuthMessage(msg, 'Registro exitoso. Error al enviar email de verificación.', 'orange');
+      }
+    } catch (err) { msg.style.color = 'red'; msg.textContent = err.message; }
+    btnRegister.disabled = false;
+  });
+
+  if (btnLogin) btnLogin.addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-password').value;
+    const msg = document.getElementById('auth-message');
+    btnLogin.disabled = true;
+    try {
+      const userCred = await firebase.auth().signInWithEmailAndPassword(email, pass);
+      const user = userCred.user;
+      if (!user.emailVerified) {
+        // don't close modal; prompt to verify with safe DOM elements
+        showAuthMessage(msg, 'Tu correo no está verificado. Revisa tu email.', 'orange');
+        // Add a 'Reenviar verificación' button and a 'Comprobar ahora' button
+        const resendBtn = document.createElement('button'); resendBtn.className = 'btn btn-outline'; resendBtn.textContent = 'Reenviar verificación'; resendBtn.disabled = false;
+        const checkBtn = document.createElement('button'); checkBtn.className = 'btn btn-outline'; checkBtn.style.marginLeft = '0.5rem'; checkBtn.textContent = 'Comprobar ahora';
+        msg.appendChild(document.createTextNode(' '));
+        msg.appendChild(resendBtn);
+        msg.appendChild(checkBtn);
+
+        let resendDisabled = false;
+        resendBtn.addEventListener('click', async () => {
+          if (resendDisabled) return; resendDisabled = true; resendBtn.disabled = true;
+          try {
+            await user.sendEmailVerification();
+            showAuthMessage(msg, 'Email de verificación reenviado. Revisa tu bandeja de entrada.', 'green');
+          } catch (reErr) {
+            showAuthMessage(msg, 'Error al reenviar verificación: ' + reErr.message, 'red');
+          }
+          // cooldown
+          setTimeout(() => { resendDisabled = false; resendBtn.disabled = false; }, 30000);
+        });
+
+        checkBtn.addEventListener('click', async () => {
+          try {
+            await user.reload();
+            const refreshed = firebase.auth().currentUser;
+            if (refreshed && refreshed.emailVerified) {
+              showAuthMessage(msg, 'Correo verificado. Accediendo...', 'green');
+              hideAuthModal();
+            } else {
+              showAuthMessage(msg, 'Aún no verificado. Revisa tu email y presiona "Comprobar ahora" después de verificar.', 'orange');
+            }
+          } catch (err) { showAuthMessage(msg, 'Error comprobando verificación: ' + err.message, 'red'); }
+        });
+        return;
+      }
+
+
+      msg.textContent = '';
+      hideAuthModal();
+    } catch (err) { msg.style.color = 'red'; msg.textContent = err.message; }
+    btnLogin.disabled = false;
+  });
+
+  if (btnLogout) btnLogout.addEventListener('click', async () => { await firebase.auth().signOut(); });
+  if (btnLogoutTop) btnLogoutTop.addEventListener('click', async () => { await firebase.auth().signOut(); });
+  // Admin module panel search
+  const adminModulesSearch = document.getElementById('admin-modules-search');
+  if (adminModulesSearch) {
+    adminModulesSearch.addEventListener('input', () => renderAdminModulesList(adminModulesSearch.value.trim()));
+  }
+
+  // Auth state listener
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+      const emailEl = document.getElementById('user-email'); if (emailEl) emailEl.textContent = user.email;
+      const navCursos = document.getElementById('nav-cursos'); if (navCursos) navCursos.style.display = 'inline-block';
+      // Toggle header buttons: hide 'Acceder', show top 'Cerrar sesión'
+      if (btnOpenAuth) btnOpenAuth.style.display = 'none';
+      if (btnLogoutTop) btnLogoutTop.style.display = 'inline-block';
+      if (btnLogout) btnLogout.style.display = 'none';
+
+      // If email not verified, show notice and do not load modules
+      if (!user.emailVerified) {
+        document.getElementById('cursos').style.display = 'block';
+        // show verification notice
+        const userInfo = document.getElementById('user-info');
+        let notice = document.getElementById('verify-notice');
+        if (!notice) {
+          notice = document.createElement('div');
+          notice.id = 'verify-notice';
+          notice.style.marginTop = '0.5rem';
+          notice.style.color = 'orange';
+            notice.textContent = 'Cuenta sin verificar. Revisa tu correo.';
+            const resendBtn = document.createElement('button'); resendBtn.id = 'btn-resend'; resendBtn.className = 'btn btn-outline'; resendBtn.textContent = 'Reenviar verificación'; resendBtn.style.marginLeft = '0.5rem';
+            notice.appendChild(resendBtn);
+            if (userInfo) userInfo.appendChild(notice);
+            resendBtn.addEventListener('click', async () => {
+              try {
+                resendBtn.disabled = true;
+                await user.sendEmailVerification();
+                notice.style.color = 'green';
+                notice.textContent = 'Email de verificación reenviado. Revisa tu bandeja.';
+              } catch (err) {
+                notice.style.color = 'red';
+                notice.textContent = 'Error al reenviar verificación: ' + err.message;
+              }
+              setTimeout(() => { resendBtn.disabled = false; }, 30000);
+            });
+        }
+        // Hide admin area and do not load modules until verified
+        const isAdmin = siteConfig.adminEmails && siteConfig.adminEmails.includes(user.email);
+        document.getElementById('admin-add-module').style.display = 'none';
+        // ensure modules list shows message to verify
+        const modulesList = document.getElementById('modules-list'); if (modulesList) { modulesList.textContent = ''; const p = document.createElement('p'); p.textContent = 'Debes verificar tu correo para acceder a los módulos.'; modulesList.appendChild(p); }
+      } else {
+        // Verified user: show dashboard and modules
+        document.getElementById('cursos').style.display = 'block';
+        // Check token claims for admin flag (preferred) and fallback to public config list
+        let isAdmin = false;
+        try {
+          const idt = await user.getIdTokenResult(true);
+          isAdmin = !!(idt && idt.claims && idt.claims.admin);
+        } catch (e) {
+          console.warn('Error fetching token claims:', e);
+        }
+        if (!isAdmin && siteConfig.adminEmails && siteConfig.adminEmails.includes(user.email)) isAdmin = true;
+        document.getElementById('admin-add-module').style.display = isAdmin ? 'block' : 'none';
+        // show admin modules panel and render list
+        const adminPanel = document.getElementById('admin-modules-panel'); if (adminPanel) adminPanel.style.display = isAdmin ? 'block' : 'none';
+        if (isAdmin) renderAdminModulesList();
+        // remove any verify notice
+        const notice = document.getElementById('verify-notice'); if (notice) notice.remove();
+        // load modules now
+        loadModulesForUser(user.uid);
+      }
+    } else {
+      // Logged out: hide dashboard
+      document.getElementById('cursos').style.display = 'none';
+      const navCursos = document.getElementById('nav-cursos'); if (navCursos) navCursos.style.display = 'none';
+      // Toggle header buttons: show 'Acceder', hide top 'Cerrar sesión'
+      if (btnOpenAuth) btnOpenAuth.style.display = 'inline-block';
+      if (btnLogoutTop) btnLogoutTop.style.display = 'none';
+      if (btnLogout) btnLogout.style.display = 'none';
+      // Clear modules list and show login message
+      const modulesList = document.getElementById('modules-list');
+      if (modulesList) {
+        modulesList.textContent = '';
+        const p = document.createElement('p');
+        p.textContent = 'Inicia sesión para acceder a los módulos del curso.';
+        modulesList.appendChild(p);
+      }
+    }
+  });
+
+  // Admin add module
+  const btnAddModule = document.getElementById('btn-add-module');
+  if (btnAddModule) btnAddModule.addEventListener('click', async () => {
+    const title = document.getElementById('new-module-title').value.trim();
+    const video = document.getElementById('new-module-video').value.trim();
+    const desc = document.getElementById('new-module-desc').value.trim();
+    const duration = parseInt((document.getElementById('new-module-duration').value || '').trim()) || null;
+    const order = parseInt((document.getElementById('new-module-order').value || '').trim()) || null;
+    const objectives = (document.getElementById('new-module-objectives').value || '').split(';').map(s=>s.trim()).filter(Boolean);
+    const resources = (document.getElementById('new-module-resources').value || '').split(';').map(s=>s.trim()).filter(Boolean);
+    // capture quizzes from editor
+    const quizItems = [];
+    if (quizEditor) {
+      Array.from(quizEditor.children).forEach(wrap => {
+        const inputs = wrap.querySelectorAll('input');
+        if (!inputs || inputs.length < 3) return;
+        const qText = inputs[0].value.trim();
+        const choices = (inputs[1].value || '').split(';').map(s=>s.trim()).filter(Boolean);
+        const ans = parseInt(inputs[2].value);
+        if (!qText) return;
+        quizItems.push({ question: qText, choices, answer: Number.isNaN(ans) ? 0 : ans });
+      });
+    }
+    if (!title) return alert('El título es requerido');
+    try {
+      const courseRef = db.collection('courses').doc('tgsit-reparacion-bios');
+      const modulesRef = courseRef.collection('modules');
+      // if editing
+      const editingId = btnAddModule.dataset.editing;
+      if (editingId) {
+        await modulesRef.doc(editingId).update({ title, videoUrl: video, description: desc, objectives, resources, durationMin: duration, order: order, quiz: quizItems });
+        alert('Módulo actualizado');
+        clearEditState();
+      } else {
+        const snap = await modulesRef.orderBy('order','desc').limit(1).get();
+        const nextOrder = snap.empty ? (order || 1) : (order || (snap.docs[0].data().order || 0) + 1);
+        await modulesRef.add({ title, videoUrl: video, description: desc, objectives, resources, durationMin: duration, order: nextOrder, quiz: quizItems, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        alert('Módulo agregado');
+      }
+      // clear inputs
+      document.getElementById('new-module-title').value=''; document.getElementById('new-module-video').value=''; document.getElementById('new-module-desc').value=''; document.getElementById('new-module-duration').value=''; document.getElementById('new-module-objectives').value=''; document.getElementById('new-module-resources').value=''; document.getElementById('new-module-order').value='';
+      currentQuiz = [];
+      renderQuizEditor(currentQuiz);
+      // refresh modules list and admin view
+      const user = firebase.auth().currentUser; if (user) loadModulesForUser(user.uid);
+      renderAdminModulesList();
+    } catch (err) { alert('Error al agregar/actualizar módulo: ' + err.message); }
+  });
+  // Import TGSIT modules from public/modules-tgsit.json (admin only)
+  const btnImportTgsit = document.getElementById('btn-import-tgsit');
+  if (btnImportTgsit) btnImportTgsit.addEventListener('click', async () => {
+    if (!confirm('¿Importar los módulos de TGSIT desde public/modules-tgsit.json? Esto creará módulos en Firestore.')) return;
+    btnImportTgsit.disabled = true;
+    try {
+      const ok = await isCurrentUserAdmin();
+      if (!ok) throw new Error('Acción reservada a administradores');
+      // Prefer detailed JSON when available
+      let payload = null;
+      const tryFiles = ['/public/modules-tgsit-detailed-refined.json','/public/modules-tgsit-detailed.json','/public/modules-tgsit.json'];
+      for (const f of tryFiles) {
+        try {
+          const r = await fetch(f);
+          if (!r.ok) continue;
+          payload = await r.json();
+          break;
+        } catch (e) { continue; }
+      }
+      if (!payload) throw new Error('No se encontró modules-tgsit JSON en public/');
+      const courseId = payload.courseId || 'tgsit-reparacion-bios';
+      const courseRef = db.collection('courses').doc(courseId);
+      const modules = payload.modules || [];
+      if (!modules.length) throw new Error('No hay módulos en el JSON');
+      const batch = db.batch();
+      modules.forEach((m, i) => {
+        const ref = courseRef.collection('modules').doc();
+        batch.set(ref, {
+          title: m.title || ('Módulo ' + (i+1)),
+          description: m.description || '',
+          objectives: m.objectives || [],
+          durationMin: m.durationMin || null,
+          resources: m.resources || [],
+          videoUrl: m.videoUrl || '',
+          order: i + 1,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      });
+      await batch.commit();
+      alert('Importación completada: ' + modules.length + ' módulos creados en ' + courseId);
+      const user = firebase.auth().currentUser; if (user) loadModulesForUser(user.uid);
+    } catch (err) {
+      console.error('Import failed:', err);
+      alert('Error importando módulos: ' + (err.message || err));
+    }
+    btnImportTgsit.disabled = false;
+  });
+
+    // Chunked importer: gradual import with progress and cancel
+    const btnImportChunked = document.getElementById('btn-import-tgsit-chunked');
+    const btnStopImport = document.getElementById('btn-stop-import');
+    const importProgress = document.getElementById('import-progress');
+    let importAbort = false;
+
+    if (btnImportChunked) btnImportChunked.addEventListener('click', async () => {
+      if (!confirm('¿Iniciar importación gradual de módulos TGSIT? Se crearán módulos en lotes y verás el progreso.')) return;
+      btnImportChunked.disabled = true; btnImportTgsit.disabled = true; if (btnStopImport) { btnStopImport.style.display = 'inline-block'; btnStopImport.disabled = false; }
+      importAbort = false; if (importProgress) importProgress.textContent = 'Preparando import...';
+      try {
+        const ok = await isCurrentUserAdmin(); if (!ok) throw new Error('Acción reservada a administradores');
+        // load payload (prefer detailed)
+        let payload = null;
+        const tryFiles = ['/public/modules-tgsit-detailed-refined.json','/public/modules-tgsit-detailed.json','/public/modules-tgsit.json'];
+        for (const f of tryFiles) { try { const r = await fetch(f); if (!r.ok) continue; payload = await r.json(); break; } catch (e) { continue; } }
+        if (!payload) throw new Error('No se encontró modules-tgsit JSON en public/');
+        const courseId = payload.courseId || 'tgsit-reparacion-bios';
+        const modules = payload.modules || [];
+        if (!modules.length) throw new Error('No hay módulos para importar');
+
+        const courseRef = db.collection('courses').doc(courseId);
+        const existingSnap = await courseRef.collection('modules').get();
+        const existingTitles = new Set(existingSnap.docs.map(d => (d.data().title || '').trim().toLowerCase()));
+
+        const toCreate = modules.filter(m => !existingTitles.has((m.title||'').trim().toLowerCase()));
+        if (importProgress) importProgress.textContent = `Módulos a crear: ${toCreate.length} (de ${modules.length})`;
+
+        const chunkSize = 2; // change if needed
+        for (let i = 0; i < toCreate.length; i += chunkSize) {
+          if (importAbort) { if (importProgress) importProgress.textContent = 'Importación detenida por el usuario.'; break; }
+          const batch = db.batch();
+          const chunk = toCreate.slice(i, i + chunkSize);
+          chunk.forEach((m, idx) => {
+            const ref = courseRef.collection('modules').doc();
+            batch.set(ref, {
+              title: m.title || ('Módulo ' + (i + idx + 1)),
+              description: m.description || '',
+              objectives: m.objectives || [],
+              durationMin: m.durationMin || null,
+              resources: m.resources || [],
+              videoUrl: m.videoUrl || '',
+              order: i + idx + 1,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          });
+          if (importProgress) importProgress.textContent = `Importando módulos ${i+1} - ${Math.min(i+chunkSize, toCreate.length)} de ${toCreate.length}...`;
+          await batch.commit();
+            if (importProgress) {
+              importProgress.textContent = `Completado ${Math.min(i+chunkSize,toCreate.length)} de ${toCreate.length}`;
+              try {
+                const createdNames = chunk.map(x => x.title || 'sin título');
+                const ul = document.createElement('ul'); createdNames.forEach(n => { const li = document.createElement('li'); li.textContent = n; ul.appendChild(li); });
+                importProgress.appendChild(ul);
+              } catch (e) { console.warn('Error updating import progress list', e); }
+            }
+          // small delay to allow UI update and avoid spikes
+          await new Promise(r => setTimeout(r, 800));
+        }
+        if (!importAbort) { if (importProgress) importProgress.textContent = 'Importación finalizada.'; alert('Importación completa. Revisa los módulos en Firestore.'); }
+        const user = firebase.auth().currentUser; if (user) loadModulesForUser(user.uid);
+      } catch (err) {
+        console.error('Chunked import failed:', err);
+        if (importProgress) importProgress.textContent = 'Error: ' + (err.message || err);
+        alert('Error importando: ' + (err.message || err));
+      } finally {
+        btnImportChunked.disabled = false; btnImportTgsit.disabled = false; if (btnStopImport) { btnStopImport.style.display = 'none'; btnStopImport.disabled = false; }
+      }
+    });
+
+    if (btnStopImport) btnStopImport.addEventListener('click', async () => {
+      if (!confirm('¿Detener la importación en curso?')) return;
+      importAbort = true; btnStopImport.disabled = true; if (importProgress) importProgress.textContent = 'Deteniendo...';
+    });
+
+  async function isCurrentUserAdmin() {
+    const user = firebase.auth().currentUser; if (!user) return false;
+    try {
+      const idt = await user.getIdTokenResult(true);
+      if (idt && idt.claims && idt.claims.admin) return true;
+    } catch (e) { console.warn('No se pudo leer claims:', e); }
+    // fallback to public config list
+    if (siteConfig && siteConfig.adminEmails && siteConfig.adminEmails.includes(user.email)) return true;
+    return false;
+  }
+
+  // Clear module form
+  const btnClearModule = document.getElementById('btn-clear-module');
+  if (btnClearModule) btnClearModule.addEventListener('click', () => {
+    document.getElementById('new-module-title').value = '';
+    document.getElementById('new-module-desc').value = '';
+    document.getElementById('new-module-duration').value = '';
+    document.getElementById('new-module-objectives').value = '';
+    document.getElementById('new-module-resources').value = '';
+    document.getElementById('new-module-order').value = '';
+    currentQuiz = [];
+    renderQuizEditor(currentQuiz);
+  });
+
+  // Quiz editor handlers
+  const quizEditor = document.getElementById('quiz-editor');
+  const btnAddQuizItem = document.getElementById('btn-add-quiz-item');
+  if (btnAddQuizItem) btnAddQuizItem.addEventListener('click', () => { currentQuiz.push({ question: '', choices: [], answer: 0 }); renderQuizEditor(currentQuiz); });
+  // initial render
+  renderQuizEditor(currentQuiz);
+
+  // Module viewer handlers
+  const moduleClose = document.getElementById('module-close');
+  const moduleClose2 = document.getElementById('module-close-2');
+  if (moduleClose) moduleClose.addEventListener('click', () => document.getElementById('module-modal').style.display = 'none');
+  if (moduleClose2) moduleClose2.addEventListener('click', () => document.getElementById('module-modal').style.display = 'none');
+  const moduleMarkBtn = document.getElementById('module-mark-complete');
+  if (moduleMarkBtn) moduleMarkBtn.addEventListener('click', async () => {
+    const cur = firebase.auth().currentUser; if (!cur) return alert('Debes iniciar sesión para marcar módulo como visto.');
+    const currentModuleId = moduleMarkBtn.dataset.moduleId; if (!currentModuleId) return;
+    try { await markModuleCompleted(cur.uid, currentModuleId); document.getElementById('module-modal').style.display = 'none'; } catch (e) { alert('Error: ' + e.message); }
+  });
+}
+
+// Render admin modules list with search
+async function renderAdminModulesList(filter='') {
+  const list = document.getElementById('admin-modules-list'); if (!list) return;
+  list.textContent = '';
+  const courseRef = db.collection('courses').doc('tgsit-reparacion-bios');
+  try {
+    const snap = await courseRef.collection('modules').orderBy('order','asc').get();
+    if (snap.empty) { list.textContent = 'No hay módulos en Firestore.'; return; }
+    snap.docs.forEach(doc => {
+      const d = doc.data();
+      if (filter && !d.title.toLowerCase().includes(filter.toLowerCase())) return;
+      const card = document.createElement('div'); card.className = 'module-card';
+      // left thumbnail
+      const thumb = document.createElement('img'); thumb.className = 'thumb'; thumb.src = d.thumbnail || '/public/images/modules/placeholder.svg'; card.appendChild(thumb);
+      // right content
+      const rightWrap = document.createElement('div'); rightWrap.className = 'right-wrap';
+      const title = document.createElement('h4'); title.textContent = d.title; rightWrap.appendChild(title);
+      const quizCount = d.quiz ? d.quiz.length : 0;
+      const meta = document.createElement('div'); meta.className='meta'; meta.textContent = (d.durationMin ? d.durationMin + ' min • ' : '') + (d.objectives ? d.objectives.length + ' objetivos • ' : '') + (quizCount ? (quizCount + ' preguntas') : ''); rightWrap.appendChild(meta);
+      const desc = document.createElement('div'); desc.textContent = d.description || ''; rightWrap.appendChild(desc);
+      const right = document.createElement('div'); right.className='right';
+      const viewBtn = document.createElement('button'); viewBtn.className='btn btn-outline'; viewBtn.textContent='Ver'; viewBtn.addEventListener('click', () => viewModule(doc.id, d));
+      const editBtn = document.createElement('button'); editBtn.className='btn btn-primary'; editBtn.textContent='Editar'; editBtn.addEventListener('click', () => populateEditForm(doc.id, d));
+      const upBtn = document.createElement('button'); upBtn.className='btn btn-outline'; upBtn.textContent='↑'; upBtn.title='Subir'; upBtn.addEventListener('click', async () => { await reorderModule(doc.id, -1); renderAdminModulesList(filter); });
+      const downBtn = document.createElement('button'); downBtn.className='btn btn-outline'; downBtn.textContent='↓'; downBtn.title='Bajar'; downBtn.addEventListener('click', async () => { await reorderModule(doc.id, +1); renderAdminModulesList(filter); });
+      const delBtn = document.createElement('button'); delBtn.className='btn btn-outline'; delBtn.textContent='Eliminar'; delBtn.addEventListener('click', async () => { if (!confirm('Eliminar módulo?')) return; await courseRef.collection('modules').doc(doc.id).delete(); renderAdminModulesList(filter); });
+      right.appendChild(viewBtn); right.appendChild(editBtn); right.appendChild(upBtn); right.appendChild(downBtn); right.appendChild(delBtn);
+      rightWrap.appendChild(right);
+      card.appendChild(rightWrap);
+      list.appendChild(card);
+    });
+  } catch (err) { console.error('Error loading admin modules:', err); list.textContent = 'Error cargando módulos: ' + err.message; }
+}
+
+async function reorderModule(docId, direction) {
+  // direction -1 up, +1 down
+  const courseRef = db.collection('courses').doc('tgsit-reparacion-bios');
+  const modulesRef = courseRef.collection('modules').orderBy('order','asc');
+  const snap = await modulesRef.get();
+  if (snap.empty) return;
+  const docs = snap.docs;
+  const idx = docs.findIndex(d => d.id === docId);
+  if (idx === -1) return;
+  const swapWith = idx + direction;
+  if (swapWith < 0 || swapWith >= docs.length) return;
+  const a = docs[idx]; const b = docs[swapWith];
+  const aOrder = a.data().order || (idx+1); const bOrder = b.data().order || (swapWith+1);
+  const batch = db.batch();
+  batch.update(a.ref, { order: bOrder });
+  batch.update(b.ref, { order: aOrder });
+  await batch.commit();
+}
+
+function populateEditForm(id, data) {
+  document.getElementById('new-module-title').value = data.title || '';
+  document.getElementById('new-module-desc').value = data.description || '';
+  document.getElementById('new-module-duration').value = data.durationMin || '';
+  document.getElementById('new-module-objectives').value = (data.objectives||[]).join(' ; ');
+  document.getElementById('new-module-resources').value = (data.resources||[]).join(' ; ');
+  document.getElementById('new-module-order').value = data.order || '';
+  currentQuiz = data.quiz ? JSON.parse(JSON.stringify(data.quiz)) : [];
+  renderQuizEditor(currentQuiz);
+  // store editing id
+  document.getElementById('btn-add-module').dataset.editing = id;
+  document.getElementById('btn-add-module').textContent = 'Guardar cambios';
+}
+
+function renderQuizEditor(items) {
+  const quizEditor = document.getElementById('quiz-editor');
+  if (!quizEditor) return;
+  quizEditor.textContent = '';
+  (items||[]).forEach((q, idx) => {
+    const wrap = document.createElement('div'); wrap.style.border='1px dashed var(--border-color)'; wrap.style.padding='8px'; wrap.style.marginBottom='6px';
+    const qinp = document.createElement('input'); qinp.placeholder='Pregunta'; qinp.value = q.question || ''; qinp.style.width='100%';
+    const choices = document.createElement('input'); choices.placeholder='Opciones (separadas por ; )'; choices.value = (q.choices||[]).join(' ; '); choices.style.width='100%'; choices.style.marginTop='6px';
+    const answer = document.createElement('input'); answer.placeholder='Índice respuesta correcta (0-based)'; answer.value = (q.answer!=null?String(q.answer):''); answer.style.width='180px'; answer.style.marginTop='6px';
+    const del = document.createElement('button'); del.className='btn btn-outline'; del.textContent='Eliminar'; del.style.marginLeft='8px'; del.addEventListener('click', () => { items.splice(idx,1); renderQuizEditor(items); });
+    wrap.appendChild(qinp); wrap.appendChild(choices); const row = document.createElement('div'); row.style.marginTop='6px'; row.appendChild(answer); row.appendChild(del); wrap.appendChild(row);
+    quizEditor.appendChild(wrap);
+  });
+  if ((items||[]).length === 0) {
+    const empty = document.createElement('div'); empty.style.color='var(--text-secondary)'; empty.textContent = 'No hay preguntas aún.'; quizEditor.appendChild(empty);
+  }
+}
+
+function clearEditState() {
+  delete document.getElementById('btn-add-module').dataset.editing;
+  document.getElementById('btn-add-module').textContent = 'Agregar módulo';
+}
+
+// View module in modal (user or admin)
+function viewModule(id, data) {
+  document.getElementById('module-title').textContent = data.title || 'Módulo';
+  document.getElementById('module-desc').textContent = data.description || '';
+  const objDiv = document.getElementById('module-objectives'); objDiv.innerHTML = ''; if (data.objectives && data.objectives.length) { const ul = document.createElement('ul'); data.objectives.forEach(o => { const li = document.createElement('li'); li.textContent = o; ul.appendChild(li); }); objDiv.appendChild(ul); }
+  const resDiv = document.getElementById('module-resources'); resDiv.innerHTML = ''; if (data.resources && data.resources.length) { const h = document.createElement('div'); h.textContent='Recursos:'; resDiv.appendChild(h); const ul = document.createElement('ul'); data.resources.forEach(r => { const li = document.createElement('li'); const a = document.createElement('a'); a.href = r; a.textContent = r; a.target='_blank'; a.rel='noopener'; li.appendChild(a); ul.appendChild(li); }); resDiv.appendChild(ul); }
+  // PDF preview if a resource points to a PDF in public/
+  const pdfRes = (data.resources||[]).find(r => r.toLowerCase().endsWith('.pdf') || r.toLowerCase().includes('.pdf#'));
+  if (pdfRes) {
+    const pdfUrl = encodeURI(pdfRes.replace(/^\//,'')); // remove leading slash if present
+    const iframeWrap = document.createElement('div'); iframeWrap.style.marginTop='12px';
+    const iframe = document.createElement('iframe'); iframe.src = '/' + pdfUrl; iframe.style.width='100%'; iframe.style.height='480px'; iframe.title='PDF preview'; iframe.loading='lazy'; iframeWrap.appendChild(iframe);
+    resDiv.appendChild(iframeWrap);
+  }
+  const markBtn = document.getElementById('module-mark-complete'); if (markBtn) markBtn.dataset.moduleId = id;
+  document.getElementById('module-modal').style.display = 'flex';
+}
+
+async function loadModulesForUser(uid) {
+  const modulesList = document.getElementById('modules-list'); if (!modulesList) return;
+  modulesList.textContent = '';
+  const loadingP = document.createElement('p'); loadingP.textContent = 'Cargando módulos...'; modulesList.appendChild(loadingP);
+  const courseRef = db.collection('courses').doc('tgsit-reparacion-bios');
+  const modulesRef = courseRef.collection('modules').orderBy('order','asc');
+  let snap;
+  try {
+    snap = await modulesRef.get();
+  } catch (err) {
+    console.error('Error loading modules for default course:', err);
+    const modulesList = document.getElementById('modules-list'); if (modulesList) { modulesList.textContent = ''; const p = document.createElement('p'); p.textContent = 'Error cargando módulos: ' + (err.message || err); modulesList.appendChild(p); }
+    // If permission denied, stop here
+    return;
+  }
+  if (snap.empty) {
+    // If empty, maybe admin hasn't imported modules
+    const modulesList = document.getElementById('modules-list'); if (modulesList) {
+      modulesList.textContent = '';
+      const p = document.createElement('p'); p.textContent = 'No hay módulos aún.';
+      modulesList.appendChild(p);
+      const advice = document.createElement('div'); advice.style.marginTop = '8px';
+      advice.style.fontSize = '0.95rem';
+      advice.style.color = '#555';
+      advice.textContent = 'Si sos administrador, inicia sesión y usa el botón "Importar módulos" en el panel de admin.';
+      modulesList.appendChild(advice);
+      // if current user is admin, add quick import button
+      firebase.auth().onAuthStateChanged(async (u) => {
+        if (!u) return;
+        try {
+          const token = await u.getIdTokenResult();
+          if (token.claims && token.claims.admin) {
+            const btn = document.createElement('button');
+            btn.textContent = 'Importar módulos (chunked)';
+            btn.className = 'btn btn-primary';
+            btn.style.marginTop = '10px';
+            btn.addEventListener('click', () => {
+              const importBtn = document.getElementById('btn-import-tgsit-chunked');
+              if (importBtn) importBtn.click(); else alert('Botón de importación no encontrado en la UI.');
+            });
+            modulesList.appendChild(btn);
+          }
+        } catch (e) {
+          console.warn('No se pudo verificar claims de usuario:', e);
+        }
+      });
+    }
+    return;
+  }
+    // If empty and current user is admin, seed sample modules for demo
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser) {
+      try {
+        const idt = await currentUser.getIdTokenResult(true);
+        if (idt && idt.claims && idt.claims.admin) {
+          const sample = [
+            { title: 'Módulo 1: Introducción', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', description: 'Conceptos básicos' , order:1},
+            { title: 'Módulo 2: Diagnóstico', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', description: 'Cómo diagnosticar problemas', order:2},
+            { title: 'Módulo 3: Reparación práctica', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', description: 'Ejercicios prácticos', order:3}
+          ];
+          const batch = db.batch();
+          sample.forEach(s => {
+            const ref = courseRef.collection('modules').doc();
+            batch.set(ref, s);
+          });
+          await batch.commit();
+          // reload
+          return loadModulesForUser(uid);
+        }
+      } catch (e) {
+        console.warn('No se pudo verificar claims para seeding:', e);
+      }
+    }
+    modulesList.textContent = '';
+    const p = document.createElement('p'); p.textContent = 'No hay módulos aún. Pide al admin que agregue módulos.'; modulesList.appendChild(p);
+    return;
+  }
+
+  // Get user progress
+  const userDocRef = db.collection('users').doc(uid);
+  const userDoc = await userDocRef.get();
+  const progress = (userDoc.exists && userDoc.data().completedModules) ? userDoc.data().completedModules : [];
+
+  modulesList.textContent = '';
+  let idx = 0;
+  snap.forEach(doc => {
+    const mod = { id: doc.id, ...doc.data() };
+    idx++;
+    const prevModuleId = idx > 1 ? snap.docs[idx-2].id : null;
+    const locked = prevModuleId ? (!progress.includes(prevModuleId)) : false;
+    const div = document.createElement('div'); div.className = 'module-card' + (locked ? ' locked' : '');
+    // thumbnail
+    const thumb = document.createElement('img'); thumb.className = 'thumb'; thumb.src = mod.thumbnail || '/public/images/modules/placeholder.svg'; div.appendChild(thumb);
+    // content container
+    const content = document.createElement('div'); content.className = 'content';
+    const h4 = document.createElement('h4'); h4.textContent = mod.title || 'Módulo';
+    const pdesc = document.createElement('p'); pdesc.textContent = mod.description || '';
+    // excerpt preview
+    if (mod.excerpt) {
+      const ex = document.createElement('p'); ex.style.fontSize='0.95rem'; ex.style.color='var(--text-secondary)'; ex.textContent = (mod.excerpt||'').substring(0,250) + (mod.excerpt.length>250?'...':''); content.appendChild(ex);
+    }
+    // objectives & quiz preview
+    if (mod.objectives && mod.objectives.length) {
+      const odiv = document.createElement('div'); odiv.className='meta'; odiv.textContent = 'Objetivos: ' + mod.objectives.join(', ');
+      content.appendChild(odiv);
+    }
+    if (mod.quiz && mod.quiz.length) {
+      const qmeta = document.createElement('div'); qmeta.className='meta'; qmeta.textContent = mod.quiz.length + ' preguntas'; content.appendChild(qmeta);
+    }
+    content.appendChild(h4); content.appendChild(pdesc);
+
+    // video or iframe
+    if (mod.videoUrl && mod.videoUrl.endsWith('.mp4')) {
+      const video = document.createElement('video'); video.controls = true; video.src = mod.videoUrl; video.style.maxWidth='100%';
+      video.addEventListener('ended', () => markModuleCompleted(uid, mod.id, div));
+      content.appendChild(video);
+    } else if (mod.videoUrl && (mod.videoUrl.includes('youtube.com') || mod.videoUrl.includes('youtu.be'))) {
+      const iframe = document.createElement('iframe'); iframe.width = '560'; iframe.height = '315';
+      // Normalize common youtube links to embed
+      let embed = mod.videoUrl.replace('watch?v=','embed/');
+      if (embed.includes('youtu.be/')) embed = embed.replace('youtu.be/','www.youtube.com/embed/');
+      iframe.src = embed; iframe.frameBorder='0'; iframe.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'; iframe.allowFullscreen=true; iframe.style.width='100%'; content.appendChild(iframe);
+      // For youtube we add manual mark button
+    }
+
+    const actions = document.createElement('div'); actions.className='module-actions';
+      const viewBtn = document.createElement('button'); viewBtn.className='btn btn-outline'; viewBtn.textContent = locked ? 'Bloqueado' : 'Ver módulo'; viewBtn.disabled = !!locked; viewBtn.addEventListener('click', () => viewModule(mod.id, mod));
+      actions.appendChild(viewBtn);
+    const markBtn = document.createElement('button'); markBtn.className='btn btn-primary'; markBtn.textContent = progress.includes(mod.id) ? 'Visto' : 'Marcar como visto';
+    markBtn.disabled = progress.includes(mod.id);
+    markBtn.addEventListener('click', async () => {
+      if (markBtn.disabled) return;
+      markBtn.disabled = true;
+      markBtn.textContent = 'Procesando...';
+      try {
+        await markModuleCompleted(uid, mod.id, div);
+      } catch (err) {
+        console.error(err); alert('Error marcando módulo: ' + (err.message || err));
+        markBtn.disabled = false; markBtn.textContent = 'Marcar como visto';
+      }
+    });
+    actions.appendChild(markBtn);
+    content.appendChild(actions);
+    div.appendChild(content);
+
+    modulesList.appendChild(div);
+  });
+}
+
+async function markModuleCompleted(uid, moduleId, moduleDiv) {
+  try {
+    const userDocRef = db.collection('users').doc(uid);
+    await userDocRef.set({ completedModules: firebase.firestore.FieldValue.arrayUnion(moduleId) }, { merge: true });
+    // update UI
+    if (moduleDiv) {
+      moduleDiv.classList.remove('locked');
+      const btn = moduleDiv.querySelector('button'); if (btn) { btn.textContent='Visto'; btn.disabled=true; }
+    }
+    // reload modules to reflect unlocking
+    loadModulesForUser(uid);
+  } catch (err) { console.error('Error marking module:', err); alert('Error: ' + err.message); }
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', function () {
+  // Kick off auth & courses features
+  initAuthAndCourses().catch(err => console.warn('Auth/Courses init failed:', err));
+});
 
 // Track button clicks
 document.addEventListener('click', function (e) {
@@ -948,10 +1711,11 @@ function showFormMessage(message, type) {
   if (!messageDiv) return;
 
   messageDiv.className = `form-message ${type}`;
-  messageDiv.innerHTML = `
-    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-    <span>${message}</span>
-  `;
+  // Build message safely to avoid injecting HTML
+  messageDiv.innerHTML = '';
+  const icon = document.createElement('i'); icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+  const span = document.createElement('span'); span.textContent = message;
+  messageDiv.appendChild(icon); messageDiv.appendChild(span);
   messageDiv.style.display = 'flex';
 
   // Auto-ocultar después de 5 segundos
@@ -1044,41 +1808,52 @@ function createTestimonialCard(testimonio) {
   const fecha = formatearFecha(testimonio.fecha);
 
   // Determinar el avatar a mostrar
-  let avatarHTML;
-  if (testimonio.imagen) {
-    avatarHTML = `<img src="${testimonio.imagen}" alt="${escapeHtml(testimonio.nombre)}" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\\'fas fa-user\\'></i>';">`;
+  // Build DOM safely for avatar and content
+  const header = document.createElement('div'); header.className = 'testimonial-header';
+  const avatarWrap = document.createElement('div'); avatarWrap.className = 'testimonial-avatar';
+  if (testimonio.imagen && isValidImageUrl(testimonio.imagen)) {
+    const img = document.createElement('img'); img.alt = testimonio.nombre || 'Avatar';
+    img.src = testimonio.imagen;
+    img.addEventListener('error', () => {
+      avatarWrap.innerHTML = '<i class="fas fa-user"></i>';
+    });
+    avatarWrap.appendChild(img);
   } else {
-    avatarHTML = `<i class="fas fa-user"></i>`;
+    avatarWrap.innerHTML = '<i class="fas fa-user"></i>';
   }
 
-  card.innerHTML = `
-    <div class="testimonial-header">
-      <div class="testimonial-avatar">
-        ${avatarHTML}
-      </div>
-      <div class="testimonial-info">
-        <h4>${escapeHtml(testimonio.nombre)}</h4>
-        <span class="testimonial-date">
-          <i class="fas fa-clock"></i> ${fecha}
-        </span>
-      </div>
-    </div>
-    <div class="testimonial-body">
-      <p>${escapeHtml(testimonio.comentario)}</p>
-    </div>
-    <div class="testimonial-footer">
-      <button class="like-btn ${hasLiked ? 'liked' : ''}" data-id="${testimonio.id}">
-        <i class="fas fa-heart"></i>
-        <span class="like-count">${testimonio.likes || 0}</span>
-      </button>
-    </div>
-  `;
+  const info = document.createElement('div'); info.className = 'testimonial-info';
+  const h4 = document.createElement('h4'); h4.textContent = testimonio.nombre || '';
+  const spanDate = document.createElement('span'); spanDate.className = 'testimonial-date';
+  const clockIcon = document.createElement('i'); clockIcon.className = 'fas fa-clock';
+  spanDate.appendChild(clockIcon); spanDate.appendChild(document.createTextNode(' ' + fecha));
+  info.appendChild(h4); info.appendChild(spanDate);
+  header.appendChild(avatarWrap); header.appendChild(info);
+
+  const body = document.createElement('div'); body.className = 'testimonial-body';
+  const p = document.createElement('p'); p.textContent = testimonio.comentario || '';
+  body.appendChild(p);
+
+  const footer = document.createElement('div'); footer.className = 'testimonial-footer';
+  const likeBtnEl = document.createElement('button'); likeBtnEl.className = 'like-btn ' + (hasLiked ? 'liked' : ''); likeBtnEl.dataset.id = testimonio.id;
+  likeBtnEl.innerHTML = '<i class="fas fa-heart"></i><span class="like-count">' + (testimonio.likes || 0) + '</span>';
+  footer.appendChild(likeBtnEl);
+
+  card.appendChild(header); card.appendChild(body); card.appendChild(footer);
 
   // Agregar evento de like
-  const likeBtn = card.querySelector('.like-btn');
-  likeBtn.addEventListener('click', () => handleLike(testimonio.id));
+  likeBtnEl.addEventListener('click', () => handleLike(testimonio.id));
 
   return card;
+}
+
+// Validate that an image URL is safe (http(s) or data URI)
+function isValidImageUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const u = new URL(url, location.href);
+    return (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'data:');
+  } catch (e) { return false; }
 }
 
 // Actualizar likes de un testimonio existente

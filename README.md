@@ -1,3 +1,29 @@
+Nuevas mejoras de módulos (implementadas):
+
+- **Previsualización de PDFs**: si un módulo contiene un recurso que apunta a un PDF en `public/`, se muestra un preview embebido en el modal del módulo.
+- **Campo `order`** en el formulario admin: permite definir el orden manual de los módulos.
+- **Editor de quizzes**: puedes añadir preguntas con opciones y seleccionar la respuesta correcta; estos se guardan en el campo `quiz` de cada módulo.
+
+Prueba rápida:
+1. Inicia sesión como admin y abre la sección **Cursos**.
+2. Usa el formulario mejorado para crear/editar módulos (añade objetivos, recursos y quizzes).  
+3. Si quieres importar todos los módulos desde el JSON (`public/modules-tgsit-detailed-refined.json` es ahora preferido), usa **Importar progresivamente** o ejecuta el script server-side (ver sección 'Importación' más arriba). Puedes regenerar el JSON y miniaturas con:
+
+    ```powershell
+    python scripts/refine_modules.py
+    ```
+
+Esto crea `public/modules-tgsit-detailed-refined.json` y las miniaturas SVG en `public/images/modules/`.
+Nuevas mejoras de módulos (implementadas):
+
+- **Previsualización de PDFs**: si un módulo contiene un recurso que apunta a un PDF en `public/`, se muestra un preview embebido en el modal del módulo.
+- **Campo `order`** en el formulario admin: permite definir el orden manual de los módulos.
+- **Editor de quizzes**: puedes añadir preguntas con opciones y seleccionar la respuesta correcta; estos se guardan en el campo `quiz` de cada módulo.
+
+Prueba rápida:
+1. Inicia sesión como admin y abre la sección **Cursos**.
+2. Usa el formulario mejorado para crear/editar módulos (añade objetivos, recursos y quizzes).  
+3. Si quieres importar todos los módulos desde el JSON (`public/modules-tgsit-detailed-refined.json` es preferido), usa **Importar progresivamente** o ejecuta el script server-side (ver sección 'Importación' más arriba).
 # Devices F2 - Sitio Web del Servicio Técnico
 
 Sitio web moderno y profesional para el servicio técnico de reparación y ensamblaje de computadoras Devices F2.
@@ -159,3 +185,109 @@ Para soporte técnico o consultas sobre el sitio web, contacta a Devices F2:
 ---
 
 **Desarrollado con ❤️ para Devices F2**
+
+## 🧑‍🏫 Cursos / Módulos (experimental)
+
+Se agregó una sección experimental para ofrecer un diplomado por módulos con registro de usuarios (Auth) y progreso (Firestore).
+
+Pasos rápidos para habilitar:
+1. Configura Firebase en `firebase-config.js` (ya existe plantilla en el repo).
+2. En Firebase Console: habilita **Authentication → Email/Password** y **Firestore Database** (modo de pruebas para comenzar).
+3. Actualiza `public/config.json` con el `live.meetUrl` y el listado `adminEmails` (usuarios que pueden crear módulos).
+4. Sube el proyecto a tu hosting y prueba: en el sitio haz clic en "Acceder" para registrarte y luego ve a la sección "Cursos".
+
+## Crear un administrador (admin)
+
+Hay dos formas de conceder permisos de administrador:
+
+- Rápido (solo UI, no seguro para producción): añade tu email a `public/config.json` → `adminEmails` (lista de strings). Esto habilita las UI admin (solo conveniencia).
+- Seguro (recomendado): establece la claim personalizada `admin` en el usuario de Firebase Auth. Para ello he añadido un script que puedes ejecutar localmente.
+
+Instrucciones (método seguro):
+
+1. En Firebase Console → Project Settings → Service accounts → Genera una nueva clave privada (JSON) y guárdala como `serviceAccountKey.json` en la raíz del proyecto (o guarda la ruta y usa la variable de entorno `GOOGLE_APPLICATION_CREDENTIALS`).
+2. Instala la dependencia: `npm install firebase-admin` (solo en tu máquina local donde correrás el script).
+3. Ejecuta: `node scripts/set-admin-claim.js tu-email@dominio.com`.
+4. El script buscará al usuario por email y añadirá `{ admin: true }` a sus custom claims.
+
+Nota: después de asignar claims, el usuario puede necesitar recargar el token (salir y entrar o usar `user.getIdToken(true)` en la app) para que la UI muestre las opciones de admin.
+
+Notas:
+- Los módulos se almacenan en `courses / diplomado-reparacion / modules` en Firestore.
+- El progreso del usuario se guarda en `users / {uid}` con `completedModules`.
+- Para demo: si no hay módulos, el primer admin puede "sembrar" módulos de ejemplo usando la interfaz.
+
+### Registro y verificación de correo
+
+- Al registrarse, se crea automáticamente un documento en `users/{uid}` con campos básicos y `completedModules: []`.
+- Tras registrar, el sistema envía un **email de verificación** y la sesión se cierra hasta que el usuario confirme su correo.
+- Si un usuario inicia sesión sin verificar, verá un aviso con opción para reenviar el email de verificación.
+
+### Reglas de Firestore
+
+He incluido `FIRESTORE_RULES.txt` con reglas de ejemplo para proteger `users/{uid}` y permitir solo escritura de módulos a administradores (requiere claims `admin`). Ajusta y publica las reglas desde Firebase Console.
+
+Para desplegar las reglas desde tu máquina (si usas Firebase CLI):
+
+```powershell
+# Asegúrate de haber instalado y autenticado Firebase CLI
+firebase deploy --only firestore:rules
+```
+
+Si prefieres usar el archivo `firestore.rules` incluido aquí, también funcionará con el mismo comando.
+
+Para asignar el claim `admin` a un usuario (necesitas una key de cuenta de servicio):
+
+```powershell
+# Guarda tu key en el repo como serviceAccountKey.json (temporal) o exporta la variable de entorno
+#$env:GOOGLE_APPLICATION_CREDENTIALS = "C:\ruta\a\serviceAccountKey.json"
+node scripts/set-admin-claim.js tu-admin@correo.com
+```
+
+Nota: No subas `serviceAccountKey.json` a GitHub; agrégalo a `.gitignore` y elimínalo cuando termines.
+
+Comandos útiles añadidos al proyecto:
+
+- Instalar dev deps (incluye `firebase-tools`):
+```powershell
+npm install
+```
+
+- Desplegar reglas usando el script npm:
+```powershell
+npm run firebase:rules
+```
+
+- Ejecutar importación (dry-run primero):
+```powershell
+npm run import-modules:dry
+# y luego (después de revisar):
+npm run import-modules -- --yes
+```
+
+Los scripts `scripts/set-admin-claim.js` y `scripts/import-modules-admin.js` ahora aceptan la opción `--key <path>` para especificar la ubicación del archivo JSON de cuenta de servicio en lugar de usar la variable de entorno.
+
+Chequeo rápido del entorno:
+
+```powershell
+# Ejecútalo para verificar que tengas dependencias instaladas, key y el JSON de módulos
+node scripts/verify-setup.js
+```
+
+Admin UI (gestión de módulos)
+--------------------------------
+
+Hice una mejora al panel de admin en la sección `Cursos` para gestionar los módulos de forma más profesional:
+
+- Formulario mejorado para crear módulos: **Título**, **Duración**, **Descripción**, **Objetivos** (separados por `;`), **Recursos** (URLs separados por `;`) y URL de video opcional.
+- Panel de módulos existente con búsqueda, ver, editar, eliminar y reordenar módulos (flechas ↑ ↓).
+- Vista de módulo (modal) para leer la descripción, objetivos y recursos, y botón **Marcar como visto** para usuarios.
+
+Para usarlo:
+1. Inicia sesión con tu cuenta admin (asegúrate que el correo esté verificado).  
+2. En `Cursos`, si tu usuario es admin verás la sección **Agregar módulo (Admin)** y el panel con la lista de módulos.  
+3. Usa **Importar progresivamente** para traer módulos desde `public/modules-tgsit-detailed.json` si lo deseas.
+
+Si querés, puedo ajustar la UI (por ejemplo, permitir previsualizar PDFs embebidos, importar objetivos automáticamente desde el JSON, o añadir campos para quizzes). Dime qué prefieres y lo implemento.
+
+Si quieres que implemente subida de videos a Firebase Storage o integración automática con Google Calendar/Meet para programar sesiones, lo puedo prototipar en la siguiente iteración.

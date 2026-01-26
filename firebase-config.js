@@ -116,6 +116,23 @@ function escucharTestimonios(callback) {
       callback(testimonios);
     }, (error) => {
       console.error('Error al escuchar testimonios:', error);
+      // Mostrar mensaje amigable en la UI
+      try {
+        const container = document.getElementById('testimonials-container');
+        const loading = document.getElementById('testimonials-loading');
+        const empty = document.getElementById('testimonials-empty');
+        if (loading) loading.style.display = 'none';
+        if (empty) empty.style.display = 'none';
+        if (container) {
+          container.innerHTML = '';
+          const errDiv = document.createElement('div');
+          errDiv.className = 'testimonials-error';
+          errDiv.textContent = 'No se pueden cargar testimonios: ' + (error.message || error);
+          container.appendChild(errDiv);
+        }
+      } catch (e) {
+        // Ignorar errores de DOM por si la página no está lista
+      }
       callback([]);
     });
 }
