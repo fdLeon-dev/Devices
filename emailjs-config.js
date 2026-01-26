@@ -22,10 +22,10 @@ function initEmailJS() {
 
   try {
     emailjs.init(EMAILJS_CONFIG.publicKey);
-    console.log('EmailJS inicializado correctamente');
+    console.log('%c📧 EmailJS inicializado correctamente', 'color: #28a745; font-weight: bold;');
     return true;
   } catch (error) {
-    console.error('Error al inicializar EmailJS:', error);
+    console.error('❌ Error al inicializar EmailJS:', error);
     return false;
   }
 }

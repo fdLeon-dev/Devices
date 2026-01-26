@@ -20,6 +20,12 @@ let db;
 let testimoniosRef;
 
 function initFirebase() {
+  // Verificar si Firebase ya está inicializado
+  if (typeof db !== 'undefined' && db) {
+    console.log('%c🔄 Firebase ya está inicializado', 'color: #ffc107; font-weight: bold;');
+    return true;
+  }
+
   // Verificar si Firebase está cargado
   if (typeof firebase === 'undefined') {
     console.error('Firebase SDK no está cargado');
@@ -32,10 +38,10 @@ function initFirebase() {
     db = firebase.firestore();
     testimoniosRef = db.collection('testimonios');
 
-    console.log('Firebase inicializado correctamente');
+    console.log('%c🔥 Firebase inicializado correctamente', 'color: #ff6b35; font-weight: bold;');
     return true;
   } catch (error) {
-    console.error('Error al inicializar Firebase:', error);
+    console.error('❌ Error al inicializar Firebase:', error);
     return false;
   }
 }
@@ -145,5 +151,65 @@ function obtenerUserId() {
     localStorage.setItem('devicesf2_userId', userId);
   }
   return userId;
+}
+
+// Función para dar/quitar like a un testimonio
+async function toggleLike(testimonioId, userId) {
+  try {
+    const docRef = testimoniosRef.doc(testimonioId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return { success: false, error: 'Testimonio no encontrado' };
+    }
+
+    const data = doc.data();
+    const likedBy = data.likedBy || [];
+    const hasLiked = likedBy.includes(userId);
+
+    if (hasLiked) {
+      // Quitar like
+      await docRef.update({
+        likes: firebase.firestore.FieldValue.increment(-1),
+        likedBy: firebase.firestore.FieldValue.arrayRemove(userId)
+      });
+      return { success: true, hasLiked: false };
+    } else {
+      // Dar like
+      await docRef.update({
+        likes: firebase.firestore.FieldValue.increment(1),
+        likedBy: firebase.firestore.FieldValue.arrayUnion(userId)
+      });
+      return { success: true, hasLiked: true };
+    }
+  } catch (error) {
+    console.error('Error al toggle like:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Función para eliminar un testimonio
+async function deleteTestimonial(testimonioId, userId) {
+  try {
+    const docRef = testimoniosRef.doc(testimonioId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return { success: false, error: 'Testimonio no encontrado' };
+    }
+
+    const data = doc.data();
+
+    // Verificar que el usuario sea el propietario
+    if (data.userId !== userId) {
+      return { success: false, error: 'No tienes permisos para eliminar este testimonio' };
+    }
+
+    await docRef.delete();
+    return { success: true };
+  } catch (error) {
+    console.error('Error al eliminar testimonio:', error);
+    return { success: false, error: error.message };
+  }
 }
 

@@ -16,7 +16,7 @@ self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function (cache) {
-        console.log('Cache abierto');
+        console.log('%c📦 Cache del Service Worker abierto', 'color: #6f42c1; font-weight: bold;');
         return cache.addAll(urlsToCache);
       })
   );

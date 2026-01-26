@@ -456,11 +456,11 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('/sw.js')
       .then(function (registration) {
-        console.log('ServiceWorker registration successful');
-        console.warn('If you still see 404s for images that were renamed, try unregistering the Service Worker (DevTools > Application > Service Workers) and hard-reload the page to bypass cached assets.');
+        console.log('%c⚙️ ServiceWorker registrado correctamente', 'color: #17a2b8; font-weight: bold;');
+        console.warn('%c💡 Si ves errores 404 en imágenes renombradas, desregistra el Service Worker (DevTools > Application > Service Workers) y recarga la página', 'color: #ffc107;');
       })
       .catch(function (err) {
-        console.log('ServiceWorker registration failed');
+        console.error('❌ Error al registrar ServiceWorker:', err);
       });
   });
 }
@@ -498,6 +498,8 @@ async function loadSiteConfig() {
   }
 }
 
+// Funciones de modal de autenticación DESHABILITADAS para producción
+/*
 function showAuthModal() {
   document.getElementById('auth-modal').style.display = 'flex';
   // Allow closing with Escape key while modal is open
@@ -517,6 +519,7 @@ function showAuthMessage(msgEl, text, color) {
   // Clear children safely
   msgEl.textContent = text || '';
 }
+*/
 
 function renderLiveInfo() {
   const sched = `${siteConfig.live.dayOfWeek || '-'} ${siteConfig.live.time || ''}`;
@@ -524,6 +527,9 @@ function renderLiveInfo() {
   const join = document.getElementById('btn-join-live'); if (join) join.href = siteConfig.live.meetUrl || '#';
 }
 
+// Función de autenticación y cursos DESHABILITADA para producción
+// Los cursos están en reforma y no deben estar disponibles
+/*
 async function initAuthAndCourses() {
   await loadSiteConfig();
   renderLiveInfo();
@@ -545,15 +551,14 @@ async function initAuthAndCourses() {
   if (btnOpenAuth) {
     // Diagnostic helper: log clicks and verify modal opens
     btnOpenAuth.addEventListener('click', () => {
-      console.log('DEBUG: btn-open-auth clicked');
       setTimeout(() => {
         const modal = document.getElementById('auth-modal');
         if (modal && getComputedStyle(modal).display !== 'flex') {
-          console.warn('DEBUG: auth-modal did not open after click. Modal display:', getComputedStyle(modal).display);
+          console.warn('⚠️ El modal de autenticación no se abrió después del clic');
           // Show a small inline hint for the user
           try {
             const hint = document.getElementById('auth-click-hint') || (function(){ const d = document.createElement('div'); d.id='auth-click-hint'; d.style.color='#c00'; d.style.marginTop='6px'; d.textContent = 'Detectado clic, pero el modal no se abrió. Revisa la consola para más detalles.'; const parent = document.getElementById('user-info') || document.body; parent.appendChild(d); return d; })();
-          } catch (e) { /* ignore DOM errors */ }
+          } catch (e) { // ignore DOM errors }
         }
       }, 250);
     });
@@ -962,8 +967,11 @@ async function initAuthAndCourses() {
     try { await markModuleCompleted(cur.uid, currentModuleId); document.getElementById('module-modal').style.display = 'none'; } catch (e) { alert('Error: ' + e.message); }
   });
 }
+*/
 
 // Render admin modules list with search
+// Función de administración de módulos DESHABILITADA para producción
+/*
 async function renderAdminModulesList(filter='') {
   const list = document.getElementById('admin-modules-list'); if (!list) return;
   list.textContent = '';
@@ -996,7 +1004,10 @@ async function renderAdminModulesList(filter='') {
     });
   } catch (err) { console.error('Error loading admin modules:', err); list.textContent = 'Error cargando módulos: ' + err.message; }
 }
+*/
 
+// Función de reordenamiento de módulos DESHABILITADA para producción
+/*
 async function reorderModule(docId, direction) {
   // direction -1 up, +1 down
   const courseRef = db.collection('courses').doc('tgsit-reparacion-bios');
@@ -1015,7 +1026,10 @@ async function reorderModule(docId, direction) {
   batch.update(b.ref, { order: aOrder });
   await batch.commit();
 }
+*/
 
+// Función de edición de módulos DESHABILITADA para producción
+/*
 function populateEditForm(id, data) {
   document.getElementById('new-module-title').value = data.title || '';
   document.getElementById('new-module-desc').value = data.description || '';
@@ -1029,7 +1043,10 @@ function populateEditForm(id, data) {
   document.getElementById('btn-add-module').dataset.editing = id;
   document.getElementById('btn-add-module').textContent = 'Guardar cambios';
 }
+*/
 
+/*
+// Función de editor de quizzes DESHABILITADA para producción
 function renderQuizEditor(items) {
   const quizEditor = document.getElementById('quiz-editor');
   if (!quizEditor) return;
@@ -1047,6 +1064,7 @@ function renderQuizEditor(items) {
     const empty = document.createElement('div'); empty.style.color='var(--text-secondary)'; empty.textContent = 'No hay preguntas aún.'; quizEditor.appendChild(empty);
   }
 }
+*/
 
 function clearEditState() {
   delete document.getElementById('btn-add-module').dataset.editing;
@@ -1054,6 +1072,8 @@ function clearEditState() {
 }
 
 // View module in modal (user or admin)
+// Función de visualización de módulos DESHABILITADA para producción
+/*
 function viewModule(id, data) {
   document.getElementById('module-title').textContent = data.title || 'Módulo';
   document.getElementById('module-desc').textContent = data.description || '';
@@ -1112,7 +1132,10 @@ function viewModule(id, data) {
   if (markBtn) markBtn.dataset.moduleId = id;
   document.getElementById('module-modal').style.display = 'flex';
 }
+*/
 
+// Función de carga de módulos DESHABILITADA para producción
+/*
 async function loadModulesForUser(uid) {
   const modulesList = document.getElementById('modules-list'); if (!modulesList) return;
   modulesList.textContent = '';
@@ -1257,7 +1280,10 @@ async function loadModulesForUser(uid) {
     modulesList.appendChild(div);
   });
 }
+*/
 
+// Función de marcado de módulos completados DESHABILITADA para producción
+/*
 async function markModuleCompleted(uid, moduleId, moduleDiv) {
   try {
     const userDocRef = db.collection('users').doc(uid);
@@ -1271,11 +1297,12 @@ async function markModuleCompleted(uid, moduleId, moduleDiv) {
     loadModulesForUser(uid);
   } catch (err) { console.error('Error marking module:', err); alert('Error: ' + err.message); }
 }
+*/
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', function () {
-  // Kick off auth & courses features
-  initAuthAndCourses().catch(err => console.warn('Auth/Courses init failed:', err));
+  // Auth & courses features DISABLED for production
+  // initAuthAndCourses().catch(err => console.warn('Auth/Courses init failed:', err));
 });
 
 // Track button clicks
@@ -1522,7 +1549,7 @@ function initializeRealtimeTestimonials() {
   const firebaseInitialized = initFirebase();
 
   if (!firebaseInitialized) {
-    console.log('Firebase no configurado. El sistema de testimonios no estará disponible.');
+    console.warn('⚠️ Firebase no configurado. El sistema de testimonios funcionará en modo offline.');
     showTestimonialsOfflineMessage();
     return;
   }
@@ -1727,6 +1754,7 @@ async function agregarTestimonioConImagen(nombre, comentario, imageBase64) {
       nombre: nombre,
       comentario: comentario,
       imagen: imageBase64,
+      userId: currentUserId, // Agregar ID del usuario para poder eliminar
       likes: 0,
       likedBy: [],
       fecha: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1734,10 +1762,10 @@ async function agregarTestimonioConImagen(nombre, comentario, imageBase64) {
     };
 
     const docRef = await testimoniosRef.add(testimonio);
-    console.log('Testimonio agregado con ID:', docRef.id);
+    console.log('%c✅ Testimonio agregado exitosamente', 'color: #28a745; font-weight: bold;', 'ID:', docRef.id);
     return { success: true, id: docRef.id };
   } catch (error) {
-    console.error('Error al agregar testimonio:', error);
+    console.error('❌ Error al agregar testimonio:', error);
     return { success: false, error: error.message };
   }
 }
@@ -1877,6 +1905,17 @@ function createTestimonialCard(testimonio) {
   likeBtnEl.innerHTML = '<i class="fas fa-heart"></i><span class="like-count">' + (testimonio.likes || 0) + '</span>';
   footer.appendChild(likeBtnEl);
 
+  // Agregar botón de eliminar si el testimonio pertenece al usuario actual
+  if (testimonio.userId === currentUserId) {
+    const deleteBtnEl = document.createElement('button'); deleteBtnEl.className = 'delete-btn'; deleteBtnEl.dataset.id = testimonio.id;
+    deleteBtnEl.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtnEl.title = 'Eliminar testimonio';
+    footer.appendChild(deleteBtnEl);
+
+    // Agregar evento de eliminación
+    deleteBtnEl.addEventListener('click', () => handleDelete(testimonio.id));
+  }
+
   card.appendChild(header); card.appendChild(body); card.appendChild(footer);
 
   // Agregar evento de like
@@ -1947,6 +1986,51 @@ async function handleLike(testimonioId) {
     setTimeout(() => {
       likeBtn.disabled = false;
     }, 500);
+  }
+}
+
+// Manejar eliminación de testimonio
+async function handleDelete(testimonioId) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este testimonio? Esta acción no se puede deshacer.')) {
+    return;
+  }
+
+  const deleteBtn = document.querySelector(`.delete-btn[data-id="${testimonioId}"]`);
+
+  if (!deleteBtn) return;
+
+  // Deshabilitar botón temporalmente
+  deleteBtn.disabled = true;
+  deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+  try {
+    const result = await deleteTestimonial(testimonioId, currentUserId);
+
+    if (result.success) {
+      // Animación de salida
+      const card = document.querySelector(`.live-testimonial-card[data-id="${testimonioId}"]`);
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(-20px)';
+        setTimeout(() => card.remove(), 300);
+      }
+
+      showNotification('Testimonio eliminado correctamente', 'success');
+
+      // Track evento
+      trackEvent('testimonial_delete', {
+        testimonial_id: testimonioId
+      });
+    } else {
+      throw new Error(result.error || 'Error al eliminar testimonio');
+    }
+  } catch (error) {
+    console.error('Error al eliminar testimonio:', error);
+    showNotification('Error al eliminar testimonio. Intenta nuevamente.', 'error');
+
+    // Restaurar botón
+    deleteBtn.disabled = false;
+    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
   }
 }
 

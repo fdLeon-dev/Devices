@@ -29,7 +29,7 @@
           "answer": 1
         }
       ],
-      "thumbnail": "/public/images/modules/introducci-n-a-bios-y-uefi.svg",
+      "thumbnail": "/public/images/modules/real/introduccion-a-bios-y-uefi.jpg",
       "order": 1
     },
     {
@@ -48,7 +48,7 @@
       "videoUrl": "",
       "pdfPage": 25,
       "quiz": [],
-      "thumbnail": "/public/images/modules/herramientas-y-seguridad.svg",
+      "thumbnail": "/public/images/modules/real/herramientas-y-seguridad.jpg",
       "order": 2
     },
     {
@@ -67,7 +67,7 @@
       "videoUrl": "",
       "pdfPage": 9,
       "quiz": [],
-      "thumbnail": "/public/images/modules/diagn-stico-del-arranque-y-c-digos-post.svg",
+      "thumbnail": "/public/images/modules/real/diagnostico-de-fallos.jpg",
       "order": 3
     },
     {
@@ -86,7 +86,7 @@
       "videoUrl": "",
       "pdfPage": 29,
       "quiz": [],
-      "thumbnail": "/public/images/modules/cmos-bater-as-y-configuraci-n.svg",
+      "thumbnail": "/public/images/modules/real/componentes-hardware.jpg",
       "order": 4
     },
     {
@@ -105,7 +105,7 @@
       "videoUrl": "",
       "pdfPage": 27,
       "quiz": [],
-      "thumbnail": "/public/images/modules/recuperaci-n-de-bios-m-todos-software.svg",
+      "thumbnail": "/public/images/modules/real/backup-y-restauracion.jpg",
       "order": 5
     },
     {
@@ -124,7 +124,7 @@
       "videoUrl": "",
       "pdfPage": 9,
       "quiz": [],
-      "thumbnail": "/public/images/modules/recuperaci-n-de-bios-m-todos-hardware.svg",
+      "thumbnail": "/public/images/modules/real/actualizacion-de-firmware.jpg",
       "order": 6
     },
     {
@@ -143,7 +143,7 @@
       "videoUrl": "",
       "pdfPage": 21,
       "quiz": [],
-      "thumbnail": "/public/images/modules/firmware-malicioso-y-mitigaciones.svg",
+      "thumbnail": "/public/images/modules/real/mantenimiento-preventivo.jpg",
       "order": 7
     },
     {
@@ -162,7 +162,7 @@
       "videoUrl": "",
       "pdfPage": 23,
       "quiz": [],
-      "thumbnail": "/public/images/modules/laboratorio-pr-ctico-casos-reales.svg",
+      "thumbnail": "/public/images/modules/real/solucion-de-problemas-comunes.jpg",
       "order": 8
     },
     {
@@ -181,7 +181,7 @@
       "videoUrl": "",
       "pdfPage": 2,
       "quiz": [],
-      "thumbnail": "/public/images/modules/proyecto-final-y-evaluaci-n.svg",
+      "thumbnail": "/public/images/modules/real/optimizacion-del-sistema.jpg",
       "order": 9
     }
   ]
