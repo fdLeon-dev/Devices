@@ -337,12 +337,27 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   flex-wrap: wrap;
 }
 
-.hero-image {
-  display: flex;
-  justify-content: center;
+/* Hero-specific WhatsApp button (green, prominent) */
+.hero .btn-whatsapp {
+  background: var(--whatsapp-green);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.12);
+  display: inline-flex;
   align-items: center;
-  animation: fadeInRight 0.8s ease;
+  gap: 8px;
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
+
+.hero .btn-whatsapp:hover {
+  background: var(--whatsapp-green-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(37, 211, 102, 0.18);
+}
+
 
 .hero-graphic {
   position: relative;
