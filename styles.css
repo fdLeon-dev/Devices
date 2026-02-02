@@ -2446,6 +2446,83 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   visibility: visible;
 }
 
+/* AI Assistant Float Button */
+.ai-container {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  z-index: 1000;
+}
+
+.ai-float {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-hover);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ai-float:hover { transform: translateY(-3px) scale(1.03); }
+
+/* AI Modal */
+.ai-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.35);
+  z-index: 1100;
+  padding: 20px;
+}
+
+.ai-modal[aria-hidden="false"] { display: flex; }
+
+.ai-modal-content {
+  width: 420px;
+  max-width: calc(100% - 40px);
+  background: var(--bg-primary);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-modal-content h3 { margin: 0; font-size: 1.1rem; }
+.ai-close { position: absolute; right: 26px; top: 22px; background: transparent; border: none; font-size: 1.6rem; color: var(--text-primary); cursor: pointer; }
+
+.ai-chat { max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.ai-message { padding: 10px 12px; border-radius: 8px; max-width: 86%; }
+.ai-message.user { align-self: flex-end; background: rgba(var(--primary-rgb), 0.08); }
+.ai-message.bot { align-self: flex-start; background: #f4f4f4; }
+
+.ai-input { display: flex; gap: 10px; }
+.ai-input input { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); }
+
+.ai-quick { font-size: 0.85rem; color: var(--text-secondary); display:flex; gap:6px; flex-wrap:wrap; }
+.ai-quick-btn { background: transparent; border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 6px; cursor:pointer; }
+
+/* Service suggestions */
+.suggest-actions { display:flex; gap:8px; align-items:center; margin-top:8px; }
+.service-suggestions { display:flex; gap:8px; flex-wrap:wrap; }
+.suggestion-chip { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding:6px 10px; border-radius: 999px; cursor: pointer; font-size:0.85rem; }
+
+@media (max-width: 520px) {
+  .ai-modal-content { width: 100%; height: 100%; border-radius: 0; max-height: 100%; }
+}
+
+
 /* Footer */
 .footer {
   background: var(--secondary-color);

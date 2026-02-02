@@ -730,6 +730,16 @@
                 <option value="365" data-price="600">1 año (+$600)</option>
               </select>
             </div>
+
+            <div class="form-group">
+              <label for="problem-description">Describí tu problema</label>
+              <textarea id="problem-description" name="problem-description" rows="3" placeholder="Ej: La PC no enciende, aparecen pitidos en el arranque, la pantalla parpadea..."></textarea>
+              <div class="suggest-actions">
+                <button class="btn btn-outline" id="btn-suggest-service" type="button">Sugerir servicio</button>
+                <div id="service-suggestions" class="service-suggestions" aria-live="polite"></div>
+              </div>
+            </div>
+
           </div>
           <div class="calculator-result">
             <div class="result-card">
@@ -873,6 +883,27 @@
       </a>
       <div class="whatsapp-tooltip">
         <span>¡Cotiza tu servicio!</span>
+      </div>
+    </div>
+
+    <!-- AI Assistant Float Button -->
+    <div class="ai-container">
+      <button class="ai-float" id="ai-open" aria-label="Abrir Asistente IA" title="Asistente IA">
+        <i class="fas fa-robot"></i>
+      </button>
+    </div>
+
+    <!-- AI Modal -->
+    <div id="ai-modal" class="ai-modal" aria-hidden="true" role="dialog" aria-label="Asistente IA">
+      <div class="ai-modal-content">
+        <button class="ai-close" id="ai-close" aria-label="Cerrar asistente">&times;</button>
+        <h3>Asistente IA</h3>
+        <div class="ai-chat" id="ai-chat" role="log" aria-live="polite"></div>
+        <div class="ai-input">
+          <input id="ai-prompt" placeholder="Describe tu problema o pregunta..." aria-label="Mensaje al asistente">
+          <button class="btn btn-primary" id="ai-send">Enviar</button>
+        </div>
+        <div class="ai-quick">Sugerencias: <button class="ai-quick-btn">Mi PC no enciende</button> <button class="ai-quick-btn">Es muy lenta</button></div>
       </div>
     </div>
 

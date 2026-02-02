@@ -56,6 +56,10 @@ function initializeApp() {
   initializeCalculator();
   initializeWorkFilters();
   initializeStats();
+
+  // Initialize AI assistant & smart suggestions
+  initializeAIAssistant();
+  initializeSuggestService();
 }
 
 // Theme Toggle
@@ -142,6 +146,173 @@ function initializeSmoothScrolling() {
 function initializeFormHandling() {
   if (quoteForm) {
     quoteForm.addEventListener('submit', handleFormSubmit);
+  }
+}
+
+// -----------------------------
+// AI Assistant (mock) + Suggest Service
+// -----------------------------
+function initializeAIAssistant() {
+  const aiOpen = document.getElementById('ai-open');
+  const aiModal = document.getElementById('ai-modal');
+  const aiClose = document.getElementById('ai-close');
+  const aiSend = document.getElementById('ai-send');
+  const aiPrompt = document.getElementById('ai-prompt');
+  const aiChat = document.getElementById('ai-chat');
+  const quickBtns = document.querySelectorAll('.ai-quick-btn');
+
+  if (!aiOpen || !aiModal) return;
+
+  function openAI() {
+    aiModal.setAttribute('aria-hidden', 'false');
+    aiPrompt.focus();
+    appendBotMessage('Hola! Soy el asistente. Contame el problema y te sugiero el mejor servicio.');
+  }
+
+  function closeAI() {
+    aiModal.setAttribute('aria-hidden', 'true');
+  }
+
+  aiOpen.addEventListener('click', openAI);
+  aiClose.addEventListener('click', closeAI);
+  aiModal.addEventListener('click', (e) => {
+    if (e.target === aiModal) closeAI();
+  });
+
+  aiSend.addEventListener('click', async () => {
+    const text = aiPrompt.value.trim();
+    if (!text) return;
+    appendUserMessage(text);
+    aiPrompt.value = '';
+    const loadingId = appendBotMessage('Pensando...');
+    const response = await mockAIResponse(text);
+    replaceBotMessage(loadingId, response.text);
+
+    // If AI returns suggestions, render them
+    if (response.suggestions && response.suggestions.length) {
+      response.suggestions.forEach(s => {
+        const chip = document.createElement('button');
+        chip.className = 'suggestion-chip';
+        chip.textContent = s.label;
+        chip.addEventListener('click', () => {
+          selectServiceByValue(s.value);
+          // close AI after selection for workflow simplicity
+          closeAI();
+        });
+        aiChat.appendChild(chip);
+      });
+      aiChat.scrollTop = aiChat.scrollHeight;
+    }
+  });
+
+  quickBtns.forEach(b => b.addEventListener('click', () => {
+    aiPrompt.value = b.textContent;
+    aiSend.click();
+  }));
+
+  function appendUserMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'ai-message user';
+    div.textContent = text;
+    aiChat.appendChild(div);
+    aiChat.scrollTop = aiChat.scrollHeight;
+  }
+
+  function appendBotMessage(text) {
+    const id = 'bot-' + Math.random().toString(36).slice(2, 9);
+    const div = document.createElement('div');
+    div.className = 'ai-message bot';
+    div.id = id;
+    div.textContent = text;
+    aiChat.appendChild(div);
+    aiChat.scrollTop = aiChat.scrollHeight;
+    return id;
+  }
+
+  function replaceBotMessage(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  async function mockAIResponse(text) {
+    // Very simple rule-based mock. Replace with API call as needed.
+    const normalized = text.toLowerCase();
+    const suggestions = [];
+    let reply = 'Gracias. Voy a revisar, te recomiendo traer la PC para diagnóstico.';
+
+    if (/pantalla|monitor|parpadea|falla|imagen/.test(normalized)) {
+      suggestions.push({ label: 'Diagnóstico Completo', value: 'diagnostico-completo' });
+      reply = 'Parece un problema de pantalla o GPU. Te sugiero un diagnóstico completo y revisión de la GPU.';
+    } else if (/no enciende|no arranca|pitidos|beep/.test(normalized)) {
+      suggestions.push({ label: 'Diagnóstico Completo', value: 'diagnostico-completo' });
+      suggestions.push({ label: 'Reparación Básica', value: 'reparacion-basica' });
+      reply = 'Los pitidos o la falta de arranque suelen indicar problemas de hardware (PSU, RAM, placa). Recomendado diagnóstico.';
+    } else if (/lent|lento|reinicia|calentamiento/.test(normalized)) {
+      suggestions.push({ label: 'Optimización de Sistema', value: 'optimizacion-sistema' });
+      suggestions.push({ label: 'Mantenimiento', value: 'mantenimiento' });
+      reply = 'Puede ser un problema de software o temperatura. Puedo sugerir optimización y limpieza.';
+    } else if (/recuperacion|datos|disco|hdd|ssd/.test(normalized)) {
+      suggestions.push({ label: 'Recuperación de Datos', value: 'recuperacion-datos' });
+      reply = 'Si hay pérdida de datos podemos intentar recuperación; traenos el disco para evaluación.';
+    }
+
+    // Simulate latency
+    await new Promise(r => setTimeout(r, 700));
+    return { text: reply, suggestions };
+  }
+}
+
+function initializeSuggestService() {
+  const btnSuggest = document.getElementById('btn-suggest-service');
+  const problemInput = document.getElementById('problem-description');
+  const suggestionsContainer = document.getElementById('service-suggestions');
+  const serviceSelect = document.getElementById('service-type');
+
+  if (!btnSuggest || !problemInput || !suggestionsContainer || !serviceSelect) return;
+
+  btnSuggest.addEventListener('click', () => {
+    const text = problemInput.value.trim().toLowerCase();
+    if (!text) {
+      suggestionsContainer.innerHTML = '<span class="suggestion-chip">Describe el problema para sugerir</span>';
+      return;
+    }
+    const results = suggestServicesFromText(text);
+    suggestionsContainer.innerHTML = '';
+
+    results.forEach(s => {
+      const chip = document.createElement('button');
+      chip.className = 'suggestion-chip';
+      chip.type = 'button';
+      chip.textContent = s.label;
+      chip.addEventListener('click', () => {
+        selectServiceByValue(s.value);
+      });
+      suggestionsContainer.appendChild(chip);
+    });
+  });
+
+  function suggestServicesFromText(text) {
+    const items = [];
+    if (/pantalla|monitor|parpadea|imagen/.test(text)) items.push({ label: 'Diagnóstico Completo', value: 'diagnostico-completo' });
+    if (/no enciende|no arranca|pitidos|beep/.test(text)) items.push({ label: 'Diagnóstico Completo', value: 'diagnostico-completo' });
+    if (/lent|lento|reinicia|calentamiento/.test(text)) items.push({ label: 'Optimización de Sistema', value: 'optimizacion-sistema' });
+    if (/sdd|hdd|disco|datos|recuperaci/.test(text)) items.push({ label: 'Recuperación de Datos', value: 'recuperacion-datos' });
+    if (/ram|memoria/.test(text)) items.push({ label: 'Upgrade de RAM', value: 'upgrade-ram' });
+    if (items.length === 0) items.push({ label: 'Diagnóstico Completo', value: 'diagnostico-completo' });
+    return items;
+  }
+}
+
+function selectServiceByValue(value) {
+  const serviceSelect = document.getElementById('service-type');
+  if (!serviceSelect) return;
+  const option = serviceSelect.querySelector(`option[value="${value}"]`);
+  if (option) {
+    serviceSelect.value = value;
+    // small highlight animation
+    option.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    serviceSelect.classList.add('highlighted');
+    setTimeout(() => serviceSelect.classList.remove('highlighted'), 900);
   }
 }
 
