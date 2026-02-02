@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -58,16 +59,24 @@
           <a href="#cotizar" class="nav-link">Cotizar</a>
           <a href="#contacto" class="nav-link">Contacto</a>
           <a href="#cursos" class="nav-link" id="nav-cursos" style="display:none">Cursos</a>
+          <!-- WhatsApp in mobile menu -->
+          <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="nav-link nav-link-whatsapp" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp</a>
         </div>
-        <div class="nav-toggle" id="nav-toggle">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
+
+        <div class="nav-actions">
+          <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp nav-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </a>
+          <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
+          <div class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-moon"></i>
+          </div>
+          <div class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
         </div>
-        <div class="theme-toggle" id="theme-toggle">
-          <i class="fas fa-moon"></i>
-        </div>
-        <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
       </div>
     </nav>
 
@@ -80,7 +89,7 @@
             rápidas y confiables para tu equipo.</p>
           <div class="hero-buttons">
             <a href="#cotizar" class="btn btn-primary">Cotizar Ahora</a>
-            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20técnico" class="btn btn-whatsapp" target="_blank" rel="noopener">
+            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp para cotizar" title="Abrir en WhatsApp">
               <i class="fab fa-whatsapp"></i> WhatsApp
             </a>
             <a href="#servicios" class="btn btn-secondary">Ver Servicios</a>
@@ -859,7 +868,7 @@
 
     <!-- WhatsApp Float Button -->
     <div class="whatsapp-container">
-      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20más%20sobre%20sus%20servicios%20técnicos" class="whatsapp-float" target="_blank" rel="noopener">
+      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20servicios%20t%C3%A9cnicos" class="whatsapp-float" target="_blank" rel="noopener" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp">
         <i class="fab fa-whatsapp"></i>
       </a>
       <div class="whatsapp-tooltip">

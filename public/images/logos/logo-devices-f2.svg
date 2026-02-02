@@ -1,13 +1,13 @@
 <svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#8a2be2;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7b1fa2;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#6A4CDB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5436B8;stop-opacity:1" />
     </linearGradient>
   </defs>
   
   <!-- Icono de computadora -->
-  <rect x="10" y="15" width="30" height="20" rx="2" fill="url(#gradient)" stroke="#8a2be2" stroke-width="2"/>
+  <rect x="10" y="15" width="30" height="20" rx="2" fill="url(#gradient)" stroke="#6A4CDB" stroke-width="2"/>
   <rect x="12" y="17" width="26" height="16" rx="1" fill="white"/>
   <rect x="18" y="37" width="14" height="3" rx="1" fill="url(#gradient)"/>
   

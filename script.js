@@ -132,6 +132,7 @@ function initializeSmoothScrolling() {
         // Close mobile menu if open
         navMenu.classList.remove('active');
         navToggle.classList.remove('active');
+        navToggle.setAttribute('aria-expanded', 'false');
       }
     });
   });
@@ -275,8 +276,10 @@ function highlightContactFields() {
 // Mobile Menu
 function initializeMobileMenu() {
   navToggle.addEventListener('click', function () {
+    const isActive = !navMenu.classList.contains('active');
     navMenu.classList.toggle('active');
     navToggle.classList.toggle('active');
+    navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
   });
 
   // Close menu when clicking outside
@@ -363,7 +366,7 @@ function showNotification(message, type = 'info') {
     `;
 
   if (type === 'success') {
-    notification.style.borderLeft = '4px solid #25d366';
+    notification.style.borderLeft = '4px solid var(--whatsapp-green)';
   }
 
   document.body.appendChild(notification);
@@ -1529,9 +1532,9 @@ function addScrollAnimations() {
 document.addEventListener('DOMContentLoaded', addScrollAnimations);
 
 // Console welcome message
-console.log('%c🚀 Devices F2 - Website Loaded Successfully!', 'color: #8a2be2; font-size: 16px; font-weight: bold;');
+console.log('%c🚀 Devices F2 - Website Loaded Successfully!', 'color: #6A4CDB; font-size: 16px; font-weight: bold;');
 console.log('%c💻 Servicio técnico profesional de computadoras', 'color: #666; font-size: 12px;');
-console.log('%c✨ Enhanced with testimonials, calculator, and filters!', 'color: #8a2be2; font-size: 12px;');
+console.log('%c✨ Enhanced with testimonials, calculator, and filters!', 'color: #6A4CDB; font-size: 12px;'); 
 
 // ============================================
 // Sistema de Testimonios en Tiempo Real
