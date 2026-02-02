@@ -2513,11 +2513,16 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 .ai-quick { font-size: 0.85rem; color: var(--text-secondary); display:flex; gap:6px; flex-wrap:wrap; }
 .ai-quick-btn { background: transparent; border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 6px; cursor:pointer; }
 
+/* AI modal footer */
+.ai-footer { display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:8px; }
+.ai-footer .btn-outline { padding: 8px 10px; }
+
 /* Service suggestions */
 .suggest-actions { display:flex; gap:8px; align-items:center; margin-top:8px; }
 .service-suggestions { display:flex; gap:8px; flex-wrap:wrap; }
 .suggestion-chip { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding:6px 10px; border-radius: 999px; cursor: pointer; font-size:0.85rem; }
 
+.ai-notice { font-size: 0.85rem; color: var(--text-secondary); }
 @media (max-width: 520px) {
   .ai-modal-content { width: 100%; height: 100%; border-radius: 0; max-height: 100%; }
 }

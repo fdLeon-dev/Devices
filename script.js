@@ -210,6 +210,55 @@ function initializeAIAssistant() {
     aiSend.click();
   }));
 
+  // Share via WhatsApp and copy handlers
+  const aiWhats = document.getElementById('ai-whatsapp');
+  const aiCopy = document.getElementById('ai-copy');
+
+  function buildConversationText() {
+    const nodes = Array.from(aiChat.querySelectorAll('.ai-message'));
+    const lines = nodes.map(n => {
+      if (n.classList.contains('user')) return 'Cliente: ' + n.textContent;
+      return 'Asistente: ' + n.textContent;
+    });
+    // Include selected service if present
+    const serviceSelect = document.getElementById('service-type');
+    if (serviceSelect && serviceSelect.value) {
+      const label = serviceSelect.options[serviceSelect.selectedIndex].text;
+      lines.unshift('Servicio sugerido: ' + label);
+    }
+    return lines.join('\n');
+  }
+
+  function sendToWhatsApp(text) {
+    const base = 'https://wa.me/59892803418?text=';
+    const url = base + encodeURIComponent(text);
+    window.open(url, '_blank');
+  }
+
+  if (aiWhats) {
+    aiWhats.addEventListener('click', () => {
+      const txt = buildConversationText();
+      if (!txt) return alert('No hay mensajes para enviar.');
+      sendToWhatsApp(txt);
+    });
+  }
+
+  if (aiCopy) {
+    aiCopy.addEventListener('click', async () => {
+      const txt = buildConversationText();
+      if (!txt) return alert('No hay mensajes para copiar.');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(txt);
+        alert('Conversación copiada al portapapeles');
+      } else {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+        alert('Conversación copiada al portapapeles');
+      }
+    });
+  }
+
   function appendUserMessage(text) {
     const div = document.createElement('div');
     div.className = 'ai-message user';
