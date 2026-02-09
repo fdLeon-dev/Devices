@@ -40,7 +40,7 @@ Sitio web moderno y profesional para el servicio técnico de reparación y ensam
 
 ## 🎨 Diseño
 
-- **Colores**: Violeta (#8a2be2) como color principal, con tema claro/oscuro
+- **Colores**: Violeta (principal: #6A4CDB) como color principal, con tema claro/oscuro
 - **Tipografía**: Inter (sans-serif moderna y legible)
 - **Iconos**: Font Awesome para una experiencia visual consistente
 - **Animaciones**: Efectos sutiles y transiciones suaves
@@ -144,7 +144,7 @@ Modifica las variables CSS en `:root` para cambiar la paleta de colores:
 
 ```css
 :root {
-    --primary-color: #8a2be2;
+    --primary-color: #6A4CDB;
     --secondary-color: #2c2c2c;
     /* ... más variables */
 }

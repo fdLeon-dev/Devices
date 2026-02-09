@@ -8,9 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Font Awesome Icons (local fallback) -->
+  <link rel="stylesheet" href="/public/vendor/fontawesome/css/all.min.css">
 
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css">
@@ -44,6 +45,63 @@
 </head>
 
 <body>
+  <!-- SVG Icon sprite (inline, hidden) -->
+  <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display:none" aria-hidden="true">
+    <symbol id="i-sun" viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79L3.17 4.84 4.97 6.63 6.76 4.84zM1 13h3v-2H1v2zm10 9h2v-3h-2v3zm7.04-19.37l-1.79 1.79 1.79 1.79 1.79-1.79-1.79-1.79zM17.24 19.16l1.79 1.79 1.8-1.79-1.79-1.79-1.8 1.79zM23 11v2h-3v-2h3zM4.97 17.37L3.17 18.97l1.79 1.79 1.8-1.79-1.79-1.6zM12 8a4 4 0 100 8 4 4 0 000-8z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm-1 15l-5-5 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></symbol>
+    <symbol id="i-info-circle" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></symbol>
+    <symbol id="i-times" viewBox="0 0 24 24"><path d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.41 4.29 19.71 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29 10.59 10.59 16.88 4.29z"/></symbol>
+    <symbol id="i-spinner" viewBox="0 0 50 50"><path d="M43.935 25.145a19.79 19.79 0 11-7.951-15.93" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.42 0-8 3.58-8 8h16c0-4.42-3.58-8-8-8z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9-6.36C0.33 12.53 2.77 8 7 8c2.6 0 4 2.33 5 3.68C13.99 10.33 15.39 8 18 8c4.23 0 6.67 4.53 4 6.64C19 16.65 12 21 12 21z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm3 3h12l-1 11H7L6 9zM9 4h6l1 2H8z"/></symbol>
+    <symbol id="i-exclamation-triangle" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86A2 2 0 0010.29 3.86zM12 9v4M12 17h.01"/></symbol>
+    <symbol id="i-external-link" viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 8v5l3 3M12 2a10 10 0 100 20 10 10 0 000-20z"/></symbol>
+    <symbol id="i-search-plus" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5C16 6.46 13.54 4 10.5 4S5 6.46 5 9.5 7.46 15 10.5 15c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10.5 13C8.01 13 6 10.99 6 8.5S8.01 4 10.5 4 15 6.01 15 8.5 12.99 13 10.5 13z"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></symbol>
+    <symbol id="i-comment-dots" viewBox="0 0 24 24"><path d="M21 6h-2v7H7l-4 4V6a2 2 0 012-2h14a2 2 0 012 2zM8 11h2v2H8v-2zm4 0h2v2h-2v-2z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M12 5c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm8 0h-2.18l-1.83-2.44A2 2 0 0014.82 2H9.18a2 2 0 00-1.17.56L6.18 5H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2z"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 6h-18v11.17L6.17 13H21V6z"/></symbol>
+    <symbol id="i-paper-plane" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v6z"/></symbol>
+    <symbol id="i-robot" viewBox="0 0 24 24">
+      <!-- Head -->
+      <rect x="5" y="3" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <!-- Antenna Left -->
+      <line x1="8" y1="3" x2="7" y2="0.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="7" cy="0.5" r="0.6" fill="currentColor"/>
+      <!-- Antenna Right -->
+      <line x1="16" y1="3" x2="17" y2="0.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <circle cx="17" cy="0.5" r="0.6" fill="currentColor"/>
+      <!-- Eyes -->
+      <circle cx="9" cy="7" r="1.2" fill="currentColor"/>
+      <circle cx="15" cy="7" r="1.2" fill="currentColor"/>
+      <!-- Smile -->
+      <path d="M10 10 Q12 11 14 10" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <!-- Body -->
+      <rect x="6" y="14" width="12" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <!-- Arms -->
+      <line x1="4.5" y1="16" x2="1.5" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="19.5" y1="16" x2="22.5" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- Buttons -->
+      <circle cx="10" cy="18" r="0.5" fill="currentColor"/>
+      <circle cx="12" cy="18" r="0.5" fill="currentColor"/>
+      <circle cx="14" cy="18" r="0.5" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.57.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.24.2 2.45.57 3.57a1 1 0 01-.24 1.01l-2.21 2.21z"/></symbol>
+    <symbol id="i-envelope" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></symbol>
+    <symbol id="i-map-marker" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 6.2A4.8 4.8 0 1016.8 13 4.8 4.8 0 0012 8.2zM18.5 6.1a1.1 1.1 0 11-1.1-1.1 1.1 1.1 0 011.1 1.1z"/></symbol>
+    <symbol id="i-whatsapp-official" viewBox="0 0 24 24">
+      <!-- WhatsApp Official Logo (Font Awesome) -->
+      <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z M12.052 20.568c-1.625 0-3.222-.43-4.623-1.24l-.33-.2-3.43.9.92-3.36-.21-.33C3.5 14.69 3 13.15 3 11.5 3 6.8 6.83 3 11.5 3c1.88 0 3.66.75 4.98 2.08 1.32 1.32 2.05 3.08 2.05 4.96 0 4.7-3.83 8.52-8.48 8.52z"/>
+    </symbol>
+    <symbol id="i-instagram-official" viewBox="0 0 24 24">
+      <path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/>
+    </symbol>
+  </svg>
   <!-- Navbar -->
   <main class="main-content">
     <nav class="navbar" id="navbar">
@@ -58,16 +116,24 @@
           <a href="#cotizar" class="nav-link">Cotizar</a>
           <a href="#contacto" class="nav-link">Contacto</a>
           <a href="#cursos" class="nav-link" id="nav-cursos" style="display:none">Cursos</a>
+          <!-- WhatsApp in mobile menu -->
+          <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="nav-link nav-link-whatsapp" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp</a>
         </div>
-        <div class="nav-toggle" id="nav-toggle">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
+
+        <div class="nav-actions">
+            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp nav-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp">
+            <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> WhatsApp
+          </a>
+          <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
+          <div class="theme-toggle" id="theme-toggle" role="button" aria-label="Cambiar tema">
+            <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+          </div>
+          <div class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
         </div>
-        <div class="theme-toggle" id="theme-toggle">
-          <i class="fas fa-moon"></i>
-        </div>
-        <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
       </div>
     </nav>
 
@@ -80,8 +146,8 @@
             rápidas y confiables para tu equipo.</p>
           <div class="hero-buttons">
             <a href="#cotizar" class="btn btn-primary">Cotizar Ahora</a>
-            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20técnico" class="btn btn-whatsapp" target="_blank" rel="noopener">
-              <i class="fab fa-whatsapp"></i> WhatsApp
+            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp para cotizar" title="Abrir en WhatsApp">
+              <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> WhatsApp
             </a>
             <a href="#servicios" class="btn btn-secondary">Ver Servicios</a>
             <button class="btn btn-outline" id="btn-open-auth">Acceder</button>
@@ -118,7 +184,7 @@
             <div class="work-image">
               <img src="public/images/works/pc2.jpg" alt="PC Gaming Personalizada" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518717758536-85ae29035b6d?w=400&amp;h=300&amp;fit=crop'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -134,7 +200,7 @@
             <div class="work-image">
               <img src="public/images/laptop.jpg" alt="Reparación de Laptop" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -151,7 +217,7 @@
             <div class="work-image">
               <img src="public/images/works/after-mantenimiento.jpg" alt="Upgrade de PC" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&amp;h=300&amp;fit=crop'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -167,7 +233,7 @@
             <div class="work-image">
               <img src="public/images/works/giga.jpg" alt="Mantenimiento Preventivo" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&amp;h=300&amp;fit=crop'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -184,7 +250,7 @@
             <div class="work-image">
               <img src="public/images/works/trabajo-ensamblaje-01.svg" alt="PC de Trabajo" loading="lazy" onerror="this.src='public/images/works/trabajo-ensamblaje-01.svg'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -201,7 +267,7 @@
             <div class="work-image">
               <img src="public/images/works/mother.jpg" alt="Reparación de Motherboard" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&amp;h=300&amp;fit=crop'">
               <div class="work-overlay">
-                <i class="fas fa-search-plus"></i>
+                <svg class="icon icon-search-plus" aria-hidden="true"><use href="#i-search-plus"></use></svg>
               </div>
             </div>
             <div class="work-content">
@@ -231,12 +297,12 @@
           <!-- Formulario para agregar testimonio -->
           <div class="testimonial-form-container">
             <div class="testimonial-form-card">
-              <h3><i class="fas fa-comment-dots"></i> Comparte tu experiencia</h3>
+              <h3><svg class="icon icon-comment-dots" aria-hidden="true"><use href="#i-comment-dots"></use></svg> Comparte tu experiencia</h3>
               <form id="testimonial-form" class="new-testimonial-form">
                 <div class="form-row form-row-inline">
                   <div class="form-group form-group-name">
                     <label for="testimonial-name">
-                      <i class="fas fa-user"></i> Tu nombre
+                      <svg class="icon icon-user" aria-hidden="true"><use href="#i-user"></use></svg> Tu nombre
                     </label>
                     <input type="text" id="testimonial-name" name="name" placeholder="Tu nombre" required="" maxlength="50">
                   </div>
@@ -246,7 +312,7 @@
                     <input type="file" id="testimonial-image" name="image" accept="image/*" hidden="">
                     <button type="button" class="btn-upload-image-compact" id="btn-upload-image" title="Agregar tu foto (opcional)">
                       <div class="image-preview-compact" id="image-preview">
-                        <i class="fas fa-camera"></i>
+                        <svg class="icon icon-camera" aria-hidden="true"><use href="#i-camera"></use></svg>
                       </div>
                     </button>
                   </div>
@@ -254,7 +320,7 @@
 
                 <div class="form-group">
                   <label for="testimonial-comment">
-                    <i class="fas fa-message"></i> Tu comentario
+                    <svg class="icon icon-message" aria-hidden="true"><use href="#i-message"></use></svg> Tu comentario
                   </label>
                   <textarea id="testimonial-comment" name="comment" rows="3" placeholder="Cuéntanos sobre tu experiencia con nuestro servicio..." required="" maxlength="500"></textarea>
                   <div class="char-counter">
@@ -262,7 +328,7 @@
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-submit-testimonial">
-                  <i class="fas fa-paper-plane"></i> Enviar Comentario
+                  <svg class="icon icon-paper-plane" aria-hidden="true"><use href="#i-paper-plane"></use></svg> Enviar Comentario
                 </button>
               </form>
               <div id="form-message" class="form-message"></div>
@@ -287,7 +353,7 @@
                       <h4>@franizcua</h4>
                       <span>Hace 27 semanas</span>
                       <div class="rating">
-                        <i class="fas fa-heart"></i>
+                        <svg class="icon icon-heart" aria-hidden="true"><use href="#i-heart"></use></svg>
                         <span>1 Me gusta</span>
                       </div>
                     </div>
@@ -308,7 +374,7 @@
                       <h4>@pabolarrechart</h4>
                       <span>Hace 57 semanas</span>
                       <div class="rating">
-                        <i class="fas fa-heart"></i>
+                        <svg class="icon icon-heart" aria-hidden="true"><use href="#i-heart"></use></svg>
                         <span>1 Me gusta</span>
                       </div>
                     </div>
@@ -329,7 +395,7 @@
                       <h4>@andres__figueredo</h4>
                       <span>Hace 2 semanas</span>
                       <div class="rating">
-                        <i class="fas fa-heart"></i>
+                        <svg class="icon icon-heart" aria-hidden="true"><use href="#i-heart"></use></svg>
                         <span>3 Me gusta</span>
                       </div>
                     </div>
@@ -339,7 +405,7 @@
             </div>
             <div class="testimonial-controls">
               <button class="testimonial-prev" id="testimonial-prev">
-                <i class="fas fa-chevron-left"></i>
+                <svg class="icon icon-chevron-left" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
               </button>
               <div class="testimonial-dots">
                 <span class="dot active" data-slide="0"></span>
@@ -347,7 +413,7 @@
                 <span class="dot" data-slide="2"></span>
               </div>
               <button class="testimonial-next" id="testimonial-next">
-                <i class="fas fa-chevron-right"></i>
+                <svg class="icon icon-chevron-right" aria-hidden="true"><use href="#i-chevron-right"></use></svg>
               </button>
             </div>
           </div>
@@ -355,7 +421,7 @@
           <!-- Lista de testimonios en tiempo real -->
           <div class="testimonials-list">
             <div class="testimonials-header">
-              <h3><i class="fas fa-comments"></i> Testimonios de la comunidad</h3>
+              <h3><svg class="icon icon-comment-dots" aria-hidden="true"><use href="#i-comment-dots"></use></svg> Testimonios de la comunidad</h3>
               <div class="testimonials-count">
                 <span id="testimonials-count">0</span> testimonios
               </div>
@@ -721,6 +787,17 @@
                 <option value="365" data-price="600">1 año (+$600)</option>
               </select>
             </div>
+
+            <div class="form-group">
+              <label for="problem-description">Describí tu problema</label>
+              <textarea id="problem-description" name="problem-description" rows="3" placeholder="Ej: La PC no enciende, aparecen pitidos en el arranque, la pantalla parpadea..."></textarea>
+              <div class="suggest-actions">
+                <button class="btn btn-outline" id="btn-suggest-service" type="button">Sugerir servicio</button>
+                <div id="service-suggestions" class="service-suggestions" aria-live="polite"></div>
+              </div>
+              <div id="selected-service" class="selected-service" aria-live="polite"></div>
+            </div>
+
           </div>
           <div class="calculator-result">
             <div class="result-card">
@@ -746,7 +823,7 @@
               </div>
               <p class="price-note">* Precio estimado. El costo final puede variar según el diagnóstico.</p>
               <button class="btn btn-primary" onclick="openWhatsAppQuote()">
-                <i class="fab fa-whatsapp"></i>
+                <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg>
                 Cotizar por WhatsApp
               </button>
             </div>
@@ -801,21 +878,21 @@
         <div class="contact-grid">
           <div class="contact-info">
             <div class="contact-item">
-              <i class="fas fa-phone"></i>
+              <svg class="icon icon-phone" aria-hidden="true" width="20" height="20"><use href="#i-phone"></use></svg>
               <div>
                 <h3>Teléfono</h3>
-                <p>+598 92 803 418</p>
+                <p><a href="tel:+59892803418">+598 92 803 418</a></p>
               </div>
             </div>
             <div class="contact-item">
-              <i class="fas fa-envelope"></i>
+              <svg class="icon icon-envelope" aria-hidden="true" width="20" height="20"><use href="#i-envelope"></use></svg>
               <div>
                 <h3>Email</h3>
-                <p>devices.f02@gmail.com</p>
+                <p><a href="mailto:devices.f02@gmail.com">devices.f02@gmail.com</a></p>
               </div>
             </div>
             <div class="contact-item">
-              <i class="fas fa-map-marker-alt"></i>
+              <svg class="icon icon-map-marker" aria-hidden="true" width="20" height="20"><use href="#i-map-marker"></use></svg>
               <div>
                 <h3>Ubicación</h3>
                 <p>San Carlos, Maldonado, Uruguay</p>
@@ -832,11 +909,11 @@
               <h3>Síguenos</h3>
               <div class="social-links">
                 <a href="https://instagram.com/devices_.f2" target="_blank" rel="noopener">
-                  <i class="fab fa-instagram"></i>
+                  <svg class="icon icon-instagram" aria-hidden="true" width="20" height="20"><use href="#i-instagram-official"></use></svg>
                   <span>Instagram</span>
                 </a>
                 <a href="https://wa.me/59892803418" target="_blank" rel="noopener">
-                  <i class="fab fa-whatsapp"></i>
+                  <svg class="icon icon-whatsapp" aria-hidden="true" width="20" height="20"><use href="#i-whatsapp-official"></use></svg>
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -849,8 +926,8 @@
               </iframe>
             </div>
             <div class="map-info">
-              <p><i class="fas fa-map-marker-alt"></i> San Carlos, Maldonado, Uruguay</p>
-              <p><i class="fas fa-phone"></i> +598 92 803 418</p>
+              <p><svg class="icon icon-map-marker" aria-hidden="true" width="16" height="16"><use href="#i-map-marker"></use></svg> San Carlos, Maldonado, Uruguay</p>
+              <p><svg class="icon icon-phone" aria-hidden="true" width="16" height="16"><use href="#i-phone"></use></svg> <a href="tel:+59892803418">+598 92 803 418</a></p>
             </div>
           </div>
         </div>
@@ -859,11 +936,39 @@
 
     <!-- WhatsApp Float Button -->
     <div class="whatsapp-container">
-      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20más%20sobre%20sus%20servicios%20técnicos" class="whatsapp-float" target="_blank" rel="noopener">
-        <i class="fab fa-whatsapp"></i>
+      <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20servicios%20t%C3%A9cnicos" class="whatsapp-float" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp" target="_blank" rel="noopener">
+        <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg>
       </a>
       <div class="whatsapp-tooltip">
         <span>¡Cotiza tu servicio!</span>
+      </div>
+    </div>
+
+    <!-- AI Assistant Float Button -->
+    <div class="ai-container">
+      <button class="ai-float" id="ai-open" aria-label="Abrir Asistente IA" title="Asistente IA">
+        <svg class="icon icon-robot" aria-hidden="true" width="1.5em" height="1.5em"><use href="#i-robot"></use></svg>
+      </button>
+    </div>
+
+    <!-- Fallback visible assistant button (in case CDN or CSP blocks icons/js) -->
+    <button id="ai-fallback" class="ai-fallback" aria-label="Abrir Asistente IA" title="Asistente IA (fallback)" style="display:none"><svg class="icon icon-robot" aria-hidden="true" width="1em" height="1em"><use href="#i-robot"></use></svg> Asistente</button>
+
+    <!-- AI Modal -->
+    <div id="ai-modal" class="ai-modal" aria-hidden="true" role="dialog" aria-label="Asistente IA">
+      <div class="ai-modal-content">
+        <button class="ai-close" id="ai-close" aria-label="Cerrar asistente">&times;</button>
+        <h3>Asistente IA</h3>
+        <div class="ai-chat" id="ai-chat" role="log" aria-live="polite"></div>
+        <div class="ai-input">
+          <input id="ai-prompt" placeholder="Describe tu problema o pregunta..." aria-label="Mensaje al asistente">
+          <button class="btn btn-primary" id="ai-send">Enviar</button>
+        </div>
+        <div class="ai-quick">Sugerencias: <button class="ai-quick-btn">Mi PC no enciende</button> <button class="ai-quick-btn">Es muy lenta</button></div>
+          <div class="ai-footer">
+          <button class="btn btn-whatsapp" id="ai-whatsapp" aria-label="Enviar chat por WhatsApp"><svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> Enviar por WhatsApp</button>
+          <button class="btn btn-outline" id="ai-copy" aria-label="Copiar conversación">Copiar</button>
+        </div>
       </div>
     </div>
 
@@ -925,6 +1030,7 @@
   </footer>
 
   <!-- JavaScript -->
+  <!-- Dev: Forzar actualización/desregistro del Service Worker (eliminado por petición) -->
   <script src="firebase-config.js"></script>
   <script src="emailjs-config.js"></script>
   <script src="script.js"></script>
