@@ -1010,7 +1010,8 @@ async function initAuthAndCourses() {
     adminModulesSearch.addEventListener('input', () => renderAdminModulesList(adminModulesSearch.value.trim()));
   }
 
-  // Auth state listener
+  // Auth state listener - DESHABILITADO (módulos y autenticación removidos)
+  /*
   firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
       const emailEl = document.getElementById('user-email'); if (emailEl) emailEl.textContent = user.email;
@@ -1092,6 +1093,7 @@ async function initAuthAndCourses() {
       }
     }
   });
+  */
 
   // Admin add module
   const btnAddModule = document.getElementById('btn-add-module');
@@ -1295,17 +1297,7 @@ async function initAuthAndCourses() {
   // initial render
   renderQuizEditor(currentQuiz);
 
-  // Module viewer handlers
-  const moduleClose = document.getElementById('module-close');
-  const moduleClose2 = document.getElementById('module-close-2');
-  if (moduleClose) moduleClose.addEventListener('click', () => document.getElementById('module-modal').style.display = 'none');
-  if (moduleClose2) moduleClose2.addEventListener('click', () => document.getElementById('module-modal').style.display = 'none');
-  const moduleMarkBtn = document.getElementById('module-mark-complete');
-  if (moduleMarkBtn) moduleMarkBtn.addEventListener('click', async () => {
-    const cur = firebase.auth().currentUser; if (!cur) return alert('Debes iniciar sesión para marcar módulo como visto.');
-    const currentModuleId = moduleMarkBtn.dataset.moduleId; if (!currentModuleId) return;
-    try { await markModuleCompleted(cur.uid, currentModuleId); document.getElementById('module-modal').style.display = 'none'; } catch (e) { alert('Error: ' + e.message); }
-  });
+  // Module viewer handlers - commented out (modules system removed)
 }
 */
 
