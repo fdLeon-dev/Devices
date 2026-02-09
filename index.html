@@ -115,7 +115,6 @@
           <a href="#trabajos" class="nav-link">Trabajos</a>
           <a href="#cotizar" class="nav-link">Cotizar</a>
           <a href="#contacto" class="nav-link">Contacto</a>
-          <a href="#cursos" class="nav-link" id="nav-cursos" style="display:none">Cursos</a>
           <!-- WhatsApp in mobile menu -->
           <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="nav-link nav-link-whatsapp" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp</a>
         </div>
@@ -124,7 +123,6 @@
             <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp nav-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp">
             <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> WhatsApp
           </a>
-          <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
           <div class="theme-toggle" id="theme-toggle" role="button" aria-label="Cambiar tema">
             <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
           </div>
@@ -447,72 +445,7 @@
       </div>
     </section>
 
-    <!-- Cursos / Dashboard Section (oculto si no logueado) -->
-    <section id="cursos" class="courses" style="display:none">
-      <div class="container">
-        <div class="section-header">
-          <h2>Mi Diplomado: Reparación de Computadoras</h2>
-          <p>Accede a los módulos, videos y clases en vivo</p>
-        </div>
 
-        <div id="user-dashboard">
-          <div id="user-info" style="margin-bottom: 1rem;">
-            <strong id="user-email"></strong>
-            <button id="btn-logout" class="btn btn-secondary" style="margin-left:1rem;">Cerrar sesión</button>
-          </div>
-
-          <div id="live-class" style="margin-bottom: 1rem;">
-            <h3>Clase semanal en vivo</h3>
-            <p>Próximo: <span id="live-schedule"></span></p>
-            <a id="btn-join-live" class="btn btn-primary" target="_blank" rel="noopener">Unirse a la clase en vivo</a>
-          </div>
-
-          <div id="course-modules">
-            <h3>Módulos</h3>
-            <div id="modules-list"></div>
-          </div>
-
-          <div id="admin-add-module" style="margin-top:1rem; display:none;">
-            <h4>Agregar módulo (Admin)</h4>
-            <div id="admin-module-manager">
-              <div style="display:flex;gap:8px;align-items:center;">
-                <input id="new-module-title" placeholder="Título" style="flex:1;" />
-                <input id="new-module-duration" placeholder="Duración (min)" style="width:120px;" />
-                <input id="new-module-order" placeholder="Orden" style="width:80px;" />
-              </div>
-              <input id="new-module-video" placeholder="URL de video (mp4 o youtube)" />
-              <textarea id="new-module-desc" placeholder="Descripción"></textarea>
-              <input id="new-module-objectives" placeholder="Objetivos (separados por ; )" />
-              <input id="new-module-resources" placeholder="Recursos (URLs separadas por ; )" />
-              <div style="margin-top:0.5rem;">
-                <label style="font-size:0.95rem;color:var(--text-secondary);">Quizzes</label>
-                <div id="quiz-editor" style="margin-top:0.25rem;"></div>
-                <button id="btn-add-quiz-item" class="btn btn-outline" style="margin-top:0.5rem;">Agregar pregunta</button>
-              </div>
-              <div style="display:flex;gap:8px;margin-top:0.5rem;">
-                <button id="btn-add-module" class="btn btn-primary">Agregar módulo</button>
-                <button id="btn-clear-module" class="btn btn-outline">Limpiar</button>
-              </div>
-            </div>
-            <div id="admin-modules-panel" style="margin-top:1rem; display:none;">
-              <h4>Módulos existentes</h4>
-              <input id="admin-modules-search" placeholder="Buscar módulo por título" style="width:100%;margin-bottom:0.5rem;" />
-              <div id="admin-modules-list"></div>
-            </div>
-            <div style="margin-top:0.75rem;">
-              <button id="btn-import-tgsit" class="btn btn-outline">Importar módulos desde PDF (TGSIT)</button>
-              <a id="link-preview-tgsit" href="/public/modules-tgsit-syllabus.md" target="_blank" class="btn btn-secondary" style="margin-left:0.5rem;">Previsualizar sílabo</a>
-              <small style="display:block;margin-top:0.5rem;color:var(--text-secondary);">Importa los módulos definidos en <code>public/modules-tgsit-detailed-refined.json</code> (preferido) o en <code>public/modules-tgsit-detailed.json</code> / <code>public/modules-tgsit.json</code></small>
-              <div style="margin-top:0.5rem;">
-                <button id="btn-import-tgsit-chunked" class="btn btn-primary">Importar progresivamente (chunked)</button>
-                <button id="btn-stop-import" class="btn btn-outline" style="margin-left:0.5rem; display:none;">Detener importación</button>
-                <div id="import-progress" style="margin-top:0.5rem;color:var(--text-secondary);"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Solicita tu Cotización Section -->
     <section id="solicitar-cotizacion" class="quote">
@@ -972,28 +905,7 @@
       </div>
     </div>
 
-    <!-- Auth Modal (simple) -->
-    <div id="auth-modal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <button id="auth-close" class="modal-close">&times;</button>
-        <h3 id="auth-title">Acceder</h3>
-        <div id="auth-forms">
-          <div id="login-form">
-            <input id="login-email" type="email" placeholder="Correo electrónico" />
-            <input id="login-password" type="password" placeholder="Contraseña" />
-            <button id="btn-login" class="btn btn-primary">Iniciar sesión</button>
-            <p>¿No tienes cuenta? <a href="#" id="show-register">Regístrate</a></p>
-          </div>
-          <div id="register-form" style="display:none;">
-            <input id="reg-email" type="email" placeholder="Correo electrónico" />
-            <input id="reg-password" type="password" placeholder="Contraseña (mín 6)" />
-            <button id="btn-register" class="btn btn-primary">Registrarse</button>
-            <p>¿Ya tienes cuenta? <a href="#" id="show-login">Inicia sesión</a></p>
-          </div>
-          <div id="auth-message" style="margin-top:0.5rem;color:var(--text-secondary);"></div>
-        </div>
-      </div>
-    </div>
+
 
     <!-- Module Viewer Modal -->
     <div id="module-modal" class="modal" style="display:none;">
