@@ -1,0 +1,21 @@
+/* Minimal local Font Awesome fallback (subset) - created for privacy and offline resilience
+   This file provides minimal class-to-emoji fallbacks for icons used by the site.
+   If later you prefer to vendor the full Font Awesome package, replace this file with the real `all.min.css` and add the `webfonts/` folder. */
+
+.fas, .fa { font-style: normal; display: inline-block; line-height: 1; vertical-align: middle; }
+.fas[class*="fa-"]::before { font-style: normal; display: inline-block; }
+
+/* Common icons used in the project */
+.fas.fa-sun::before { content: "☀️"; }
+.fas.fa-moon::before { content: "🌙"; }
+.fas.fa-check-circle::before { content: "✅"; }
+.fas.fa-times::before { content: "✖️"; }
+.fas.fa-spinner::before { content: "⏳"; display:inline-block; animation: fa-fallback-spin 1s linear infinite; }
+.fas.fa-user::before { content: "👤"; }
+.fas.fa-heart::before { content: "♥"; color: var(--primary-color); }
+.fas.fa-trash::before { content: "🗑️"; }
+.fas.fa-exclamation-triangle::before { content: "⚠️"; }
+.fas.fa-external-link-alt::before { content: "🔗"; }
+.fas.fa-clock::before { content: "🕒"; }
+
+@keyframes fa-fallback-spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }

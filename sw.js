@@ -8,7 +8,7 @@ const urlsToCache = [
   '/styles.css',
   '/script.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  '/public/vendor/fontawesome/css/all.min.css'
 ];
 
 // Instalación del Service Worker
@@ -52,9 +52,21 @@ self.addEventListener('fetch', function (event) {
         const fetchRequest = event.request.clone();
 
         return fetch(fetchRequest).then(function (response) {
-          // Verificar si recibimos una respuesta válida
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+          // Si la respuesta es 404 y es una imagen, devolver un SVG placeholder
+          try {
+            const isImage = event.request.destination === 'image' || (event.request.headers && event.request.headers.get && event.request.headers.get('accept') && event.request.headers.get('accept').includes('image'));
+            if (response && response.status === 404 && isImage) {
+              const placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140" viewBox="0 0 200 140" role="img" aria-label="placeholder"><rect width="100%" height="100%" fill="#eee"/><g fill="#bbb"><rect x="24" y="36" width="152" height="68" rx="6"/></g><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#999" font-family="sans-serif" font-size="14">Imagen no disponible</text></svg>';
+              return new Response(placeholderSvg, { headers: { 'Content-Type': 'image/svg+xml' } });
+            }
+
+            // Verificar si recibimos una respuesta válida para cache
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+          } catch (e) {
+            // En caso de error inspeccionar la respuesta normal
+            if (!response) return response;
           }
 
           // Clonar la respuesta

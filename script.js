@@ -22,45 +22,116 @@ document.addEventListener('DOMContentLoaded', function () {
   initializeApp();
 });
 
-function initializeApp() {
-  // Set current year
-  if (currentYear) {
-    currentYear.textContent = new Date().getFullYear();
+function showDebugBanner(message, level = 'info') {
+  // Create or update a small banner at top-right for quick debugging
+  let banner = document.getElementById('debug-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'debug-banner';
+    banner.style.position = 'fixed';
+    banner.style.top = '12px';
+    banner.style.right = '12px';
+    banner.style.padding = '8px 12px';
+    banner.style.borderRadius = '8px';
+    banner.style.zIndex = 9999;
+    banner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+    banner.style.fontSize = '0.9rem';
+    document.body.appendChild(banner);
   }
+  banner.style.background = level === 'error' ? 'rgba(220,94,94,0.95)' : 'rgba(50,150,220,0.95)';
+  banner.style.color = 'white';
+  banner.textContent = message;
+
+  // Auto-hide after a while
+  clearTimeout(banner._hideTimer);
+  banner._hideTimer = setTimeout(() => {
+    try { banner.remove(); } catch (e) {}
+  }, 5000);
+}
+
+function showToast(message, type = 'info', timeout = 4000) {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.setAttribute('aria-live', 'polite');
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.setAttribute('role', 'alert');
+  toast.innerHTML = `<span class="msg">${message}</span><button class="close" aria-label="Cerrar">×</button>`;
+
+  const closeBtn = toast.querySelector('.close');
+  closeBtn.addEventListener('click', () => {
+    toast.remove();
+  });
+
+  container.appendChild(toast);
+
+  // Auto remove
+  toast._timer = setTimeout(() => {
+    try { toast.remove(); } catch (e) {}
+  }, timeout);
+}
+
+// Helper: create an SVG icon element from the inline sprite
+function createIconSVG(name, classes = '') {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class', ('icon icon-' + name + ' ' + classes).trim());
+  svg.setAttribute('aria-hidden','true');
+  const use = document.createElementNS('http://www.w3.org/2000/svg','use');
+  use.setAttribute('href', '#i-' + name);
+  svg.appendChild(use);
+  return svg;
+}
+function initializeApp() {
+  // quick sign that script ran
+  try { console.log('%c[DEV] script.js loaded', 'color: #6A4CDB; font-weight: bold;'); } catch (e) {}
+
+  // Set current year
+  try {
+    if (currentYear) {
+      currentYear.textContent = new Date().getFullYear();
+    }
+  } catch (e) { console.error('Error setting year', e); showDebugBanner('Error setting year: ' + e.message, 'error'); }
 
   // Initialize theme
-  initializeTheme();
+  try { initializeTheme(); } catch (e) { console.error('initializeTheme failed', e); showDebugBanner('Theme init error: ' + e.message, 'error'); }
 
   // Initialize lazy loading
-  initializeLazyLoading();
+  try { initializeLazyLoading(); } catch (e) { console.error('initializeLazyLoading failed', e); showDebugBanner('Lazy load error: ' + e.message, 'error'); }
 
   // Initialize smooth scrolling
-  initializeSmoothScrolling();
+  try { initializeSmoothScrolling(); } catch (e) { console.error('initializeSmoothScrolling failed', e); showDebugBanner('Smooth scroll error: ' + e.message, 'error'); }
 
   // Initialize EmailJS
-  if (typeof initEmailJS !== 'undefined') {
-    initEmailJS();
-  }
+  try { if (typeof initEmailJS !== 'undefined') { initEmailJS(); } } catch (e) { console.error('initEmailJS failed', e); showDebugBanner('EmailJS init error: ' + e.message, 'error'); }
 
   // Initialize form handling
-  initializeFormHandling();
+  try { initializeFormHandling(); } catch (e) { console.error('initializeFormHandling failed', e); showDebugBanner('Form init error: ' + e.message, 'error'); }
 
   // Initialize mobile menu
-  initializeMobileMenu();
+  try { initializeMobileMenu(); } catch (e) { console.error('initializeMobileMenu failed', e); showDebugBanner('Menu init error: ' + e.message, 'error'); }
 
   // Initialize navbar scroll effect
-  initializeNavbarScroll();
+  try { initializeNavbarScroll(); } catch (e) { console.error('initializeNavbarScroll failed', e); showDebugBanner('Navbar init error: ' + e.message, 'error'); }
 
   // Initialize new features
-  initializeTestimonials();
-  initializeCalculator();
-  initializeWorkFilters();
-  initializeStats();
+  try { initializeTestimonials(); } catch (e) { console.error('initializeTestimonials failed', e); showDebugBanner('Testimonials init error: ' + e.message, 'error'); }
+  try { initializeCalculator(); } catch (e) { console.error('initializeCalculator failed', e); showDebugBanner('Calculator init error: ' + e.message, 'error'); }
+  try { initializeWorkFilters(); } catch (e) { console.error('initializeWorkFilters failed', e); showDebugBanner('Work filters init error: ' + e.message, 'error'); }
+  try { initializeStats(); } catch (e) { console.error('initializeStats failed', e); showDebugBanner('Stats init error: ' + e.message, 'error'); }
 
   // Initialize AI assistant & smart suggestions
-  initializeAIAssistant();
-  initializeSuggestService();
+  try { initializeAIAssistant(); } catch (e) { console.error('initializeAIAssistant failed', e); showDebugBanner('AI assistant error: ' + e.message, 'error'); }
+  try { initializeSuggestService(); } catch (e) { console.error('initializeSuggestService failed', e); showDebugBanner('Suggest service error: ' + e.message, 'error'); }
+  // Dev helper removed: registerSWForceButton() intentionally omitted
+
 }
+
+// (Brand icons are now embedded in the sprite to avoid runtime fetching.)
 
 // Theme Toggle
 function initializeTheme() {
@@ -81,11 +152,11 @@ function toggleTheme() {
 }
 
 function updateThemeIcon(theme) {
-  const icon = themeToggle.querySelector('i');
+  if (!themeToggle) return;
   if (theme === 'dark') {
-    icon.className = 'fas fa-sun';
+    themeToggle.innerHTML = '<svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>'; 
   } else {
-    icon.className = 'fas fa-moon';
+    themeToggle.innerHTML = '<svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>'; 
   }
 }
 
@@ -153,15 +224,23 @@ function initializeFormHandling() {
 // AI Assistant (mock) + Suggest Service
 // -----------------------------
 function initializeAIAssistant() {
-  const aiOpen = document.getElementById('ai-open');
+  let aiOpen = document.getElementById('ai-open');
   const aiModal = document.getElementById('ai-modal');
   const aiClose = document.getElementById('ai-close');
   const aiSend = document.getElementById('ai-send');
   const aiPrompt = document.getElementById('ai-prompt');
   const aiChat = document.getElementById('ai-chat');
   const quickBtns = document.querySelectorAll('.ai-quick-btn');
+  const aiFallback = document.getElementById('ai-fallback');
 
-  if (!aiOpen || !aiModal) return;
+  // If the main AI button or modal is missing due to blocking, create a visible fallback
+  if (!aiOpen) {
+    showDebugBanner('AI button missing — creating fallback', 'info');
+    aiOpen = aiFallback;
+    if (aiFallback) aiFallback.style.display = 'inline-flex';
+  }
+
+  if (!aiModal) { showDebugBanner('AI modal missing - assistant disabled', 'error'); return; }
 
   function openAI() {
     aiModal.setAttribute('aria-hidden', 'false');
@@ -238,7 +317,7 @@ function initializeAIAssistant() {
   if (aiWhats) {
     aiWhats.addEventListener('click', () => {
       const txt = buildConversationText();
-      if (!txt) return alert('No hay mensajes para enviar.');
+      if (!txt) { showToast('No hay mensajes para enviar.', 'error'); return; }
       sendToWhatsApp(txt);
     });
   }
@@ -246,15 +325,15 @@ function initializeAIAssistant() {
   if (aiCopy) {
     aiCopy.addEventListener('click', async () => {
       const txt = buildConversationText();
-      if (!txt) return alert('No hay mensajes para copiar.');
+      if (!txt) { showToast('No hay mensajes para copiar.', 'error'); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(txt);
-        alert('Conversación copiada al portapapeles');
+        showToast('Conversación copiada', 'success');
       } else {
         // fallback
         const ta = document.createElement('textarea');
         ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-        alert('Conversación copiada al portapapeles');
+        showToast('Conversación copiada', 'success');
       }
     });
   }
@@ -335,10 +414,36 @@ function initializeSuggestService() {
       chip.textContent = s.label;
       chip.addEventListener('click', () => {
         selectServiceByValue(s.value);
+        suggestionsContainer.innerHTML = '';
       });
       suggestionsContainer.appendChild(chip);
     });
   });
+
+  function renderSelectedService(label, value) {
+    const container = document.getElementById('selected-service');
+    if (!container) return;
+    container.innerHTML = '';
+    const chip = document.createElement('div');
+    chip.className = 'selected-service-chip';
+    chip.setAttribute('data-value', value);
+    chip.innerHTML = `<span class="label">${label}</span><button class="remove-btn" aria-label="Eliminar servicio seleccionado">×</button>`;
+    container.appendChild(chip);
+
+    const remove = chip.querySelector('.remove-btn');
+    remove.addEventListener('click', () => {
+      deselectService();
+    });
+  }
+
+  function deselectService() {
+    const serviceSelect = document.getElementById('service-type');
+    const container = document.getElementById('selected-service');
+    if (serviceSelect) serviceSelect.value = '';
+    if (container) container.innerHTML = '';
+  }
+
+  // selectServiceByValue is defined globally; renderSelectedService and deselectService are local to suggestions
 
   function suggestServicesFromText(text) {
     const items = [];
@@ -500,6 +605,14 @@ function initializeMobileMenu() {
     navMenu.classList.toggle('active');
     navToggle.classList.toggle('active');
     navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+
+    // Accessibility & UX: focus first link when opening, return focus to toggle when closing
+    if (isActive) {
+      const firstLink = navMenu.querySelector('.nav-link');
+      if (firstLink) firstLink.focus();
+    } else {
+      navToggle.focus();
+    }
   });
 
   // Close menu when clicking outside
@@ -557,13 +670,14 @@ function showNotification(message, type = 'info') {
 
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
+  const iconName = (type === 'success') ? 'check-circle' : 'info-circle';
   notification.innerHTML = `
         <div class="notification-content">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <svg class="icon icon-${iconName}" aria-hidden="true"><use href="#i-${iconName}"></use></svg>
             <span>${message}</span>
         </div>
         <button class="notification-close" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
+            <svg class="icon icon-times" aria-hidden="true"><use href="#i-times"></use></svg>
         </button>
     `;
 
@@ -687,6 +801,9 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Función para forzar actualización o desregistro del Service Worker
+/* registerSWForceButton removed */
 
 // Analytics Events
 function trackEvent(eventName, parameters = {}) {
@@ -1800,11 +1917,11 @@ function showTestimonialsOfflineMessage() {
   if (container) {
     container.innerHTML = `
       <div class="testimonials-offline">
-        <i class="fas fa-exclamation-triangle"></i>
+        <svg class="icon icon-exclamation-triangle" aria-hidden="true"><use href="#i-exclamation-triangle"></use></svg>
         <h4>Sistema de testimonios no disponible</h4>
         <p>Para habilitar los testimonios en tiempo real, configura Firebase en el archivo firebase-config.js</p>
         <a href="https://console.firebase.google.com" target="_blank" class="btn btn-secondary">
-          <i class="fas fa-external-link-alt"></i> Ir a Firebase Console
+          <svg class="icon icon-external-link" aria-hidden="true"><use href="#i-external-link"></use></svg> Ir a Firebase Console
         </a>
       </div>
     `;
@@ -1823,9 +1940,9 @@ function setupCharacterCounter() {
 
       // Cambiar color cuando se acerque al límite
       if (count > 450) {
-        charCount.style.color = '#e74c3c';
+        charCount.style.color = 'var(--danger)';
       } else if (count > 400) {
-        charCount.style.color = '#f39c12';
+        charCount.style.color = 'var(--warning)';
       } else {
         charCount.style.color = 'var(--text-secondary)';
       }
@@ -1919,7 +2036,7 @@ function setupTestimonialForm() {
 
     // Mostrar estado de carga
     const originalHtml = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    submitBtn.innerHTML = '<svg class="icon icon-spinner" aria-hidden="true"><use href="#i-spinner"></use></svg> Enviando...';
     submitBtn.disabled = true;
 
     try {
@@ -2002,7 +2119,7 @@ function showFormMessage(message, type) {
   messageDiv.className = `form-message ${type}`;
   // Build message safely to avoid injecting HTML
   messageDiv.innerHTML = '';
-  const icon = document.createElement('i'); icon.className = `fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+  const icon = document.createElementNS('http://www.w3.org/2000/svg','svg'); icon.setAttribute('class', `icon icon-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`); const use = document.createElementNS('http://www.w3.org/2000/svg','use'); use.setAttribute('href', `#i-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`); icon.appendChild(use);
   const span = document.createElement('span'); span.textContent = message;
   messageDiv.appendChild(icon); messageDiv.appendChild(span);
   messageDiv.style.display = 'flex';
@@ -2104,17 +2221,17 @@ function createTestimonialCard(testimonio) {
     const img = document.createElement('img'); img.alt = testimonio.nombre || 'Avatar';
     img.src = testimonio.imagen;
     img.addEventListener('error', () => {
-      avatarWrap.innerHTML = '<i class="fas fa-user"></i>';
+      avatarWrap.innerHTML = '<svg class="icon icon-user" aria-hidden="true"><use href="#i-user"></use></svg>'; 
     });
     avatarWrap.appendChild(img);
   } else {
-    avatarWrap.innerHTML = '<i class="fas fa-user"></i>';
+    avatarWrap.innerHTML = '<svg class="icon icon-user" aria-hidden="true"><use href="#i-user"></use></svg>';
   }
 
   const info = document.createElement('div'); info.className = 'testimonial-info';
   const h4 = document.createElement('h4'); h4.textContent = testimonio.nombre || '';
   const spanDate = document.createElement('span'); spanDate.className = 'testimonial-date';
-  const clockIcon = document.createElement('i'); clockIcon.className = 'fas fa-clock';
+  const clockIcon = document.createElementNS('http://www.w3.org/2000/svg','svg'); clockIcon.setAttribute('class','icon icon-clock'); const useClock = document.createElementNS('http://www.w3.org/2000/svg','use'); useClock.setAttribute('href','#i-clock'); clockIcon.appendChild(useClock);
   spanDate.appendChild(clockIcon); spanDate.appendChild(document.createTextNode(' ' + fecha));
   info.appendChild(h4); info.appendChild(spanDate);
   header.appendChild(avatarWrap); header.appendChild(info);
@@ -2125,13 +2242,13 @@ function createTestimonialCard(testimonio) {
 
   const footer = document.createElement('div'); footer.className = 'testimonial-footer';
   const likeBtnEl = document.createElement('button'); likeBtnEl.className = 'like-btn ' + (hasLiked ? 'liked' : ''); likeBtnEl.dataset.id = testimonio.id;
-  likeBtnEl.innerHTML = '<i class="fas fa-heart"></i><span class="like-count">' + (testimonio.likes || 0) + '</span>';
+  likeBtnEl.innerHTML = '<svg class="icon icon-heart" aria-hidden="true"><use href="#i-heart"></use></svg><span class="like-count">' + (testimonio.likes || 0) + '</span>';
   footer.appendChild(likeBtnEl);
 
   // Agregar botón de eliminar si el testimonio pertenece al usuario actual
   if (testimonio.userId === currentUserId) {
     const deleteBtnEl = document.createElement('button'); deleteBtnEl.className = 'delete-btn'; deleteBtnEl.dataset.id = testimonio.id;
-    deleteBtnEl.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtnEl.innerHTML = '<svg class="icon icon-trash" aria-hidden="true"><use href="#i-trash"></use></svg>';
     deleteBtnEl.title = 'Eliminar testimonio';
     footer.appendChild(deleteBtnEl);
 
@@ -2224,7 +2341,7 @@ async function handleDelete(testimonioId) {
 
   // Deshabilitar botón temporalmente
   deleteBtn.disabled = true;
-  deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  deleteBtn.innerHTML = '<svg class="icon icon-spinner" aria-hidden="true"><use href="#i-spinner"></use></svg>'; 
 
   try {
     const result = await deleteTestimonial(testimonioId, currentUserId);
@@ -2253,7 +2370,7 @@ async function handleDelete(testimonioId) {
 
     // Restaurar botón
     deleteBtn.disabled = false;
-    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteBtn.innerHTML = '<svg class="icon icon-trash" aria-hidden="true"><use href="#i-trash"></use></svg>'; 
   }
 }
 

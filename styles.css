@@ -27,10 +27,20 @@
   --whatsapp-green-hover: #20ba5a;
   --whatsapp-green-dark: #128c7e;
   --whatsapp-rgb: 37, 211, 102;
+  /* Alerts */
+  --danger: #e74c3c;
+  --warning: #f39c12;
   /* Fonts */
   --font-body: 'Inter', sans-serif;
   --font-heading: 'Poppins', 'Inter', sans-serif;
 }
+
+/* SVG icons */
+.icon { width: 1.1em; height: 1.1em; display: inline-block; vertical-align: middle; fill: currentColor; stroke: currentColor; }
+.icon.icon-spinner { animation: fa-fallback-spin 1s linear infinite; }
+.icon.icon-heart { color: var(--primary-color); }
+.icon.icon-ai { width: 1.5em; height: 1.5em; }
+.icon.icon-whatsapp { width: 1.1em; height: 1.1em; }
 
 [data-theme="dark"] {
   /* Dark Theme Colors */
@@ -263,7 +273,8 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
 /* Small responsive tweaks for dashboard */
 @media (max-width: 640px) {
-  .nav-menu { display: none; }
+  /* Ensure mobile nav is available — display:flex to allow toggle to show menu */
+  .nav-menu { display: flex; }
   .module-card { padding: 0.75rem; }
 }
 
@@ -405,6 +416,30 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 .hero-graphic:hover .hero-avatar-overlay {
   transform: scale(1.05);
 }
+
+/* White circular badge with inner avatar used in hero */
+.hero-badge {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  border: 6px solid rgba(106,76,219,0.85); /* primary color ring */
+  z-index: 6;
+}
+.hero-badge-inner { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: white; }
+.hero-badge-inner img { width: 80%; height: 80%; object-fit: contain; display: block; }
+
+/* Ensure WhatsApp float icon svg is sized and visible */
+.whatsapp-float svg.icon { width: 1.6rem; height: 1.6rem; fill: currentColor; }
+.whatsapp-container { z-index: 9999; }
 
 .hero-graphic i {
   font-size: 4rem;
@@ -672,6 +707,8 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 10px 16px;
+  position: relative;
 }
 
 .btn-whatsapp:hover {
@@ -681,8 +718,13 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   transform: translateY(-2px);
 }
 
-.btn-whatsapp i {
+.btn-whatsapp i, .btn-whatsapp svg {
   font-size: 1.1rem;
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  width: 1.1em;
+  height: 1.1em;
 }
 
 .btn-full {
@@ -1329,6 +1371,20 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   color: white;
   opacity: 0.9;
   z-index: 1;
+}
+
+.image-preview-compact .icon-camera {
+  color: white;
+  stroke: white;
+}
+
+.image-preview-compact svg {
+  color: white;
+}
+
+.image-preview-compact svg path {
+  fill: white;
+  stroke: white;
 }
 
 .image-preview-compact img {
@@ -2466,7 +2522,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   position: fixed;
   bottom: 30px;
   left: 30px;
-  z-index: 1000;
+  z-index: 1102; /* above mobile nav */
 }
 
 .ai-float {
@@ -2478,11 +2534,19 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   box-shadow: var(--shadow-hover);
   border: none;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  padding: 0;
+  position: relative;
+}
+
+.ai-float i {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
 }
 
 .ai-float:hover { transform: translateY(-3px) scale(1.03); }
@@ -2537,10 +2601,74 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 .service-suggestions { display:flex; gap:8px; flex-wrap:wrap; }
 .suggestion-chip { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; padding:6px 10px; border-radius: 999px; cursor: pointer; font-size:0.85rem; }
 
+/* Selected service chip */
+.selected-service { margin-top: 10px; }
+.selected-service-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(var(--primary-rgb), 0.12); border-radius: 999px; color: var(--text-primary); font-weight: 600; }
+.selected-service-chip .remove-btn { background: transparent; border: none; color: var(--text-primary); font-size: 1rem; font-weight: 700; cursor: pointer; padding: 4px; line-height: 1; }
+.selected-service-chip .remove-btn:focus { outline: 2px solid rgba(var(--primary-rgb), 0.2); border-radius: 6px; }
+
+.selected-service .label { display: inline-block; }
+
 .ai-notice { font-size: 0.85rem; color: var(--text-secondary); }
+
+/* Toast notifications */
+#toast-container {
+  position: fixed;
+  top: 76px; /* below debug banner */
+  right: 12px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 220px;
+  max-width: 380px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  font-weight: 600;
+  transform-origin: right top;
+  animation: toast-in 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.toast.info { background: linear-gradient(90deg, #3498db, #2b9bd7); }
+.toast.success { background: linear-gradient(90deg, #25d366, #1fa854); }
+.toast.error { background: linear-gradient(90deg, #e74c3c, #d64541); }
+
+.toast .close { margin-left: auto; background: transparent; border: none; color: rgba(255,255,255,0.9); font-weight: 700; cursor: pointer; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-6px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 @media (max-width: 520px) {
   .ai-modal-content { width: 100%; height: 100%; border-radius: 0; max-height: 100%; }
 }
+
+/* Fallback assistant button (visible text) */
+.ai-fallback {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  z-index: 1103;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ai-fallback:focus { outline: 3px solid rgba(var(--primary-rgb), 0.18); }
+
 
 
 /* Footer */
@@ -2668,19 +2796,26 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
     position: fixed;
     left: -100%;
     top: 70px;
+    bottom: 0;
     flex-direction: column;
     background: var(--bg-primary);
     width: 100%;
     text-align: center;
-    transition: 0.3s;
+    transition: left 0.25s ease, transform 0.25s ease;
     box-shadow: var(--shadow);
     padding: 20px 0;
     border-top: 1px solid var(--border-color);
+    z-index: 1001; /* ensure it overlays content */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(0);
   }
 
   .nav-menu.active {
     left: 0;
   }
+
+  .nav-menu .nav-link { display: block; padding: 12px 20px; }
 
   .nav-toggle {
     display: flex;
@@ -3146,3 +3281,20 @@ a:focus {
     opacity: 0;
   }
 }
+
+/* Font Awesome fallback (emoji icons) 🔧 */
+.fas { font-style: normal; display: inline-block; line-height: 1; vertical-align: middle; }
+.fas[class*="fa-"]::before { font-style: normal; display: inline-block; }
+.fas.fa-sun::before { content: "☀️"; }
+.fas.fa-moon::before { content: "🌙"; }
+.fas.fa-check-circle::before { content: "✅"; }
+.fas.fa-times::before { content: "✖️"; }
+.fas.fa-spinner::before { content: "⏳"; display:inline-block; animation: fa-fallback-spin 1s linear infinite; }
+.fas.fa-user::before { content: "👤"; }
+.fas.fa-heart::before { content: "♥"; color: var(--primary-color); }
+.fas.fa-trash::before { content: "🗑️"; }
+.fas.fa-exclamation-triangle::before { content: "⚠️"; }
+.fas.fa-external-link-alt::before { content: "🔗"; }
+.fas.fa-clock::before { content: "🕒"; }
+
+@keyframes fa-fallback-spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
