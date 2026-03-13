@@ -40,7 +40,8 @@
 .icon.icon-spinner { animation: fa-fallback-spin 1s linear infinite; }
 .icon.icon-heart { color: var(--primary-color); }
 .icon.icon-ai { width: 1.5em; height: 1.5em; }
-.icon.icon-whatsapp { width: 1.1em; height: 1.1em; }
+.icon-robot-img { width: 1.5em; height: 1.5em; object-fit: contain; vertical-align: middle; }
+.icon-whatsapp-img { width: 1.1em; height: 1.1em; object-fit: contain; vertical-align: middle; }
 
 [data-theme="dark"] {
   /* Dark Theme Colors */
@@ -161,6 +162,8 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   margin-right: 12px;
 }
 
+
+
 .nav-menu {
   display: flex;
   gap: 30px;
@@ -246,10 +249,14 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
 .hero-buttons .btn-primary { padding: 14px 20px; border-radius: 10px; font-weight: 600; box-shadow: 0 8px 30px rgba(var(--primary-rgb), 0.08); }
 
-/* Responsive: hide desktop WhatsApp, show in menu */
+/* Responsive tweaks */
 @media (max-width: 900px) {
-  .nav-whatsapp { display: none; }
-  .nav-link-whatsapp { display: inline-flex; background: var(--whatsapp-green); color: #fff; padding: 10px 14px; border-radius: 8px; gap:8px; justify-content:center; }
+  /* keep the main WhatsApp button visible instead of swapping it for a menu link
+     the small-screen menu already contains other links so the extra one looked like
+     a duplicate when the navbar collapsed */
+  .nav-whatsapp { display: inline-flex; }
+  /* hide the redundant menu item completely */
+  .nav-link-whatsapp { display: none; }
   .hero-container { grid-template-columns: 1fr; gap: 30px; }
   .nav-toggle { display: flex; }
 }
@@ -700,15 +707,15 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   }
 }
 
+/* WhatsApp buttons should use the standard .btn sizing so they look "normal" */
 .btn-whatsapp {
   background: var(--whatsapp-green);
   color: white;
   border: 2px solid var(--whatsapp-green);
-  display: inline-flex;
+  display: inline-flex;      /* keep icon/text alignment */
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  position: relative;
+  /* padding now inherited from .btn (15px 30px) */
 }
 
 .btn-whatsapp:hover {
@@ -2325,6 +2332,179 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   min-height: 100px;
 }
 
+.service-option span {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.service-option span {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Calculator Select Styles */
+.calculator select[multiple] {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.3s ease, max-height 0.3s ease, opacity 0.3s ease;
+  min-height: 120px;
+  overflow-y: auto;
+}
+
+.calculator select[multiple]:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.calculator select[multiple] option {
+  padding: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* service toggle wrapper */
+.service-type-wrapper {
+  position: relative;
+  width: 100%;             /* ensure full width inside form */
+  display: flex;
+  align-items: center;
+  min-width: 0;            /* allow contents to shrink gracefully */
+}
+
+/* scrollbar styling */
+.service-list::-webkit-scrollbar {
+  width: 6px;
+}
+.service-list::-webkit-scrollbar-track {
+  background: var(--background);
+}
+.service-list::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+
+.service-type-wrapper nav {
+  max-height: 240px; /* show roughly 3 items tall */
+  overflow-y: auto;
+  padding-right: 4px; /* space for scrollbar */
+}
+/* scrollbar within nav */
+.service-type-wrapper nav::-webkit-scrollbar {
+  width: 6px;
+}
+.service-type-wrapper nav::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 3px;
+}
+.service-type-wrapper select {
+  display: none !important;
+}
+
+
+
+/* new checkbox list styling: now part of the normal layout, always visible */
+.service-list {
+  /* visible block with scroll bar and smooth collapse animation */
+  position: relative;
+  width: 100%;
+  margin-top: 4px;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
+  max-height: none; /* remove max height for grid */
+  overflow-y: visible; /* no scroll needed */
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.service-list label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  padding: 12px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--card-background, #f8f9fa);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-height: 50px;
+  white-space: normal; /* allow wrapping */
+  text-align: left;
+}
+
+.service-list label:hover {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.service-list label.checked {
+  border-color: var(--primary-color);
+  background: var(--primary-light);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.service-list input[type="checkbox"] {
+  margin-left: auto;
+  margin-right: 0;
+  transform: scale(1.2);
+}
+
+/* additional custom checkbox states */
+.service-list input[type="checkbox"]:checked {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.service-list input[type="checkbox"]:checked::after {
+  content: '\2713';
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  top: -1px;
+  left: 2px;
+}
+
+/* highlight animation for programmatic selection */
+.service-list input[type="checkbox"].highlighted {
+  outline: 2px solid var(--primary-dark);
+  transition: outline 0.3s ease;
+}
+
+/* hide list when collapsed (toggle will add class if user clicks) */
+.service-type-wrapper.collapsed .service-list {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  border: none;
+  pointer-events: none;
+}
+
+/* badges for urgency and warranty */
+.urgency-badge,
+.warranty-badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--whatsapp-green);
+  background: rgba(37, 211, 102, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
 /* Contact Section */
 .contact {
   padding: 80px 0;
@@ -2465,8 +2645,8 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
 .whatsapp-float {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 56px;               /* match the AI button size */
+  height: 56px;
   background: var(--whatsapp-green);
   color: white;
   border-radius: 50%;
@@ -2474,7 +2654,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  font-size: 1.8rem;
+  font-size: 1.5rem;          /* consistent with ai-float */
   box-shadow: var(--shadow-hover);
   transition: all 0.3s ease;
   animation: pulse 2s infinite;
@@ -2582,9 +2762,12 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 .ai-close { position: absolute; right: 26px; top: 22px; background: transparent; border: none; font-size: 1.6rem; color: var(--text-primary); cursor: pointer; }
 
 .ai-chat { max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.ai-message { padding: 10px 12px; border-radius: 8px; max-width: 86%; }
+.ai-message { padding: 10px 12px; border-radius: 8px; max-width: 86%; display: flex; align-items: flex-start; gap: 8px; }
 .ai-message.user { align-self: flex-end; background: rgba(var(--primary-rgb), 0.08); }
 .ai-message.bot { align-self: flex-start; background: #f4f4f4; }
+.ai-avatar { flex-shrink: 0; width: 20px; height: 20px; }
+.ai-message.user .ai-avatar { order: 2; }
+.ai-message.bot .ai-avatar { order: 0; }
 
 .ai-input { display: flex; gap: 10px; }
 .ai-input input { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); }
@@ -2594,6 +2777,8 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
 /* AI modal footer */
 .ai-footer { display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:8px; }
+
+
 .ai-footer .btn-outline { padding: 8px 10px; }
 
 /* Service suggestions */
@@ -2831,6 +3016,49 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
   .nav-toggle.active .bar:nth-child(3) {
     transform: translateY(-8px) rotate(-45deg);
+  }
+
+  /* Menu Preview Styles */
+  .menu-preview {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    min-width: 180px;
+  }
+
+  .menu-preview.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .menu-preview-content {
+    padding: 8px 0;
+  }
+
+  .menu-preview-content a {
+    display: block;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 8px;
+  }
+
+  .menu-preview-content a:hover {
+    background: var(--bg-secondary);
+    color: var(--primary-color);
   }
 
   .hero-container {

@@ -6,6 +6,8 @@ const themeToggle = document.getElementById('theme-toggle');
 const quoteForm = document.getElementById('quote-form');
 const currentYear = document.getElementById('current-year');
 
+// Note: EmailJS is the primary email delivery method. Webhook support removed.
+
 // New elements for enhanced features
 const testimonialPrev = document.getElementById('testimonial-prev');
 const testimonialNext = document.getElementById('testimonial-next');
@@ -86,6 +88,39 @@ function createIconSVG(name, classes = '') {
   svg.appendChild(use);
   return svg;
 }
+
+function numberToSpanishWords(num) {
+  const unidades = ['cero','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve'];
+  const especiales = ['diez','once','doce','trece','catorce','quince','dieciseis','diecisiete','dieciocho','diecinueve'];
+  const decenas = ['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+
+  if (num < 10) return unidades[num];
+  if (num < 20) return especiales[num - 10];
+  if (num < 100) {
+    const d = Math.floor(num/10);
+    const r = num%10;
+    if (r === 0) return decenas[d];
+    if (d === 2) return 'veinti' + unidades[r];
+    return decenas[d] + ' y ' + unidades[r];
+  }
+  if (num < 1000) {
+    const c = Math.floor(num/100);
+    const r = num%100;
+    let texto = c === 1 ? 'cien' : (c === 5 ? 'quinientos' : (c === 7 ? 'setecientos' : (c === 9 ? 'novecientos' : (c === 3 ? 'trescientos' : (c === 4 ? 'cuatrocientos' : (c === 6 ? 'seiscientos' : c + 'cientos'))))));
+    if (c === 1 && r > 0) texto = 'ciento';
+    if (!r) return texto;
+    return texto + ' ' + numberToSpanishWords(r);
+  }
+  if (num < 1000000) {
+    const miles = Math.floor(num / 1000);
+    const resto = num % 1000;
+    let texto = (miles === 1 ? 'mil' : numberToSpanishWords(miles) + ' mil');
+    if (!resto) return texto;
+    return texto + ' ' + numberToSpanishWords(resto);
+  }
+  return num.toString();
+}
+
 function initializeApp() {
   // quick sign that script ran
   try { console.log('%c[DEV] script.js loaded', 'color: #6A4CDB; font-weight: bold;'); } catch (e) {}
@@ -213,10 +248,248 @@ function initializeSmoothScrolling() {
   });
 }
 
+// Función para calcular precios de la cotización
+function calcularPrecios(servicio, urgency, warranty) {
+  // Precios base por servicio (en pesos uruguayos)
+  const preciosBase = {
+    reparacion: 1500,
+    'reparacion-basica': 1500,
+    'reparacion-avanzada': 2500,
+    upgrade: 2000,
+    'upgrade-ram': 800,
+    'upgrade-gpu': 2000,
+    'upgrade-completo': 3500,
+    ensamblaje: 2500,
+    'ensamblaje-basico': 1500,
+    'ensamblaje-gaming': 2500,
+    mantenimiento: 1000,
+    'limpieza-profunda': 300,
+    'configuracion-red': 300,
+    'instalacion-software': 150,
+    'recuperacion-datos': 800,
+    asesoramiento: 200,
+    'soporte-remoto': 400,
+    'diagnostico-completo': 100,
+    'optimizacion-sistema': 350,
+    'backup-datos': 200,
+    'limpieza-malware': 550,
+    'reemplazo-pantalla': 1800,
+    'instalacion-antivirus': 250,
+    otro: 1800
+  };
+
+  const servicios = Array.isArray(servicio) ? servicio : [servicio];
+  const basePrice = servicios.reduce((total, serv) => {
+    const normalized = (serv || '').trim();
+    return total + (preciosBase[normalized] || preciosBase.otro);
+  }, 0);
+
+  // Recargos por urgencia
+  const recargosUrgencia = {
+    normal: 0,
+    urgente: basePrice * 0.3, // 30% extra
+    express: basePrice * 0.5  // 50% extra
+  };
+
+  const urgencyPrice = recargosUrgencia[urgency] || 0;
+
+  // Recargos por garantía extendida (por día adicional)
+  const diasBase = 30;
+  const diasSeleccionados = parseInt(warranty) || 30;
+  const diasExtra = Math.max(0, diasSeleccionados - diasBase);
+  const costoPorDiaExtra = basePrice * 0.005; // 0.5% del precio base por día
+  const warrantyPrice = diasExtra * costoPorDiaExtra;
+
+  const totalPrice = basePrice + urgencyPrice + warrantyPrice;
+
+  return {
+    basePrice,
+    urgencyPrice,
+    warrantyPrice,
+    totalPrice
+  };
+}
+
+// Helper functions for form data processing
+function getUrgencyText(urgencyValue) {
+  const urgencyTexts = {
+    normal: 'Normal (3-5 días)',
+    urgente: 'Urgente (24-48 horas)',
+    express: 'Express (mismo día)'
+  };
+  return urgencyTexts[urgencyValue] || 'Normal (3-5 días)';
+}
+
+function getWarrantyText(warrantyValue) {
+  const warrantyTexts = {
+    '30': '30 días',
+    '90': '90 días',
+    '180': '6 meses',
+    '365': '1 año'
+  };
+  return warrantyTexts[warrantyValue] || '30 días';
+}
+
+function getUrgencyMultiplier(urgencyValue) {
+  const multipliers = {
+    normal: 1,
+    urgente: 1.3,
+    express: 1.5
+  };
+  return multipliers[urgencyValue] || 1;
+}
+
+function getQuoteFormPdfData() {
+  if (!quoteForm) return null;
+  const formData = new FormData(quoteForm);
+  const services = formData.getAll('service').filter(v => v && v.trim() !== '');
+  const urgency = formData.get('urgency') || 'normal';
+  const warranty = formData.get('warranty') || '30';
+  const message = formData.get('message') || '';
+
+  const prices = calcularPrecios(services, urgency, warranty);
+  const urgencyText = getUrgencyText(urgency);
+  const warrantyText = getWarrantyText(warranty);
+
+  return {
+    userName: formData.get('name') || 'Cliente Web',
+    userEmail: formData.get('email') || 'no proporcionado',
+    userPhone: formData.get('phone') || 'no proporcionado',
+    servicios: services.map(s => ({ name: s, price: calcularPrecios(s, urgency, warranty).basePrice })),
+    urgency: urgencyText,
+    warranty: warrantyText,
+    basePrice: prices.basePrice,
+    urgencyPrice: prices.urgencyPrice,
+    warrantyPrice: prices.warrantyPrice,
+    totalPrice: prices.totalPrice,
+    descripcion: message
+  };
+}
+
+function sourceQuoteFormData(){
+  if (!quoteForm) return null;
+  const formData = new FormData(quoteForm);
+  return {
+    name: formData.get('name') || '',
+    email: formData.get('email') || '',
+    phone: formData.get('phone') || '',
+    service: formData.getAll('service') || [],
+    urgency: formData.get('urgency') || 'normal',
+    warranty: formData.get('warranty') || '30',
+    preferredDate: formData.get('preferred-date') || '',
+    message: formData.get('message') || ''
+  };
+}
+
+function restoreQuoteFormData(saved) {
+  if (!saved || !quoteForm) return;
+
+  quoteForm.querySelector('#name').value = saved.name || '';
+  quoteForm.querySelector('#email').value = saved.email || '';
+  quoteForm.querySelector('#phone').value = saved.phone || '';
+
+  const serviceSelect = quoteForm.querySelector('#service');
+  if (serviceSelect) {
+    const selectedServices = saved.service || [];
+    Array.from(serviceSelect.options).forEach(opt => {
+      opt.selected = selectedServices.includes(opt.value);
+    });
+  }
+
+  quoteForm.querySelector('#urgency').value = saved.urgency || 'normal';
+  quoteForm.querySelector('#warranty').value = saved.warranty || '30';
+  quoteForm.querySelector('#preferred-date').value = saved.preferredDate || '';
+  quoteForm.querySelector('#message').value = saved.message || '';
+}
+
+function saveQuoteFormDraft() {
+  const data = sourceQuoteFormData();
+  if (!data) return;
+  localStorage.setItem('quoteFormDraft', JSON.stringify(data));
+}
+
+function loadQuoteFormDraft() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('quoteFormDraft'));
+    if (saved) {
+      restoreQuoteFormData(saved);
+    }
+  } catch (e) {
+    console.warn('No se pudo cargar borrador de cotización', e);
+  }
+}
+
+function updateQuoteFormTotal() {
+  const data = sourceQuoteFormData();
+  if (!data) return;
+
+  const prices = calcularPrecios(data.service, data.urgency, data.warranty);
+  const totalEl = document.getElementById('quote-form-total');
+  if (totalEl) {
+    totalEl.textContent = `$${(prices.totalPrice || 0).toLocaleString('es-UY')}`;
+  }
+}
+
+
+function downloadQuoteFormPdf() {
+  const datosFactura = getQuoteFormPdfData();
+  if (!datosFactura) {
+    showNotification('No se pudo generar PDF: datos incompletos.', 'error');
+    return;
+  }
+  generarPdfCotizacion(datosFactura).then(pdfDataUrl => {
+    const link = document.createElement('a');
+    link.href = pdfDataUrl;
+    link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    showNotification('Factura PDF descargada.', 'success');
+  }).catch(error => {
+    console.error('Error generando PDF de cotización desde form:', error);
+    showNotification('Error generando PDF. Intenta nuevamente.', 'error');
+  });
+}
+
 // Form Handling
 function initializeFormHandling() {
   if (quoteForm) {
     quoteForm.addEventListener('submit', handleFormSubmit);
+    const downloadFormPdfBtn = document.getElementById('btn-download-quote-form-pdf');
+    if (downloadFormPdfBtn) {
+      downloadFormPdfBtn.addEventListener('click', downloadQuoteFormPdf);
+    }
+
+    const serviceSelect = document.getElementById('service');
+    if (serviceSelect) {
+      serviceSelect.addEventListener('mousedown', (event) => {
+        const option = event.target;
+        if (option && option.tagName === 'OPTION') {
+          event.preventDefault();
+          option.selected = !option.selected;
+          // Trigger change event manually so total updates
+          const changeEvent = new Event('change', { bubbles: true });
+          serviceSelect.dispatchEvent(changeEvent);
+        }
+      });
+    }
+
+    quoteForm.addEventListener('change', () => {
+      updateQuoteFormTotal();
+    });
+
+    updateQuoteFormTotal();
+
+    // Establecer fecha mínima para el campo de fecha preferida (mañana)
+    const preferredDateInput = document.getElementById('preferred-date');
+    if (preferredDateInput) {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const year = tomorrow.getFullYear();
+      const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+      const day = String(tomorrow.getDate()).padStart(2, '0');
+      preferredDateInput.min = `${year}-${month}-${day}`;
+    }
   }
 }
 
@@ -299,10 +572,10 @@ function initializeAIAssistant() {
       if (n.classList.contains('user')) return 'Cliente: ' + n.textContent;
       return 'Asistente: ' + n.textContent;
     });
-    // Include selected service if present
-    const serviceSelect = document.getElementById('service-type');
-    if (serviceSelect && serviceSelect.value) {
-      const label = serviceSelect.options[serviceSelect.selectedIndex].text;
+    // Include selected service if present (checkbox-based list)
+    const checked = document.querySelectorAll('#service-list input[type="checkbox"]:checked');
+    if (checked.length) {
+      const label = checked[0].closest('label')?.textContent.trim() || checked[0].value;
       lines.unshift('Servicio sugerido: ' + label);
     }
     return lines.join('\n');
@@ -341,7 +614,19 @@ function initializeAIAssistant() {
   function appendUserMessage(text) {
     const div = document.createElement('div');
     div.className = 'ai-message user';
-    div.textContent = text;
+
+    // user avatar (generic person icon) next to message
+    const icon = createIconSVG('user');
+    icon.setAttribute('width','20');
+    icon.setAttribute('height','20');
+    icon.classList.add('ai-avatar');
+
+    const span = document.createElement('span');
+    span.textContent = text;
+
+    div.appendChild(span);
+    div.appendChild(icon);
+
     aiChat.appendChild(div);
     aiChat.scrollTop = aiChat.scrollHeight;
   }
@@ -351,7 +636,19 @@ function initializeAIAssistant() {
     const div = document.createElement('div');
     div.className = 'ai-message bot';
     div.id = id;
-    div.textContent = text;
+
+    // bot avatar (robot image) on the left
+    const icon = document.createElement('img');
+    icon.src = 'public/images/icons/robot.png';
+    icon.alt = 'Asistente Virtual';
+    icon.classList.add('ai-avatar', 'icon-robot-img');
+
+    const span = document.createElement('span');
+    span.textContent = text;
+
+    div.appendChild(icon);
+    div.appendChild(span);
+
     aiChat.appendChild(div);
     aiChat.scrollTop = aiChat.scrollHeight;
     return id;
@@ -394,9 +691,9 @@ function initializeSuggestService() {
   const btnSuggest = document.getElementById('btn-suggest-service');
   const problemInput = document.getElementById('problem-description');
   const suggestionsContainer = document.getElementById('service-suggestions');
-  const serviceSelect = document.getElementById('service-type');
+  const serviceList = document.getElementById('service-list');
 
-  if (!btnSuggest || !problemInput || !suggestionsContainer || !serviceSelect) return;
+  if (!btnSuggest || !problemInput || !suggestionsContainer || !serviceList) return;
 
   btnSuggest.addEventListener('click', () => {
     const text = problemInput.value.trim().toLowerCase();
@@ -420,30 +717,9 @@ function initializeSuggestService() {
     });
   });
 
-  function renderSelectedService(label, value) {
-    const container = document.getElementById('selected-service');
-    if (!container) return;
-    container.innerHTML = '';
-    const chip = document.createElement('div');
-    chip.className = 'selected-service-chip';
-    chip.setAttribute('data-value', value);
-    chip.innerHTML = `<span class="label">${label}</span><button class="remove-btn" aria-label="Eliminar servicio seleccionado">×</button>`;
-    container.appendChild(chip);
-
-    const remove = chip.querySelector('.remove-btn');
-    remove.addEventListener('click', () => {
-      deselectService();
-    });
-  }
-
-  function deselectService() {
-    const serviceSelect = document.getElementById('service-type');
-    const container = document.getElementById('selected-service');
-    if (serviceSelect) serviceSelect.value = '';
-    if (container) container.innerHTML = '';
-  }
-
-  // selectServiceByValue is defined globally; renderSelectedService and deselectService are local to suggestions
+  // previously there were helper functions to render a "selected service" chip using
+  // the <select> element; since we now use checkboxes those were no longer needed.
+  // selection is visible directly via the checkboxes.
 
   function suggestServicesFromText(text) {
     const items = [];
@@ -458,33 +734,55 @@ function initializeSuggestService() {
 }
 
 function selectServiceByValue(value) {
-  const serviceSelect = document.getElementById('service-type');
-  if (!serviceSelect) return;
-  const option = serviceSelect.querySelector(`option[value="${value}"]`);
-  if (option) {
-    serviceSelect.value = value;
-    // small highlight animation
-    option.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    serviceSelect.classList.add('highlighted');
-    setTimeout(() => serviceSelect.classList.remove('highlighted'), 900);
-  }
+  // check the corresponding checkbox (if present) and make it visible/animated
+  const cb = document.querySelector(`#service-list input[type="checkbox"][value="${value}"]`);
+  if (!cb) return;
+  cb.checked = true;
+  cb.dispatchEvent(new Event('change'));
+  // highlight and scroll into view for user feedback
+  cb.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  cb.classList.add('highlighted');
+  setTimeout(() => cb.classList.remove('highlighted'), 900);
+}
+
+// Función para sugerir una fecha de cita (próximo día hábil)
+function sugerirFechaCita() {
+  const hoy = new Date();
+  let fechaSugerida = new Date(hoy);
+
+  // Avanzar al próximo día hábil (lunes a viernes)
+  do {
+    fechaSugerida.setDate(fechaSugerida.getDate() + 1);
+  } while (fechaSugerida.getDay() === 0 || fechaSugerida.getDay() === 6); // 0 = domingo, 6 = sábado
+
+  // Formatear como YYYY-MM-DD
+  const year = fechaSugerida.getFullYear();
+  const month = String(fechaSugerida.getMonth() + 1).padStart(2, '0');
+  const day = String(fechaSugerida.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 async function handleFormSubmit(e) {
   e.preventDefault();
 
   const formData = new FormData(quoteForm);
+  // Just in case, ensure multi select service is reflected in data object
+  const servicioSeleccionado = formData.getAll('service').filter(v => v && v.trim() !== '');
+
   const data = {
     nombre: formData.get('name'),
     email: formData.get('email'),
     telefono: formData.get('phone'),
-    servicio: formData.get('service'),
-    mensaje: formData.get('message')
+    servicio: servicioSeleccionado,
+    urgency: formData.get('urgency') || 'normal',
+    warranty: formData.get('warranty') || '30',
+    mensaje: formData.get('message'),
+    fechaPreferida: formData.get('preferred-date')
   };
 
   // Validación básica - campos obligatorios
-  if (!data.nombre || !data.servicio || !data.mensaje) {
-    showNotification('Por favor completa todos los campos obligatorios', 'error');
+  if (!data.nombre || !data.servicio || !data.servicio.length || !data.mensaje) {
+    showNotification('Por favor completa todos los campos obligatorios (incluye al menos un servicio seleccionado)', 'error');
     return;
   }
 
@@ -502,6 +800,18 @@ async function handleFormSubmit(e) {
   data.email = tieneEmail ? data.email.trim() : 'No proporcionado';
   data.telefono = tieneTelefono ? data.telefono.trim() : 'No proporcionado';
 
+  // Calcular precios usando los valores reales del formulario
+  const precios = calcularPrecios(data.servicio, data.urgency, data.warranty); // ahora `servicio` puede ser array
+
+  // Sugerir fecha de cita si no se proporcionó
+  if (!data.fechaPreferida || data.fechaPreferida.trim() === '') {
+    data.fechaPreferida = sugerirFechaCita();
+  }
+
+  // Agregar campos adicionales para el template completo de EmailJS
+  data.urgencyMultiplier = `${getUrgencyMultiplier(data.urgency)}x`;
+  data.precios = precios;
+
   // Show loading state
   const submitBtn = quoteForm.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
@@ -509,10 +819,45 @@ async function handleFormSubmit(e) {
   submitBtn.disabled = true;
 
   try {
-    // 1. Enviar email al negocio con EmailJS
-    const emailResult = await enviarEmailCotizacion(data);
+    console.log('typeof enviarEmailCotizacion =', typeof enviarEmailCotizacion);
+    const emailResult = await enviarEmailCotizacion(data, null); // Enviar email sin PDF primero
+    console.log('emailResult recibido:', emailResult);
 
     if (emailResult.success) {
+      // 1. Generar PDF de la cotización usando los datos del formulario
+      const datosFactura = {
+        userName: data.nombre,
+        userEmail: data.email,
+        userPhone: data.telefono,
+        servicios: data.servicio ? [data.servicio] : ['Servicio personalizado'],
+        urgency: getUrgencyText(data.urgency),
+        warranty: getWarrantyText(data.warranty),
+        basePrice: precios.basePrice,
+        urgencyPrice: precios.urgencyPrice,
+        warrantyPrice: precios.warrantyPrice,
+        totalPrice: precios.totalPrice,
+        descripcion: data.mensaje || ''
+      };
+
+      let pdfDataUrl = null;
+      try {
+        pdfDataUrl = await generarPdfCotizacion(datosFactura);
+        // Enviar PDF por webhook después de generado
+        if (pdfDataUrl) {
+          console.log('📎 Enviando PDF generado por webhook...');
+          (async () => {
+            try {
+              const webhookResult = await enviarPdfPorWebhook(data, pdfDataUrl);
+              console.log('✅ PDF enviado por webhook:', webhookResult);
+            } catch (webhookErr) {
+              console.warn('⚠️ No se pudo enviar PDF por webhook:', webhookErr);
+            }
+          })();
+        }
+      } catch (pdfErr) {
+        console.warn('No se pudo generar PDF de cotización:', pdfErr);
+      }
+
       // Show success message
       showNotification('¡Cotización enviada! Te contactaremos pronto.', 'success');
 
@@ -540,6 +885,8 @@ async function handleFormSubmit(e) {
       // Reset form
       quoteForm.reset();
 
+      // Intent: enviar por EmailJS exclusivamente (fallback a WhatsApp si falla)
+
       // Enviar por WhatsApp (fallback)
       setTimeout(() => {
         sendToWhatsApp(data);
@@ -548,9 +895,14 @@ async function handleFormSubmit(e) {
 
   } catch (error) {
     console.error('Error al enviar cotización:', error);
+    // mostrar información adicional si la función no existe
+    if (typeof enviarEmailCotizacion === 'undefined') {
+      console.error('! enviarEmailCotizacion no definida al momento del submit');
+    }
     showNotification('Hubo un error. Te redirigimos a WhatsApp.', 'error');
 
     // Fallback: enviar por WhatsApp siempre
+    // Intent: enviar por EmailJS exclusivamente (fallback a WhatsApp si falla)
     setTimeout(() => {
       sendToWhatsApp(data);
     }, 1000);
@@ -600,11 +952,46 @@ function highlightContactFields() {
 
 // Mobile Menu
 function initializeMobileMenu() {
+  // Crear elemento de previsualización
+  const menuPreview = document.createElement('div');
+  menuPreview.id = 'menu-preview';
+  menuPreview.className = 'menu-preview';
+  menuPreview.innerHTML = `
+    <div class="menu-preview-content">
+      <a href="#servicios">Servicios</a>
+      <a href="#trabajos">Trabajos</a>
+      <a href="#cotizar">Cotizar</a>
+      <a href="#contacto">Contacto</a>
+      <a href="#cursos" id="preview-cursos" style="display:none">Cursos</a>
+    </div>
+  `;
+  document.body.appendChild(menuPreview);
+
+  // Función para sincronizar la visibilidad del enlace de cursos
+  function syncCursosVisibility() {
+    const navCursos = document.getElementById('nav-cursos');
+    const previewCursos = document.getElementById('preview-cursos');
+    if (navCursos && previewCursos) {
+      previewCursos.style.display = navCursos.style.display;
+    }
+  }
+
+  // Sincronizar inicialmente y observar cambios
+  syncCursosVisibility();
+  const observer = new MutationObserver(syncCursosVisibility);
+  const navCursos = document.getElementById('nav-cursos');
+  if (navCursos) {
+    observer.observe(navCursos, { attributes: true, attributeFilter: ['style'] });
+  }
+
   navToggle.addEventListener('click', function () {
     const isActive = !navMenu.classList.contains('active');
     navMenu.classList.toggle('active');
     navToggle.classList.toggle('active');
     navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+
+    // Ocultar preview cuando se abre el menú
+    menuPreview.classList.remove('visible');
 
     // Accessibility & UX: focus first link when opening, return focus to toggle when closing
     if (isActive) {
@@ -615,11 +1002,31 @@ function initializeMobileMenu() {
     }
   });
 
+  // Mostrar preview al hacer hover
+  navToggle.addEventListener('mouseenter', function() {
+    if (!navMenu.classList.contains('active')) {
+      menuPreview.classList.add('visible');
+    }
+  });
+
+  navToggle.addEventListener('mouseleave', function() {
+    setTimeout(() => {
+      if (!menuPreview.matches(':hover')) {
+        menuPreview.classList.remove('visible');
+      }
+    }, 100);
+  });
+
+  menuPreview.addEventListener('mouseleave', function() {
+    menuPreview.classList.remove('visible');
+  });
+
   // Close menu when clicking outside
   document.addEventListener('click', function (e) {
-    if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+    if (!navToggle.contains(e.target) && !navMenu.contains(e.target) && !menuPreview.contains(e.target)) {
       navMenu.classList.remove('active');
       navToggle.classList.remove('active');
+      menuPreview.classList.remove('visible');
     }
   });
 }
@@ -941,14 +1348,14 @@ async function initAuthAndCourses() {
         showAuthMessage(msg, 'Registro exitoso. Se envió un email de verificación, por favor revísalo antes de iniciar sesión.', 'green');
         // Sign out so user must verify before accessing dashboard
         await firebase.auth().signOut();
-      } catch (verErr) {
-        console.warn('Error enviando verificación:', verErr);
-        showAuthMessage(msg, 'Registro exitoso. Error al enviar email de verificación.', 'orange');
-      }
-    } catch (err) { msg.style.color = 'red'; msg.textContent = err.message; }
-    btnRegister.disabled = false;
-  });
+      } catch (error) {
+        console.error('Error al enviar cotización:', error);
+        showNotification('Hubo un error enviando la cotización por Email. Te redirigimos a WhatsApp.', 'error');
 
+        // Fallback: redirigir a WhatsApp para que el cliente complete la comunicación
+        setTimeout(() => {
+          sendToWhatsApp(data);
+        }, 1000);
   if (btnLogin) btnLogin.addEventListener('click', async () => {
     const email = document.getElementById('login-email').value.trim();
     const pass = document.getElementById('login-password').value;
@@ -1722,22 +2129,76 @@ function initializeTestimonials() {
 
 // Calculator Functionality
 function initializeCalculator() {
-  const serviceType = document.getElementById('service-type');
-  const urgency = document.getElementById('urgency');
-  const warranty = document.getElementById('warranty');
+  const serviceListContainer = document.getElementById('service-list');
+  const urgency = document.getElementById('calc-urgency');
+  const warranty = document.getElementById('calc-warranty');
 
   const basePriceEl = document.getElementById('base-price');
   const urgencyPriceEl = document.getElementById('urgency-price');
   const warrantyPriceEl = document.getElementById('warranty-price');
   const totalPriceEl = document.getElementById('total-price');
 
+  const basePriceLabelEl = document.getElementById('base-price-label');
+  const urgencyPriceLabelEl = document.getElementById('urgency-price-label');
+  const warrantyPriceLabelEl = document.getElementById('warranty-price-label');
+
+  const serviceWrapper = document.getElementById('service-wrapper');
+  const urgencyBadgeEl = document.getElementById('urgency-badge');
+  const warrantyBadgeEl = document.getElementById('warranty-badge');
+
+
+
+  if (!serviceListContainer || !urgency || !warranty || !basePriceEl || !urgencyPriceEl || !warrantyPriceEl || !totalPriceEl ||
+      !basePriceLabelEl || !urgencyPriceLabelEl || !warrantyPriceLabelEl) {
+    console.warn('Calculator elements not found, skipping initialization');
+    return;
+  }
+
+  function getSelectedServices() {
+    const checkboxes = Array.from(serviceListContainer.querySelectorAll('input[type="checkbox"]'));
+    return checkboxes.filter(cb => cb.checked).map(cb => ({
+      value: cb.value,
+      label: cb.closest('label')?.textContent.trim() || cb.value,
+      price: parseFloat(cb.dataset.price) || 0
+    }));
+  }
+
   function calculatePrice() {
-    const servicePrice = parseFloat(serviceType.selectedOptions[0]?.dataset.price) || 0;
+    const selected = getSelectedServices();
+    const servicePrice = selected.reduce((sum, item) => sum + item.price, 0);
+
     const urgencyMultiplier = parseFloat(urgency.selectedOptions[0]?.dataset.multiplier) || 1;
     const warrantyPrice = parseFloat(warranty.selectedOptions[0]?.dataset.price) || 0;
 
     const urgencyCost = servicePrice * (urgencyMultiplier - 1);
     const total = servicePrice + urgencyCost + warrantyPrice;
+
+    // Update labels with descriptive information
+    basePriceLabelEl.textContent = `Servicio base (${selected.length} servicio${selected.length !== 1 ? 's' : ''}):`;
+
+    const urgencyOption = urgency.selectedOptions[0];
+    if (urgencyOption && urgencyMultiplier > 1) {
+      const percentage = Math.round((urgencyMultiplier - 1) * 100);
+      urgencyPriceLabelEl.textContent = `Urgencia (${percentage}% adicional):`;
+    } else {
+      urgencyPriceLabelEl.textContent = 'Urgencia:';
+    }
+
+    const warrantyOption = warranty.selectedOptions[0];
+    if (warrantyOption && warrantyPrice > 0) {
+      warrantyPriceLabelEl.textContent = `Garantía (+$${warrantyPrice.toLocaleString()}):`;
+    } else {
+      warrantyPriceLabelEl.textContent = 'Garantía:';
+    }
+
+    console.log('Calculator update:', {
+      selectedServices: selected.length,
+      servicePrice,
+      urgencyMultiplier,
+      urgencyCost,
+      warrantyPrice,
+      total
+    });
 
     basePriceEl.textContent = `$${servicePrice.toLocaleString()}`;
     urgencyPriceEl.textContent = `$${urgencyCost.toLocaleString()}`;
@@ -1745,9 +2206,67 @@ function initializeCalculator() {
     totalPriceEl.textContent = `$${total.toLocaleString()}`;
   }
 
-  if (serviceType) serviceType.addEventListener('change', calculatePrice);
-  if (urgency) urgency.addEventListener('change', calculatePrice);
-  if (warranty) warranty.addEventListener('change', calculatePrice);
+  if (serviceListContainer) {
+    // monitor checkbox changes
+    serviceListContainer.addEventListener('change', (evt) => {
+      if (evt.target && evt.target.type === 'checkbox') {
+        const lab = evt.target.closest('label');
+        if (lab) lab.classList.toggle('checked', evt.target.checked);
+      }
+      calculatePrice();
+    });
+    // keyboard navigation: arrow keys move between checkboxes
+    serviceListContainer.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        const cbs = Array.from(serviceListContainer.querySelectorAll('input[type="checkbox"]'));
+        const idx = cbs.indexOf(document.activeElement);
+        if (idx !== -1) {
+          let next = idx + (e.key === 'ArrowDown' ? 1 : -1);
+          if (next < 0) next = cbs.length - 1;
+          if (next >= cbs.length) next = 0;
+          cbs[next].focus();
+          e.preventDefault();
+        }
+      }
+    });
+  }
+  if (urgency) {
+    urgency.addEventListener('change', () => {
+      calculatePrice();
+      updateUrgencyBadge();
+    });
+  }
+  if (warranty) {
+    warranty.addEventListener('change', () => {
+      calculatePrice();
+      updateWarrantyBadge();
+    });
+  }
+
+  function updateUrgencyBadge() {
+    if (!urgencyBadgeEl) return;
+    const multiplier = parseFloat(urgency.selectedOptions[0]?.dataset.multiplier) || 1;
+    urgencyBadgeEl.textContent = multiplier + 'x';
+  }
+
+  function updateWarrantyBadge() {
+    if (!warrantyBadgeEl) return;
+    const price = parseFloat(warranty.selectedOptions[0]?.dataset.price) || 0;
+    warrantyBadgeEl.textContent = price > 0 ? `+$${price.toLocaleString()}` : 'incluida';
+  }
+
+  // Botón para descargar cotización en PDF
+  const downloadPdfBtn = document.getElementById('btn-download-quote-pdf');
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', downloadQuotePdf);
+  }
+
+  // initialize badges
+  updateUrgencyBadge();
+  updateWarrantyBadge();
+
+  // Calculate initial price on load
+  calculatePrice();
 }
 
 // Work Filters
@@ -1813,31 +2332,428 @@ function animateCounter(element) {
   }, 16);
 }
 
+function getCalculatorQuoteData() {
+  const serviceListContainer = document.getElementById('service-list');
+  const urgency = document.getElementById('calc-urgency');
+  const warranty = document.getElementById('calc-warranty');
+
+  const checkedBoxes = Array.from(serviceListContainer?.querySelectorAll('input[type="checkbox"]:checked') || []);
+  const servicios = checkedBoxes.map(cb => ({
+    name: cb.closest('label')?.textContent.trim() || cb.value,
+    price: parseFloat(cb.dataset.price) || 0
+  }));
+
+  const basePrice = servicios.reduce((sum, s) => sum + s.price, 0);
+  const urgencyMultiplier = parseFloat(urgency.selectedOptions[0]?.dataset.multiplier) || 1;
+  const warrantyPrice = parseFloat(warranty.selectedOptions[0]?.dataset.price) || 0;
+  const urgencyCost = basePrice * (urgencyMultiplier - 1);
+  const totalPrice = basePrice + urgencyCost + warrantyPrice;
+
+  return {
+    servicioTexto: servicios.map(s => s.name).join(', ') || 'Servicio',
+    servicios,
+    urgencyText: urgency.selectedOptions[0]?.textContent || 'Normal',
+    warrantyText: warranty.selectedOptions[0]?.textContent || '30 días',
+    urgencyMultiplier,
+    basePrice,
+    urgencyPrice: urgencyCost,
+    warrantyPrice,
+    totalPrice,
+    descripcion: document.getElementById('problem-description')?.value || ''
+  };
+}
+
+function downloadQuotePdf() {
+  const datos = getCalculatorQuoteData();
+  const datosFactura = {
+    userName: document.getElementById('quote-name')?.value || 'Cliente Web',
+    userEmail: document.getElementById('quote-email')?.value || 'no-reply@devices.f2',
+    userPhone: document.getElementById('quote-phone')?.value || 'No proporcionado',
+    servicios: datos.servicios,
+    urgency: datos.urgencyText,
+    warranty: datos.warrantyText,
+    basePrice: datos.basePrice,
+    urgencyPrice: datos.urgencyPrice,
+    warrantyPrice: datos.warrantyPrice,
+    totalPrice: datos.totalPrice,
+    descripcion: datos.descripcion
+  };
+
+  generarPdfCotizacion(datosFactura).then(pdfDataUrl => {
+    const link = document.createElement('a');
+    link.href = pdfDataUrl;
+    link.download = `cotizacion_${new Date().toISOString().slice(0,10)}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }).catch(err => {
+    console.error('Error al generar descarga de PDF:', err);
+    showNotification('No se pudo generar el PDF. Intenta de nuevo.', 'error');
+  });
+}
+
 // Enhanced WhatsApp Quote Function
+// Envío de cotización desde la calculadora
+// esta función construye los datos y, al usar enviarEmailCotizacion,
+// se marca `fromCalculator: true` para que EmailJS utilice
+// el template identificado como template_h72ctck (EMAILJS_CONFIG.calculatorTemplateId).
 function openWhatsAppQuote() {
-  const serviceType = document.getElementById('service-type');
-  const urgency = document.getElementById('urgency');
-  const warranty = document.getElementById('warranty');
+  const datos = getCalculatorQuoteData();
+  const userEmail = document.getElementById('quote-email')?.value || '';
+  const userPhone = document.getElementById('quote-phone')?.value || '';
+  const userName = document.getElementById('quote-name')?.value || 'Cliente Web';
 
-  const serviceName = serviceType.selectedOptions[0]?.textContent || 'Servicio';
-  const urgencyText = urgency.selectedOptions[0]?.textContent || 'Normal';
-  const warrantyText = warranty.selectedOptions[0]?.textContent || '30 días';
+  const basePrice = datos.basePrice;
+  const urgencyPrice = datos.urgencyPrice;
+  const warrantyPrice = datos.warrantyPrice;
+  const totalPrice = datos.totalPrice;
+  const serviceListText = datos.servicioTexto;
+  const urgencyText = datos.urgencyText;
+  const warrantyText = datos.warrantyText;
+  const urgencyMultiplier = datos.urgencyMultiplier;
 
+  // Build WhatsApp message for the user
   const message = `¡Hola! Me interesa cotizar un servicio:\n\n` +
-    `📋 Servicio: ${serviceName}\n` +
-    `⏰ Urgencia: ${urgencyText}\n` +
-    `🛡️ Garantía: ${warrantyText}\n\n` +
+    `📋 Servicios: ${serviceListText}\n` +
+    `⏰ Urgencia: ${urgencyText} ($${urgencyPrice.toLocaleString()})\n` +
+    `🛡️ Garantía: ${warrantyText} ($${warrantyPrice.toLocaleString()})\n` +
+    `\n💰 Total estimado: $${totalPrice.toLocaleString()}\n\n` +
     `¿Podrían darme más información sobre el proceso y precios?`;
 
+  const datosFactura = {
+    servicios: datos.servicios,
+    urgency: urgencyText,
+    warranty: warrantyText,
+    basePrice: basePrice,
+    urgencyPrice: urgencyPrice,
+    warrantyPrice: warrantyPrice,
+    totalPrice: totalPrice,
+    descripcion: datos.descripcion,
+    userName: userName,
+    userEmail: userEmail,
+    userPhone: userPhone
+  };
+
+  // Generate PDF and send email in background (do not block user)
+  (async () => {
+    try {
+      const pdfDataUrl = await generarPdfCotizacion(datosFactura);
+
+      // Send email to business with the PDF attached (uses EmailJS helper)
+      if (typeof enviarEmailCotizacion === 'function') {
+        const datosFormulario = {
+          nombre: userName,
+          email: userEmail || 'no-reply@devices.f2',
+          telefono: userPhone || 'No proporcionado',
+          servicio: serviceListText,
+          mensaje: document.getElementById('problem-description')?.value || `Cotización de calculadora web. Servicios seleccionados: ${serviceListText}. Urgencia: ${urgencyText}. Garantía: ${warrantyText}.`,
+          // Indicar explícitamente que esto viene de la calculadora
+          fromCalculator: true,
+          // Datos específicos de la calculadora para la plantilla
+          urgency: urgencyText,
+          urgencyMultiplier: `${urgencyMultiplier}x`,
+          warranty: warrantyText,
+          precios: {
+            basePrice: basePrice,
+            urgencyPrice: urgencyPrice,
+            warrantyPrice: warrantyPrice,
+            totalPrice: totalPrice
+          },
+          fechaPreferida: new Date().toLocaleDateString('es-ES')
+        };
+
+        // Fire-and-forget: no await, but catch errors
+        enviarEmailCotizacion(datosFormulario, pdfDataUrl).then(async (res) => {
+          console.log('Email al negocio enviado:', res);
+
+          // Enviar email de confirmación al cliente si proporcionó email válido
+          if (userEmail && userEmail !== 'no-reply@devices.f2' && userEmail.includes('@')) {
+            try {
+              console.log('Enviando email de confirmación al cliente:', userEmail);
+
+              // Preparar datos para el cliente (usando el mismo template que el negocio)
+              const clienteDatos = {
+                ...datosFormulario,
+                email: userEmail // Asegurar que el email del cliente sea el destinatario
+              };
+
+              // Enviar email al cliente usando la misma función pero con datos modificados
+              const clienteRes = await enviarEmailCotizacion(clienteDatos, null);
+              console.log('Email al cliente enviado:', clienteRes);
+            } catch (clienteErr) {
+              console.error('Error enviando email al cliente:', clienteErr);
+            }
+          }
+        }).catch(err => console.error('Error enviando email con PDF:', err));
+      } else {
+        console.warn('enviarEmailCotizacion no está disponible. Configura EmailJS.');
+      }
+    } catch (err) {
+      console.error('Error generando/enviando PDF de cotización:', err);
+    }
+  })();
+
+  // Redirect user to WhatsApp immediately (no visible PDF)
   const whatsappUrl = `https://wa.me/59892803418?text=${encodeURIComponent(message)}`;
   window.open(whatsappUrl, '_blank');
 
   // Track event
   trackEvent('calculator_whatsapp_click', {
-    service_type: serviceName,
+    service_type: serviceListText,
     urgency: urgencyText,
     warranty: warrantyText
   });
+}
+
+// Helper: fetch an image and return data URL
+function fetchImageAsDataUrl(url) {
+  return fetch(url)
+    .then(res => res.blob())
+    .then(blob => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    }));
+}
+
+// Generar PDF de cotización y devolver dataURL (data:application/pdf;base64,...)
+async function generarPdfCotizacion(datos) {
+  // Ensure jsPDF is available
+  if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF no cargado');
+  const { jsPDF } = window.jspdf;
+  // A4 vertical fijo
+  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 36;
+  const usableWidth = pageWidth - margin * 2;
+  const rightX = pageWidth - margin;
+
+  // Attempt to load logo (silent failure allowed)
+  try {
+    const logoUrl = 'public/images/logos/logo-devices-f2.jpg';
+    const imgData = await fetchImageAsDataUrl(logoUrl);
+    // Use image natural ratio to avoid distortion
+    const logoImg = new Image();
+    await new Promise((resolve, reject) => {
+      logoImg.onload = () => resolve();
+      logoImg.onerror = reject;
+      logoImg.src = imgData;
+    });
+    const maxLogoWidth = 130;
+    const maxLogoHeight = 60;
+    let logoWidth = Math.min(maxLogoWidth, usableWidth * 0.25);
+    let logoHeight = logoWidth * (logoImg.height / logoImg.width);
+    if (logoHeight > maxLogoHeight) {
+      logoHeight = maxLogoHeight;
+      logoWidth = logoHeight * (logoImg.width / logoImg.height);
+    }
+    doc.addImage(imgData, 'JPEG', margin, 20, logoWidth, logoHeight);
+  } catch (e) {
+    console.warn('No se pudo cargar logo para PDF:', e);
+  }
+
+  // Funciones de utilidad para el PDF
+  const lineHeight = 14;
+  const maxWidth = usableWidth;
+  const addText = (text, x, y, options = {}) => {
+    const lines = doc.splitTextToSize(text, options.maxWidth || maxWidth);
+    doc.text(lines, x, y, { maxWidth: options.maxWidth || maxWidth, align: options.align || 'left' });
+    return y + (lines.length * lineHeight);
+  };
+
+  const addRowText = (label, value, x, y, width = 460) => {
+    doc.setFontSize(10);
+    doc.text(`${label}:`, x, y);
+    const valueLines = doc.splitTextToSize(value, width);
+    doc.text(valueLines, x + 110, y);
+    return y + (valueLines.length * lineHeight);
+  };
+
+  // Header
+  doc.setFontSize(20);
+  doc.text('FACTURA - COTIZACIÓN', margin, 100);
+  doc.setFontSize(10);
+  doc.text(`Fecha: ${new Date().toLocaleString()}`, margin, 118);
+  doc.text(`Folio: ${'COT-' + Math.floor(Math.random()*900000 + 100000)}`, rightX, 118, { align: 'right' });
+
+  // Divider
+  doc.setLineWidth(0.6);
+  doc.line(margin, 125, rightX, 125);
+
+  // Cliente info
+  let y = 150;
+  doc.setFontSize(12);
+  doc.text('DATOS DEL CLIENTE', margin, y);
+  y += 16;
+  y = addRowText('Nombre', datos.userName || 'Cliente Web', 40, y);
+  y = addRowText('Email', datos.userEmail || 'No proporcionado', 40, y);
+  y = addRowText('Teléfono', datos.userPhone || 'No proporcionado', 40, y);
+
+  // Problem description
+  if (datos.descripcion) {
+    y += 4;
+    doc.setFontSize(10);
+    doc.text('Descripción del problema:', 40, y);
+    y += 12;
+    doc.setFontSize(9);
+    y = addText(datos.descripcion, 40, y, { maxWidth: 500 });
+    y += 8;
+    doc.setFontSize(10);
+  }
+
+  // Divider
+  y += 5;
+  doc.line(margin, y, rightX, y);
+  y += 16;
+
+  // Services / Items
+  doc.setFontSize(12);
+  doc.text('SERVICIOS SOLICITADOS', margin, y);
+  y += 16;
+  doc.setFontSize(10);
+
+  // Table headers
+  doc.setFontSize(10);
+  doc.text('Descripción', margin, y);
+  doc.text('Costo', rightX, y, { align: 'right' });
+  y += 16;
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, rightX, y);
+  y += 16;
+
+  // Services
+  const servicesRaw = Array.isArray(datos.servicios) ? datos.servicios : [];
+  let services = servicesRaw.map(item => {
+    if (typeof item === 'string' || typeof item === 'number') {
+      return { name: String(item), price: 0 };
+    }
+    if (item && typeof item === 'object') {
+      return { name: item.name || item.label || 'Servicio', price: parseFloat(item.price) || 0 };
+    }
+    return { name: 'Servicio', price: 0 };
+  });
+
+  let totalServicePrice = services.reduce((sum, s) => sum + s.price, 0);
+
+  if (services.length === 0 && datos.basePrice > 0) {
+    services.push({ name: 'Servicio general', price: datos.basePrice });
+    totalServicePrice = datos.basePrice;
+  }
+
+  if (totalServicePrice === 0 && services.length > 0 && datos.basePrice) {
+    const equalShare = (datos.basePrice || 0) / services.length;
+    services.forEach(s => s.price = equalShare);
+    totalServicePrice = datos.basePrice;
+  }
+
+  if (services.length === 0) {
+    doc.setFontSize(10);
+    doc.text('No se seleccionaron servicios.', 40, y);
+    y += lineHeight + 8;
+  } else {
+    services.forEach(servicio => {
+      if (y > pageHeight - margin - 120) {
+        doc.addPage();
+        y = margin + 20;
+      }
+      const serviceLines = doc.splitTextToSize(servicio.name, usableWidth * 0.7);
+      doc.text(serviceLines, margin, y);
+      doc.text(`$${(servicio.price || 0).toLocaleString('es-UY')}`, rightX, y, { align: 'right' });
+      y += Math.max(1, serviceLines.length) * lineHeight + 10;
+    });
+  }
+
+  // Divider
+  if (y > pageHeight - margin - 150) {
+    doc.addPage();
+    y = margin + 20;
+  }
+  y += 12;
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, rightX, y);
+  y += 20;
+
+  // Price breakdown
+  if (y > pageHeight - margin - 120) {
+    doc.addPage();
+    y = margin + 20;
+  }
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  const detailX = rightX - 220; // mover más a la izquierda como se solicitó
+  const valueX = rightX - 8;
+  doc.text('Subtotal (Servicios):', detailX, y);
+  doc.text(`$${totalServicePrice.toLocaleString('es-UY')}`, valueX, y, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  y += 18;
+
+  doc.text(`Recargo por urgencia (${datos.urgency}):`, detailX, y);
+  doc.text(`$${(datos.urgencyPrice || 0).toLocaleString('es-UY')}`, valueX, y, { align: 'right' });
+  y += 16;
+
+  doc.text(`Acrecentado por Garantía (${datos.warranty}):`, detailX, y);
+  doc.text(`$${(datos.warrantyPrice || 0).toLocaleString('es-UY')}`, valueX, y, { align: 'right' });
+  y += 18;
+
+  // Total
+  doc.setFontSize(13);
+  doc.setFont(undefined, 'bold');
+  doc.text('TOTAL ESTIMADO:', detailX, y);
+  doc.text(`$${(datos.totalPrice || 0).toLocaleString('es-UY')}`, valueX, y, { align: 'right' });
+  doc.setFont(undefined, 'normal');
+  y += 26;
+
+  doc.setFontSize(9);
+  doc.setTextColor(51, 51, 51);
+  doc.setFont(undefined, 'normal');
+  doc.text('* Precios con IVA incluido (si aplica).', margin, y);
+  y += 16;
+
+  // Espacio extra para total en palabras y evitar solape al ubicar detalles.
+  y += 12;
+  y += 16;
+  y += 28;
+
+  // Total en palabras
+  const totalEntero = Math.round((datos.totalPrice || 0));
+  const totalTexto = numberToSpanishWords(totalEntero);
+  doc.setFontSize(10);
+  doc.text(`Total en palabras: ${totalTexto.charAt(0).toUpperCase() + totalTexto.slice(1)} pesos`, 40, y);
+  y += 16;
+
+  // Service details
+  doc.setFontSize(11);
+  doc.text('DETALLES DEL SERVICIO', 40, y);
+  y += 14;
+  doc.setFontSize(10);
+  doc.text(`Urgencia: ${datos.urgency || 'Normal'}`, 40, y);
+  y += 12;
+  doc.text(`Garantía: ${datos.warranty || '30 días'}`, 40, y);
+  y += 20;
+
+  // Footer
+  doc.setFontSize(9);
+  doc.line(40, y, 550, y);
+  y += 12;
+  doc.text('Devices F2 - Servicio Técnico Profesional de Computadoras', 40, y);
+  y += 10;
+  doc.text('Correo: devices.f02@gmail.com | Teléfono: +598 92 803 418', 40, y);
+  y += 10;
+  doc.text('San Carlos, Maldonado, Uruguay', 40, y);
+  y += 12;
+  doc.setTextColor(150);
+  doc.text('Esta cotización es válida por 7 días. Para confirmar tu servicio, contáctanos por WhatsApp.', 40, y);
+
+  // Return data URL
+  return doc.output('datauristring');
+}
+
+// Enviar PDF al webhook configurado (devuelve la respuesta JSON)
+async function sendPdfToWebhook(datosFormulario) {
+  // Webhook helper removed — using EmailJS exclusively.
+  throw new Error('sendPdfToWebhook removed: use EmailJS via enviarEmailCotizacion');
 }
 
 // Enhanced animations

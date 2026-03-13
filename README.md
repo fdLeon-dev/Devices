@@ -28,6 +28,26 @@ Prueba rápida:
 
 Sitio web moderno y profesional para el servicio técnico de reparación y ensamblaje de computadoras Devices F2.
 
+## 🆕 Últimas Implementaciones
+
+### Formulario Completo con Templates de EmailJS Separados
+- **Template del Formulario**: `quote-template.html` - Para cotizaciones simples (un servicio)
+- **Template de la Calculadora**: `calculator-template.html` - Para cotizaciones con múltiples servicios
+- **Detección Automática**: El sistema detecta automáticamente qué template usar según el origen
+- **Emails Automáticos**: Se envían emails tanto al negocio como al cliente cuando se proporciona email
+- **Seguimiento al Cliente**: La calculadora envía confirmación automática al email proporcionado
+- **Campos Completos**: Incluye nombre, email, teléfono, servicio, urgencia, garantía, fecha preferida y descripción completa
+- **Cálculos Automáticos**: Precios calculados dinámicamente según urgencia y garantía seleccionadas
+- **Email Profesional**: Template HTML responsive con desglose detallado de precios y información del cliente
+
+### Previsualización del Menú Hamburguesa
+
+- **Hover para Preview**: Al pasar el mouse sobre el botón hamburguesa (solo en desktop), se muestra una previsualización del menú
+- **Navegación Mejorada**: Los usuarios pueden ver las opciones disponibles antes de abrir el menú completo
+- **Sincronización Automática**: El preview se actualiza cuando cambian las opciones del menú (ej: mostrar/ocultar sección de "Cursos" para usuarios admin)
+- **Interacción Fluida**: El preview aparece/desaparece suavemente con animaciones CSS
+- **Accesibilidad**: No interfiere con la navegación por teclado ni con lectores de pantalla
+
 ## 🚀 Características
 
 - **Diseño Moderno**: Interfaz limpia y profesional con tema claro/oscuro
@@ -291,3 +311,57 @@ Para usarlo:
 Si querés, puedo ajustar la UI (por ejemplo, permitir previsualizar PDFs embebidos, importar objetivos automáticamente desde el JSON, o añadir campos para quizzes). Dime qué prefieres y lo implemento.
 
 Si quieres que implemente subida de videos a Firebase Storage o integración automática con Google Calendar/Meet para programar sesiones, lo puedo prototipar en la siguiente iteración.
+
+## 📋 Plantilla de Cotización
+
+Se incluye una plantilla HTML (`quote-template.html`) basada en los campos de la calculadora de presupuesto. Esta plantilla puede ser utilizada para:
+
+- **Emails de cotización**: Copia el contenido para crear plantillas en EmailJS
+- **Vista previa de cotizaciones**: Muestra el detalle completo antes del envío
+- **Documentos PDF**: Base para generar PDFs con jsPDF
+
+### Campos de la Plantilla (Formulario Completo)
+
+La plantilla utiliza los siguientes placeholders que se reemplazan automáticamente con los datos del formulario completo:
+
+- `{{userName}}` - Nombre completo del cliente
+- `{{userEmail}}` - Correo electrónico del cliente
+- `{{userPhone}}` - Número de teléfono del cliente
+- `{{selectedServices}}` - Número de servicios seleccionados (siempre 1 para formulario)
+- `{{servicesList}}` - Tipo de servicio seleccionado (reparacion, upgrade, ensamblaje, mantenimiento, otro)
+- `{{urgencyText}}` - Texto descriptivo de urgencia (Normal/Urgente/Express)
+- `{{urgencyMultiplier}}` - Multiplicador numérico de urgencia (1x, 1.3x, 1.5x)
+- `{{warrantyText}}` - Texto descriptivo de garantía (30 días, 90 días, 6 meses, 1 año)
+- `{{warrantyPrice}}` - Costo adicional de garantía extendida
+- `{{servicePrice}}` - Precio base del servicio seleccionado
+- `{{urgencyCost}}` - Costo adicional por urgencia
+- `{{total}}` - Precio total estimado (base + urgencia + garantía)
+- `{{problemDescription}}` - Descripción completa del problema/requerimiento
+- `{{currentDate}}` - Fecha de generación de la cotización
+- `{{preferred_date}}` - Fecha preferida para la cita
+
+### Uso con EmailJS (Templates Separados)
+
+Para usar los templates con EmailJS:
+
+#### Template del Formulario (`quote-template.html`):
+1. Copia el contenido de `quote-template.html`
+2. Crea una plantilla en EmailJS llamada "Cotización Formulario"
+3. Configura todos los campos dinámicos listados arriba
+4. El `templateId` en `emailjs-config.js` apunta a esta plantilla
+
+#### Template de la Calculadora (`calculator-template.html`):
+1. Copia el contenido de `calculator-template.html`
+2. Crea una plantilla en EmailJS llamada "Cotización Calculadora"
+3. Configura todos los campos dinámicos listados arriba
+4. Actualiza `calculatorTemplateId` en `emailjs-config.js` con el ID real de EmailJS
+
+**Nota**: Ambos templates usan los mismos campos dinámicos, pero el de calculadora está optimizado para mostrar múltiples servicios.
+
+### Envío Automático de Emails
+
+- **Al Negocio**: Siempre se envía email a `devices.f02@gmail.com` con los detalles de la cotización
+- **Al Cliente**: Se envía automáticamente cuando se proporciona un email válido en:
+  - Formulario de cotización
+  - Calculadora (campos de email y teléfono)
+- **Templates Consistentes**: Cliente y negocio reciben el mismo contenido con el template apropiado

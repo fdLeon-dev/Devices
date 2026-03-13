@@ -1,17 +1,41 @@
 // Configuración de EmailJS para Devices F2
+console.log('%c[DEV] emailjs-config.js cargado', 'color: #6A4CDB; font-weight: bold;');
 // IMPORTANTE: Debes configurar EmailJS para que funcione
 
 // Instrucciones de configuración:
 // 1. Ve a https://www.emailjs.com/ y crea una cuenta gratis
 // 2. Crea un servicio de email (Gmail, Outlook, etc.)
-// 3. Crea una plantilla de email
-// 4. Copia tus credenciales aquí
+// 3. Crea una plantilla de email para el negocio (templateId)
+// 4. Crea otra plantilla de email para el cliente (clientTemplateId) - usa campos como {{to_email}}, {{userName}}, {{userEmail}}, {{servicesList}}, {{total}}, {{currentDate}}
+// 5. Copia tus credenciales aquí
 
 const EMAILJS_CONFIG = {
   publicKey: 'y9GCD4RwWJbp-dnRO',     // Reemplaza con tu Public Key
   serviceId: 'service_yapkcmx',     // Reemplaza con tu Service ID
-  templateId: 'template_h72ctck'    // Reemplaza con tu Template ID
+  templateId: 'template_o9khfnz',    // Template para el negocio (cotización formulario)
+  calculatorTemplateId: 'template_h72ctck', // Template para la calculadora
+  clientTemplateId: 'template_h72ctck' // Template para el cliente (calculadora) - formulario usa templateId
 };
+
+// Helper functions for form data processing
+function getUrgencyText(urgencyValue) {
+  const urgencyTexts = {
+    normal: 'Normal (3-5 días)',
+    urgente: 'Urgente (24-48 horas)',
+    express: 'Express (mismo día)'
+  };
+  return urgencyTexts[urgencyValue] || 'Normal (3-5 días)';
+}
+
+function getWarrantyText(warrantyValue) {
+  const warrantyTexts = {
+    '30': '30 días',
+    '90': '90 días',
+    '180': '6 meses',
+    '365': '1 año'
+  };
+  return warrantyTexts[warrantyValue] || '30 días';
+}
 
 // Inicializar EmailJS
 function initEmailJS() {
@@ -31,35 +55,165 @@ function initEmailJS() {
 }
 
 // Enviar email de cotización
-async function enviarEmailCotizacion(datosFormulario) {
+// pdfDataUrl: opcional, data URL (data:application/pdf;base64,...) generado por jsPDF
+async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
   if (!EMAILJS_CONFIG.publicKey || EMAILJS_CONFIG.publicKey === 'TU_PUBLIC_KEY_AQUI') {
     console.warn('EmailJS no está configurado. Revisa emailjs-config.js');
     return { success: false, error: 'EmailJS no configurado' };
   }
 
   try {
+    // Detectar si viene de calculadora (múltiples servicios), el flag explícito o formulario (un servicio)
+    const isFromCalculator = datosFormulario.fromCalculator === true ||
+                            (datosFormulario.servicio && datosFormulario.servicio.includes(',')) ||
+                            (datosFormulario.selectedServices && datosFormulario.selectedServices > 1);
+
+    // Detectar si es email para el cliente o para el negocio
+    const isClientEmail = (() => {
+      if (!datosFormulario.email) return false;
+      if (datosFormulario.email.trim() === '') return false;
+      if (datosFormulario.email === 'No proporcionado') return false;
+      if (datosFormulario.email === 'no-reply@devices.f2') return false;
+      if (!datosFormulario.email.includes('@')) return false;
+      if (datosFormulario.email === 'devices.f02@gmail.com') return false;
+      return true;
+    })();
+
+    console.log('🔍 DEBUG EMAIL:');
+    console.log('• Email recibido:', datosFormulario.email);
+    console.log('• isClientEmail:', isClientEmail);
+    console.log('• Servicio:', datosFormulario.servicio);
+    console.log('• Viene de calculadora:', isFromCalculator);
+
     const templateParams = {
-      to_email: 'devices.f02@gmail.com', // Tu email
-      from_name: datosFormulario.nombre,
-      from_email: datosFormulario.email,
-      from_phone: datosFormulario.telefono,
-      service_type: datosFormulario.servicio,
-      message: datosFormulario.mensaje,
-      reply_to: datosFormulario.email
+      // to_email se establece por payload específico (negocio vs cliente)
+      userName: datosFormulario.nombre,
+      from_name: datosFormulario.nombre,        // alias utilizado en plantilla
+      name: datosFormulario.nombre,             // alias simplificado
+      userEmail: datosFormulario.email,
+      email: datosFormulario.email,             // alias simplificado
+      userPhone: datosFormulario.telefono,
+      phone: datosFormulario.telefono,           // alias simplificado
+      selectedServices: datosFormulario.selectedServices || (datosFormulario.servicio ? datosFormulario.servicio.split(',').length : 1),
+      servicesList: datosFormulario.servicio,
+      service_type: datosFormulario.servicio,          // alias para plantilla
+      service: datosFormulario.servicio,               // otro posible nombre
+      urgencyText: datosFormulario.urgency ? getUrgencyText(datosFormulario.urgency) : 'Normal (3-5 días)',
+      urgencyMultiplier: datosFormulario.urgencyMultiplier || '1x',
+      warrantyText: datosFormulario.warranty ? getWarrantyText(datosFormulario.warranty) : '30 días',
+      warrantyPrice: datosFormulario.precios ? datosFormulario.precios.warrantyPrice : 0,
+      servicePrice: datosFormulario.precios ? datosFormulario.precios.basePrice : 0,
+      urgencyCost: datosFormulario.precios ? datosFormulario.precios.urgencyPrice : 0,
+      total: datosFormulario.precios ? datosFormulario.precios.totalPrice : 0,
+      problemDescription: datosFormulario.mensaje,
+      message: datosFormulario.mensaje,          // alias para cuerpo de mensaje
+      currentDate: new Date().toLocaleDateString('es-ES'),
+      preferred_date: datosFormulario.fechaPreferida,
+      reply_to: isClientEmail ? 'devices.f02@gmail.com' : datosFormulario.email
     };
 
-    const response = await emailjs.send(
-      EMAILJS_CONFIG.serviceId,
-      EMAILJS_CONFIG.templateId,
-      templateParams
-    );
+    // Seleccionar template según origen
+    const templateId = isFromCalculator ? EMAILJS_CONFIG.calculatorTemplateId : EMAILJS_CONFIG.templateId;
+    const clientTemplateId = isFromCalculator ? EMAILJS_CONFIG.clientTemplateId : EMAILJS_CONFIG.templateId; // Usar mismo template para formulario
 
-    console.log('Email enviado exitosamente:', response);
-    return { success: true, response };
+    console.log(`📧 Enviando ${isFromCalculator ? 'calculadora' : 'formulario'} al negocio`);
+    console.log('Template usado:', templateId);
+
+    // generar lista de destinatarios para el negocio
+    const businessRecipients = isClientEmail
+      ? `devices.f02@gmail.com,${datosFormulario.email}`
+      : 'devices.f02@gmail.com';
+
+    const businessPayload = {
+      service_id: EMAILJS_CONFIG.serviceId,
+      template_id: templateId,
+      user_id: EMAILJS_CONFIG.publicKey,
+      template_params: {
+        ...templateParams,
+        to_email: businessRecipients,
+        reply_to: datosFormulario.email || 'devices.f02@gmail.com'
+      }
+    };
+
+    console.log('📧 Business Payload completo:', JSON.stringify(businessPayload, null, 2));
+    console.log('📧 Enviando email al negocio a:', businessRecipients);
+    const businessRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(businessPayload)
+    });
+
+    if (!businessRes.ok) {
+      const text = await businessRes.text();
+      console.error('❌ Error al enviar email al negocio:', { status: businessRes.status, text });
+      return { success: false, error: text || `HTTP ${businessRes.status}` };
+    }
+
+    const businessJson = await businessRes.json().catch(() => ({}));
+    console.log('✅ Email enviado al negocio exitosamente');
+    if (isClientEmail) {
+      console.log('✅ Cliente incluido en la lista de destinatarios');
+    }
+
+
+    // Si el correo se envió y tenemos PDF, intentar enviarlo por webhook
+    if (pdfDataUrl) {
+      console.log('📎 Intentando enviar PDF como adjunto por webhook...');
+      (async () => {
+        try {
+          const webhookResult = await enviarPdfPorWebhook(datosFormulario, pdfDataUrl);
+          console.log('✅ PDF enviado por webhook:', webhookResult);
+        } catch (webhookErr) {
+          console.warn('⚠️ No se pudo enviar PDF por webhook (continúa normalmente):', webhookErr);
+        }
+      })();
+    }
+
+    return { success: true, response: businessJson };
   } catch (error) {
-    console.error('Error al enviar email:', error);
+    console.error('❌ Error al enviar email:', error);
     return { success: false, error: error.text || error.message };
   }
+}
+
+// Enviar PDF por webhook (si está disponible)
+async function enviarPdfPorWebhook(datosFormulario, pdfDataUrl) {
+  // Prefer the configured window.WEBHOOK_URL; default to Netlify function path for deployed sites
+  const webhookUrl = window.WEBHOOK_URL || '/.netlify/functions/send-pdf';
+
+  if (!webhookUrl) {
+    throw new Error('No hay webhook URL configurado');
+  }
+
+  const rawMatch = String(pdfDataUrl).match(/^data:.*;base64,(.*)$/);
+  const pdfBase64 = rawMatch ? rawMatch[1] : pdfDataUrl;
+
+  const body = {
+    to: 'devices.f02@gmail.com',
+    subject: `Cotización PDF - ${datosFormulario.servicio}`,
+    message: `Cotización para: ${datosFormulario.nombre} (${datosFormulario.email})`,
+    pdf_base64: pdfBase64,
+    pdf_filename: 'cotizacion-devices.pdf'
+  };
+
+  // Add optional Authorization header if front-end exposes the secret token
+  const headers = { 'Content-Type': 'application/json' };
+  if (window.WEBHOOK_SECRET_TOKEN) {
+    headers.Authorization = 'Bearer ' + window.WEBHOOK_SECRET_TOKEN;
+  }
+
+  const res = await fetch(webhookUrl, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Webhook error ${res.status}: ${text}`);
+  }
+
+  return res.json();
 }
 
 // Generar mensaje de WhatsApp para el cliente
@@ -92,5 +246,10 @@ function enviarWhatsAppConfirmacion(telefono, nombre, servicio) {
 
   // Abrir WhatsApp en nueva pestaña
   window.open(whatsappUrl, '_blank');
+}
+
+// Export for Node.js testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { enviarEmailCotizacion };
 }
 

@@ -67,37 +67,57 @@
     <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 6h-18v11.17L6.17 13H21V6z"/></symbol>
     <symbol id="i-paper-plane" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v6z"/></symbol>
     <symbol id="i-robot" viewBox="0 0 24 24">
-      <!-- Head -->
-      <rect x="5" y="3" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <!-- Antenna Left -->
-      <line x1="8" y1="3" x2="7" y2="0.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="7" cy="0.5" r="0.6" fill="currentColor"/>
-      <!-- Antenna Right -->
-      <line x1="16" y1="3" x2="17" y2="0.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <circle cx="17" cy="0.5" r="0.6" fill="currentColor"/>
-      <!-- Eyes -->
-      <circle cx="9" cy="7" r="1.2" fill="currentColor"/>
-      <circle cx="15" cy="7" r="1.2" fill="currentColor"/>
-      <!-- Smile -->
-      <path d="M10 10 Q12 11 14 10" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
-      <!-- Body -->
-      <rect x="6" y="14" width="12" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-      <!-- Arms -->
-      <line x1="4.5" y1="16" x2="1.5" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="19.5" y1="16" x2="22.5" y2="16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      <!-- Buttons -->
-      <circle cx="10" cy="18" r="0.5" fill="currentColor"/>
-      <circle cx="12" cy="18" r="0.5" fill="currentColor"/>
-      <circle cx="14" cy="18" r="0.5" fill="currentColor"/>
+      <!-- Base futuristic head with depth -->
+      <g>
+        <!-- Main head frame -->
+        <rect x="3" y="5" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <!-- Inner border for depth -->
+        <rect x="4" y="6" width="16" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="0.8" opacity="0.5"/>
+        
+        <!-- Circuit lines -->
+        <line x1="7" y1="5" x2="7" y2="18" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+        <line x1="17" y1="5" x2="17" y2="18" stroke="currentColor" stroke-width="0.7" opacity="0.3"/>
+        <path d="M 3 11.5 Q 12 13 21 11.5" stroke="currentColor" stroke-width="0.8" fill="none" opacity="0.4"/>
+        
+        <!-- Left optical sensor (eye) -->
+        <g>
+          <circle cx="7.5" cy="10" r="2.8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.8"/>
+          <circle cx="7.5" cy="10" r="1.8" fill="currentColor" opacity="0.8"/>
+          <circle cx="8" cy="9.5" r="0.6" fill="white" opacity="0.6"/>
+        </g>
+        
+        <!-- Right optical sensor (eye) -->
+        <g>
+          <circle cx="16.5" cy="10" r="2.8" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.8"/>
+          <circle cx="16.5" cy="10" r="1.8" fill="currentColor" opacity="0.8"/>
+          <circle cx="17" cy="9.5" r="0.6" fill="white" opacity="0.6"/>
+        </g>
+        
+        <!-- Central AI core processor -->
+        <g opacity="0.7">
+          <rect x="10.5" y="7" width="3" height="2.5" rx="0.4" fill="none" stroke="currentColor" stroke-width="0.9"/>
+          <circle cx="12" cy="8.2" r="0.6" fill="currentColor" opacity="0.9"/>
+          <line x1="11.2" y1="8.8" x2="12.8" y2="8.8" stroke="currentColor" stroke-width="0.6" opacity="0.6"/>
+        </g>
+        
+        <!-- Sensor strip bottom -->
+        <line x1="6" y1="16.5" x2="18" y2="16.5" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+        <circle cx="8" cy="16.5" r="0.4" fill="currentColor" opacity="0.7"/>
+        <circle cx="12" cy="16.5" r="0.4" fill="currentColor" opacity="0.7"/>
+        <circle cx="16" cy="16.5" r="0.4" fill="currentColor" opacity="0.7"/>
+        
+        <!-- Extended arms/antennae -->
+        <line x1="3" y1="11.5" x2="0" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+        <circle cx="-0.5" cy="11.5" r="0.9" fill="currentColor" opacity="0.6"/>
+        <line x1="21" y1="11.5" x2="24" y2="11.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+        <circle cx="24.5" cy="11.5" r="0.9" fill="currentColor" opacity="0.6"/>
+      </g>
     </symbol>
     <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24c1.12.37 2.33.57 3.57.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.24.2 2.45.57 3.57a1 1 0 01-.24 1.01l-2.21 2.21z"/></symbol>
     <symbol id="i-envelope" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></symbol>
     <symbol id="i-map-marker" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></symbol>
     <symbol id="i-instagram" viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 6.2A4.8 4.8 0 1016.8 13 4.8 4.8 0 0012 8.2zM18.5 6.1a1.1 1.1 0 11-1.1-1.1 1.1 1.1 0 011.1 1.1z"/></symbol>
-    <symbol id="i-whatsapp-official" viewBox="0 0 24 24">
-      <!-- WhatsApp Official Logo (Font Awesome) -->
-      <path fill="#25D366" d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z M12.052 20.568c-1.625 0-3.222-.43-4.623-1.24l-.33-.2-3.43.9.92-3.36-.21-.33C3.5 14.69 3 13.15 3 11.5 3 6.8 6.83 3 11.5 3c1.88 0 3.66.75 4.98 2.08 1.32 1.32 2.05 3.08 2.05 4.96 0 4.7-3.83 8.52-8.48 8.52z"/>
-    </symbol>
+    
     <symbol id="i-instagram-official" viewBox="0 0 24 24">
       <path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/>
     </symbol>
@@ -116,13 +136,11 @@
           <a href="#cotizar" class="nav-link">Cotizar</a>
           <a href="#contacto" class="nav-link">Contacto</a>
           <a href="#cursos" class="nav-link" id="nav-cursos" style="display:none">Cursos</a>
-          <!-- WhatsApp in mobile menu -->
-          <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="nav-link nav-link-whatsapp" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp</a>
         </div>
 
         <div class="nav-actions">
             <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp nav-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp">
-            <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> WhatsApp
+            <img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true"> WhatsApp
           </a>
           <button id="btn-logout-top" class="btn btn-secondary" style="display:none; margin-left:1rem;">Cerrar sesión</button>
           <div class="theme-toggle" id="theme-toggle" role="button" aria-label="Cambiar tema">
@@ -147,7 +165,7 @@
           <div class="hero-buttons">
             <a href="#cotizar" class="btn btn-primary">Cotizar Ahora</a>
             <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20cotizar%20un%20servicio%20t%C3%A9cnico" class="btn btn-whatsapp" target="_blank" rel="noopener" aria-label="Abrir WhatsApp para cotizar" title="Abrir en WhatsApp">
-              <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> WhatsApp
+              <img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true"> WhatsApp
             </a>
             <a href="#servicios" class="btn btn-secondary">Ver Servicios</a>
             <button class="btn btn-outline" id="btn-open-auth">Acceder</button>
@@ -540,21 +558,62 @@
               <span>Debes proporcionar al menos un correo electrónico o teléfono</span>
             </p>
             <div class="form-group">
-              <label for="service">Tipo de servicio</label>
-              <select id="service" name="service" required="">
-                <option value="">Selecciona un servicio</option>
-                <option value="reparacion">Reparación</option>
-                <option value="upgrade">Upgrade</option>
-                <option value="ensamblaje">Ensamblaje</option>
+              <label for="service">Tipo de servicio (puedes seleccionar más de uno)</label>
+              <select id="service" name="service" multiple size="10" style="min-height:220px;">
+                <option value="reparacion">Reparación Básica</option>
+                <option value="reparacion-avanzada">Reparación Avanzada</option>
+                <option value="upgrade-ram">Upgrade de RAM</option>
+                <option value="upgrade-gpu">Upgrade de GPU</option>
+                <option value="upgrade-completo">Upgrade Completo</option>
+                <option value="ensamblaje-basico">Ensamblaje Básico</option>
+                <option value="ensamblaje-gaming">Ensamblaje Gaming</option>
                 <option value="mantenimiento">Mantenimiento</option>
-                <option value="otro">Otro</option>
+                <option value="limpieza-profunda">Limpieza Profunda</option>
+                <option value="configuracion-red">Configuración de Red</option>
+                <option value="instalacion-software">Instalación de Software</option>
+                <option value="recuperacion-datos">Recuperación de Datos</option>
+                <option value="asesoramiento">Asesoramiento Técnico</option>
+                <option value="backup-datos">Backup de Datos</option>
+                <option value="limpieza-malware">Limpieza de Malware</option>
+                <option value="reemplazo-pantalla">Reemplazo de Pantalla</option>
+                <option value="optimizacion-sistema">Optimización de Sistema</option>
+                <option value="instalacion-antivirus">Instalación de Antivirus</option>
               </select>
+            </div>
+            <div class="form-group">
+              <label for="urgency">Urgencia <span class="optional-field">(opcional)</span></label>
+              <select id="urgency" name="urgency">
+                <option value="normal">Normal (3-5 días)</option>
+                <option value="urgente">Urgente (24-48 horas)</option>
+                <option value="express">Express (mismo día)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="warranty">Garantía <span class="optional-field">(opcional)</span></label>
+              <select id="warranty" name="warranty">
+                <option value="30">30 días</option>
+                <option value="90">90 días</option>
+                <option value="180">6 meses</option>
+                <option value="365">1 año</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="preferred-date">Fecha preferida para cita <span class="optional-field">(opcional)</span></label>
+              <input type="date" id="preferred-date" name="preferred-date" min="">
             </div>
             <div class="form-group">
               <label for="message">Describe tu problema o necesidad</label>
               <textarea id="message" name="message" rows="4" required=""></textarea>
             </div>
-            <button type="submit" class="btn btn-primary btn-full">Enviar Cotización</button>
+
+            <div class="form-group" style="margin-top:0.35rem;">
+              <strong>Total estimado: </strong><span id="quote-form-total">$0</span>
+            </div>
+
+            <div class="quote-form-actions" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+              <button type="submit" class="btn btn-primary btn-full" style="flex:1; min-width:170px;">Enviar Cotización</button>
+              <button type="button" id="btn-download-quote-form-pdf" class="btn btn-secondary" style="flex:1; min-width:170px;">Descargar Factura PDF</button>
+            </div>
           </form>
         </div>
       </div>
@@ -748,39 +807,49 @@
         <div class="calculator-container">
           <div class="calculator-form">
             <div class="form-group">
-              <label for="service-type">Tipo de Servicio</label>
-              <select id="service-type" name="service-type">
-                <option value="">Selecciona un servicio</option>
-                <option value="reparacion-basica" data-price="500">Reparación Básica</option>
-                <option value="reparacion-avanzada" data-price="1200">Reparación Avanzada</option>
-                <option value="upgrade-ram" data-price="800">Upgrade de RAM</option>
-                <option value="upgrade-gpu" data-price="2000">Upgrade de GPU</option>
-                <option value="upgrade-completo" data-price="3500">Upgrade Completo</option>
-                <option value="ensamblaje-basico" data-price="1500">Ensamblaje Básico</option>
-                <option value="ensamblaje-gaming" data-price="2500">Ensamblaje Gaming</option>
-                <option value="mantenimiento" data-price="300">Mantenimiento</option>
-                <option value="asesoramiento" data-price="200">Asesoramiento Técnico</option>
-                <option value="soporte-remoto" data-price="400">Soporte Técnico Remoto</option>
-                <option value="instalacion-software" data-price="150">Instalación de Software</option>
-                <option value="recuperacion-datos" data-price="800">Recuperación de Datos</option>
-                <option value="configuracion-red" data-price="300">Configuración de Red</option>
-                <option value="limpieza-profunda" data-price="250">Limpieza Profunda</option>
-                <option value="diagnostico-completo" data-price="100">Diagnóstico Completo</option>
-                <option value="optimizacion-sistema" data-price="350">Optimización de Sistema</option>
-                <option value="backup-datos" data-price="200">Backup de Datos</option>
-              </select>
+              <label for="service-type">Tipo de Servicio (elige uno o más haciendo clic en las casillas)</label>
+              <div class="service-type-wrapper" id="service-wrapper">
+                <!-- reemplazamos el select múltiple por un conjunto de casillas para mejorar la experiencia
+                     el select queda oculto para compatibilidad, pero las casillas son la interfaz principal -->
+                <select id="service-type" name="service-type" multiple style="display:none" aria-hidden="true"></select>
+
+                <nav>
+                  <div id="service-list" class="service-list" role="listbox" aria-multiselectable="true">
+                  <label><input type="checkbox" value="reparacion-basica" data-price="500"> Reparación Básica</label>
+                  <label><input type="checkbox" value="reparacion-avanzada" data-price="1200"> Reparación Avanzada</label>
+                  <label><input type="checkbox" value="upgrade-ram" data-price="800"> Upgrade de RAM</label>
+                  <label><input type="checkbox" value="upgrade-gpu" data-price="2000"> Upgrade de GPU</label>
+                  <label><input type="checkbox" value="upgrade-completo" data-price="3500"> Upgrade Completo</label>
+                  <label><input type="checkbox" value="ensamblaje-basico" data-price="1500"> Ensamblaje Básico</label>
+                  <label><input type="checkbox" value="ensamblaje-gaming" data-price="2500"> Ensamblaje Gaming</label>
+                  <label><input type="checkbox" value="mantenimiento" data-price="300"> Mantenimiento</label>
+                  <label><input type="checkbox" value="asesoramiento" data-price="200"> Asesoramiento Técnico</label>
+                  <label><input type="checkbox" value="soporte-remoto" data-price="400"> Soporte Técnico Remoto</label>
+                  <label><input type="checkbox" value="instalacion-software" data-price="150"> Instalación de Software</label>
+                  <label><input type="checkbox" value="recuperacion-datos" data-price="800"> Recuperación de Datos</label>
+                  <label><input type="checkbox" value="configuracion-red" data-price="300"> Configuración de Red</label>
+                  <label><input type="checkbox" value="limpieza-profunda" data-price="250"> Limpieza Profunda</label>
+                  <label><input type="checkbox" value="diagnostico-completo" data-price="100"> Diagnóstico Completo</label>
+                  <label><input type="checkbox" value="optimizacion-sistema" data-price="350"> Optimización de Sistema</label>
+                  <label><input type="checkbox" value="backup-datos" data-price="200"> Backup de Datos</label>
+                  <label><input type="checkbox" value="limpieza-malware" data-price="550"> Limpieza de Malware</label>
+                  <label><input type="checkbox" value="reemplazo-pantalla" data-price="1800"> Reemplazo de Pantalla</label>
+                  <label><input type="checkbox" value="instalacion-antivirus" data-price="250"> Instalación de Antivirus</label>
+                </div>
+                </nav>
+              </div>
             </div>
             <div class="form-group">
-              <label for="urgency">Urgencia</label>
-              <select id="urgency" name="urgency">
+              <label for="calc-urgency">Urgencia <span class="urgency-badge" id="urgency-badge">1x</span></label>
+              <select id="calc-urgency" name="urgency">
                 <option value="normal" data-multiplier="1">Normal (3-5 días)</option>
                 <option value="urgent" data-multiplier="1.5">Urgente (1-2 días)</option>
                 <option value="express" data-multiplier="2">Express (mismo día)</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="warranty">Garantía</label>
-              <select id="warranty" name="warranty">
+              <label for="calc-warranty">Garantía <span class="warranty-badge" id="warranty-badge">+$0</span></label>
+              <select id="calc-warranty" name="warranty">
                 <option value="30" data-price="0">30 días (incluida)</option>
                 <option value="90" data-price="200">90 días (+$200)</option>
                 <option value="180" data-price="400">6 meses (+$400)</option>
@@ -804,15 +873,15 @@
               <h3>Estimación de Costo</h3>
               <div class="price-breakdown">
                 <div class="price-item">
-                  <span>Servicio base:</span>
+                  <span id="base-price-label">Servicio base:</span>
                   <span id="base-price">$0</span>
                 </div>
                 <div class="price-item">
-                  <span>Urgencia:</span>
+                  <span id="urgency-price-label">Urgencia:</span>
                   <span id="urgency-price">$0</span>
                 </div>
                 <div class="price-item">
-                  <span>Garantía:</span>
+                  <span id="warranty-price-label">Garantía:</span>
                   <span id="warranty-price">$0</span>
                 </div>
                 <div class="price-divider"></div>
@@ -822,10 +891,7 @@
                 </div>
               </div>
               <p class="price-note">* Precio estimado. El costo final puede variar según el diagnóstico.</p>
-              <button class="btn btn-primary" onclick="openWhatsAppQuote()">
-                <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg>
-                Cotizar por WhatsApp
-              </button>
+              <button id="btn-download-quote-pdf" class="btn btn-secondary" type="button">Descargar factura PDF</button>
             </div>
           </div>
         </div>
@@ -913,7 +979,7 @@
                   <span>Instagram</span>
                 </a>
                 <a href="https://wa.me/59892803418" target="_blank" rel="noopener">
-                  <svg class="icon icon-whatsapp" aria-hidden="true" width="20" height="20"><use href="#i-whatsapp-official"></use></svg>
+                  <img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true">
                   <span>WhatsApp</span>
                 </a>
               </div>
@@ -937,7 +1003,7 @@
     <!-- WhatsApp Float Button -->
     <div class="whatsapp-container">
       <a href="https://wa.me/59892803418?text=Hola!%20Me%20interesa%20conocer%20m%C3%A1s%20sobre%20sus%20servicios%20t%C3%A9cnicos" class="whatsapp-float" aria-label="Abrir WhatsApp - Cotizar" title="Abrir en WhatsApp" target="_blank" rel="noopener">
-        <svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg>
+        <img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true">
       </a>
       <div class="whatsapp-tooltip">
         <span>¡Cotiza tu servicio!</span>
@@ -947,18 +1013,18 @@
     <!-- AI Assistant Float Button -->
     <div class="ai-container">
       <button class="ai-float" id="ai-open" aria-label="Abrir Asistente IA" title="Asistente IA">
-        <svg class="icon icon-robot" aria-hidden="true" width="1.5em" height="1.5em"><use href="#i-robot"></use></svg>
+        <img src="public/images/icons/robot.png" alt="Asistente IA" class="icon-robot-img" aria-hidden="true" />
       </button>
     </div>
 
     <!-- Fallback visible assistant button (in case CDN or CSP blocks icons/js) -->
-    <button id="ai-fallback" class="ai-fallback" aria-label="Abrir Asistente IA" title="Asistente IA (fallback)" style="display:none"><svg class="icon icon-robot" aria-hidden="true" width="1em" height="1em"><use href="#i-robot"></use></svg> Asistente</button>
+    <button id="ai-fallback" class="ai-fallback" aria-label="Abrir Asistente Virtual" title="Asistente Virtual (fallback)" style="display:none"><img src="public/images/icons/robot.png" alt="Asistente Virtual" class="icon-robot-img" aria-hidden="true" /> Asistente Virtual</button>
 
     <!-- AI Modal -->
     <div id="ai-modal" class="ai-modal" aria-hidden="true" role="dialog" aria-label="Asistente IA">
       <div class="ai-modal-content">
         <button class="ai-close" id="ai-close" aria-label="Cerrar asistente">&times;</button>
-        <h3>Asistente IA</h3>
+        <h3>Asistente Virtual</h3>
         <div class="ai-chat" id="ai-chat" role="log" aria-live="polite"></div>
         <div class="ai-input">
           <input id="ai-prompt" placeholder="Describe tu problema o pregunta..." aria-label="Mensaje al asistente">
@@ -966,7 +1032,7 @@
         </div>
         <div class="ai-quick">Sugerencias: <button class="ai-quick-btn">Mi PC no enciende</button> <button class="ai-quick-btn">Es muy lenta</button></div>
           <div class="ai-footer">
-          <button class="btn btn-whatsapp" id="ai-whatsapp" aria-label="Enviar chat por WhatsApp"><svg class="icon icon-whatsapp" aria-hidden="true"><use href="#i-whatsapp-official"></use></svg> Enviar por WhatsApp</button>
+          <button class="btn btn-whatsapp" id="ai-whatsapp" aria-label="Enviar chat por WhatsApp"><img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true"> Enviar por WhatsApp</button>
           <button class="btn btn-outline" id="ai-copy" aria-label="Copiar conversación">Copiar</button>
         </div>
       </div>
@@ -1032,7 +1098,21 @@
   <!-- JavaScript -->
   <!-- Dev: Forzar actualización/desregistro del Service Worker (eliminado por petición) -->
   <script src="firebase-config.js"></script>
+  <!-- EmailJS SDK (required for enviarEmailCotizacion) -->
+  <!-- EmailJS SDK (CDN oficial) -->
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script src="emailjs-config.js"></script>
+  <!-- jsPDF (client-side PDF generation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous"></script>
+  <!-- Using EmailJS for all cotizaciones; remove webhook by default. -->
+  <script>
+    // Opcional: Configurar URL del webhook para recibir y reenviar PDFs
+    // Si no está disponible, solo se envía notificación por EmailJS
+    if (!window.WEBHOOK_URL) {
+      // En Netlify funciona como función serverless en este path relativo
+      window.WEBHOOK_URL = '/.netlify/functions/send-pdf';
+    }
+  </script>
   <script src="script.js"></script>
 
 
