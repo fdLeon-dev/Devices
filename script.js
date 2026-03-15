@@ -455,23 +455,11 @@ function downloadQuoteFormPdf() {
 function initializeFormHandling() {
   if (quoteForm) {
     quoteForm.addEventListener('submit', handleFormSubmit);
-    const downloadFormPdfBtn = document.getElementById('btn-download-quote-form-pdf');
-    if (downloadFormPdfBtn) {
-      downloadFormPdfBtn.addEventListener('click', downloadQuoteFormPdf);
-    }
 
     const serviceSelect = document.getElementById('service');
     if (serviceSelect) {
-      serviceSelect.addEventListener('mousedown', (event) => {
-        const option = event.target;
-        if (option && option.tagName === 'OPTION') {
-          event.preventDefault();
-          option.selected = !option.selected;
-          // Trigger change event manually so total updates
-          const changeEvent = new Event('change', { bubbles: true });
-          serviceSelect.dispatchEvent(changeEvent);
-        }
-      });
+      // Crear sistema de selección múltiple personalizado
+      createCustomMultiSelect(serviceSelect);
     }
 
     quoteForm.addEventListener('change', () => {
@@ -479,6 +467,9 @@ function initializeFormHandling() {
     });
 
     updateQuoteFormTotal();
+
+    // Inicializar validación en tiempo real
+    initializeRealTimeValidation();
 
     // Establecer fecha mínima para el campo de fecha preferida (mañana)
     const preferredDateInput = document.getElementById('preferred-date');
@@ -490,6 +481,9 @@ function initializeFormHandling() {
       const day = String(tomorrow.getDate()).padStart(2, '0');
       preferredDateInput.min = `${year}-${month}-${day}`;
     }
+
+    // Inicializar validación en tiempo real
+    initializeRealTimeValidation();
   }
 }
 
@@ -572,11 +566,11 @@ function initializeAIAssistant() {
       if (n.classList.contains('user')) return 'Cliente: ' + n.textContent;
       return 'Asistente: ' + n.textContent;
     });
-    // Include selected service if present (checkbox-based list)
-    const checked = document.querySelectorAll('#service-list input[type="checkbox"]:checked');
-    if (checked.length) {
-      const label = checked[0].closest('label')?.textContent.trim() || checked[0].value;
-      lines.unshift('Servicio sugerido: ' + label);
+    // Include selected services if present (select multiple)
+    const serviceSelect = document.getElementById('service-type');
+    if (serviceSelect && serviceSelect.selectedOptions.length > 0) {
+      const selectedServices = Array.from(serviceSelect.selectedOptions).map(opt => opt.textContent);
+      lines.unshift('Servicios seleccionados: ' + selectedServices.join(', '));
     }
     return lines.join('\n');
   }
@@ -734,15 +728,152 @@ function initializeSuggestService() {
 }
 
 function selectServiceByValue(value) {
-  // check the corresponding checkbox (if present) and make it visible/animated
-  const cb = document.querySelector(`#service-list input[type="checkbox"][value="${value}"]`);
-  if (!cb) return;
-  cb.checked = true;
-  cb.dispatchEvent(new Event('change'));
-  // highlight and scroll into view for user feedback
-  cb.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  cb.classList.add('highlighted');
-  setTimeout(() => cb.classList.remove('highlighted'), 900);
+  // seleccionar la opción correspondiente en el select múltiple
+  const select = document.getElementById('service-type');
+  if (!select) return;
+
+  const option = select.querySelector(`option[value="${value}"]`);
+  if (!option) return;
+
+  option.selected = true;
+  select.dispatchEvent(new Event('change'));
+
+  // hacer scroll para que sea visible
+  select.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
+  // animación de highlight (agregar clase CSS si existe)
+  option.classList.add('highlighted');
+  setTimeout(() => option.classList.remove('highlighted'), 900);
+}
+
+// Función para crear un sistema de selección múltiple personalizado
+function createCustomMultiSelect(selectElement) {
+  if (!selectElement || selectElement.dataset.customMultiSelect) return;
+
+  // Marcar como ya procesado
+  selectElement.dataset.customMultiSelect = 'true';
+
+  // Crear contenedor personalizado
+  const container = document.createElement('div');
+  container.className = 'custom-multi-select';
+  container.style.cssText = `
+    position: relative;
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    max-height: 220px;
+    overflow-y: auto;
+  `;
+
+  // Crear lista de opciones
+  const optionsList = document.createElement('div');
+  optionsList.className = 'custom-options-list';
+  optionsList.style.cssText = `
+    padding: 8px;
+  `;
+
+  // Convertir cada opción en un elemento clicable
+  Array.from(selectElement.options).forEach(option => {
+    const optionDiv = document.createElement('div');
+    optionDiv.className = `custom-option ${option.selected ? 'selected' : ''}`;
+    optionDiv.dataset.value = option.value;
+    optionDiv.textContent = option.textContent;
+    optionDiv.style.cssText = `
+      padding: 8px 12px;
+      margin: 2px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: ${option.selected ? '#e6d6ff' : '#f8f9fa'};
+      color: ${option.selected ? '#6a0dad' : '#333'};
+      font-weight: ${option.selected ? '600' : 'normal'};
+      border: 2px solid ${option.selected ? '#8a2be2' : 'transparent'};
+    `;
+
+    optionDiv.addEventListener('click', () => {
+      option.selected = !option.selected;
+      optionDiv.classList.toggle('selected');
+
+      // Actualizar estilos
+      if (option.selected) {
+        optionDiv.style.background = '#e6d6ff';
+        optionDiv.style.color = '#6a0dad';
+        optionDiv.style.fontWeight = '600';
+        optionDiv.style.borderColor = '#8a2be2';
+      } else {
+        optionDiv.style.background = '#f8f9fa';
+        optionDiv.style.color = '#333';
+        optionDiv.style.fontWeight = 'normal';
+        optionDiv.style.borderColor = 'transparent';
+      }
+
+      // Disparar evento change
+      const changeEvent = new Event('change', { bubbles: true });
+      selectElement.dispatchEvent(changeEvent);
+    });
+
+    optionDiv.addEventListener('mouseenter', () => {
+      if (!optionDiv.classList.contains('selected')) {
+        optionDiv.style.background = '#f0f0f0';
+      }
+    });
+
+    optionDiv.addEventListener('mouseleave', () => {
+      if (!optionDiv.classList.contains('selected')) {
+        optionDiv.style.background = '#f8f9fa';
+      }
+    });
+
+    optionsList.appendChild(optionDiv);
+  });
+
+  container.appendChild(optionsList);
+
+  // Reemplazar el select con el contenedor personalizado
+  selectElement.parentNode.insertBefore(container, selectElement);
+  selectElement.style.display = 'none';
+
+  // Mantener referencia para actualizaciones futuras
+  selectElement.customContainer = container;
+}
+
+// Función para actualizar la visualización de opciones seleccionadas
+function updateSelectedOptionsVisual(selectElement) {
+  if (!selectElement) return;
+
+  // Si tiene contenedor personalizado, actualizarlo
+  if (selectElement.customContainer) {
+    const customOptions = selectElement.customContainer.querySelectorAll('.custom-option');
+    Array.from(selectElement.options).forEach((option, index) => {
+      const customOption = customOptions[index];
+      if (customOption) {
+        if (option.selected) {
+          customOption.classList.add('selected');
+          customOption.style.background = '#e6d6ff';
+          customOption.style.color = '#6a0dad';
+          customOption.style.fontWeight = '600';
+          customOption.style.borderColor = '#8a2be2';
+        } else {
+          customOption.classList.remove('selected');
+          customOption.style.background = '#f8f9fa';
+          customOption.style.color = '#333';
+          customOption.style.fontWeight = 'normal';
+          customOption.style.borderColor = 'transparent';
+        }
+      }
+    });
+  } else {
+    // Fallback para el sistema original
+    const options = selectElement.querySelectorAll('option');
+    options.forEach(option => {
+      if (option.selected) {
+        option.classList.add('selected-option');
+      } else {
+        option.classList.remove('selected-option');
+      }
+    });
+  }
 }
 
 // Función para sugerir una fecha de cita (próximo día hábil)
@@ -781,8 +912,21 @@ async function handleFormSubmit(e) {
   };
 
   // Validación básica - campos obligatorios
-  if (!data.nombre || !data.servicio || !data.servicio.length || !data.mensaje) {
-    showNotification('Por favor completa todos los campos obligatorios (incluye al menos un servicio seleccionado)', 'error');
+  if (!data.nombre || !data.nombre.trim()) {
+    showNotification('Por favor ingresa tu nombre completo', 'error');
+    document.getElementById('name').focus();
+    return;
+  }
+
+  if (!data.servicio || !data.servicio.length) {
+    showNotification('Por favor selecciona al menos un servicio', 'error');
+    document.getElementById('service').focus();
+    return;
+  }
+
+  if (!data.mensaje || !data.mensaje.trim()) {
+    showNotification('Por favor describe tu problema o necesidad', 'error');
+    document.getElementById('message').focus();
     return;
   }
 
@@ -791,8 +935,22 @@ async function handleFormSubmit(e) {
   const tieneTelefono = data.telefono && data.telefono.trim() !== '';
 
   if (!tieneEmail && !tieneTelefono) {
-    showNotification('Por favor proporciona al menos un correo electrónico o teléfono', 'error');
+    showNotification('Por favor proporciona al menos un correo electrónico o teléfono para contactarte', 'error');
     highlightContactFields();
+    return;
+  }
+
+  // Validación de formato de email si se proporcionó
+  if (tieneEmail && !isValidEmail(data.email.trim())) {
+    showNotification('Por favor ingresa un correo electrónico válido', 'error');
+    document.getElementById('email').focus();
+    return;
+  }
+
+  // Validación de formato de teléfono si se proporcionó
+  if (tieneTelefono && !isValidPhone(data.telefono.trim())) {
+    showNotification('Por favor ingresa un número de teléfono válido (ej: 099 XXX XXX)', 'error');
+    document.getElementById('phone').focus();
     return;
   }
 
@@ -815,7 +973,8 @@ async function handleFormSubmit(e) {
   // Show loading state
   const submitBtn = quoteForm.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
-  submitBtn.innerHTML = '<span class="loading"></span> Enviando...';
+  submitBtn.innerHTML = '<span class="loading"></span> Procesando cotización...';
+  submitBtn.disabled = true;
   submitBtn.disabled = true;
 
   try {
@@ -842,6 +1001,18 @@ async function handleFormSubmit(e) {
       let pdfDataUrl = null;
       try {
         pdfDataUrl = await generarPdfCotizacion(datosFactura);
+
+        // Descargar PDF automáticamente
+        if (pdfDataUrl) {
+          const link = document.createElement('a');
+          link.href = pdfDataUrl;
+          link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          console.log('✅ PDF descargado automáticamente');
+        }
+
         // Enviar PDF por webhook después de generado
         if (pdfDataUrl) {
           console.log('📎 Enviando PDF generado por webhook...');
@@ -859,7 +1030,7 @@ async function handleFormSubmit(e) {
       }
 
       // Show success message
-      showNotification('¡Cotización enviada! Te contactaremos pronto.', 'success');
+      showNotification('¡Cotización enviada y PDF descargado! Te contactaremos pronto.', 'success');
 
       // Reset form
       quoteForm.reset();
@@ -895,14 +1066,21 @@ async function handleFormSubmit(e) {
 
   } catch (error) {
     console.error('Error al enviar cotización:', error);
-    // mostrar información adicional si la función no existe
-    if (typeof enviarEmailCotizacion === 'undefined') {
-      console.error('! enviarEmailCotizacion no definida al momento del submit');
-    }
-    showNotification('Hubo un error. Te redirigimos a WhatsApp.', 'error');
 
-    // Fallback: enviar por WhatsApp siempre
-    // Intent: enviar por EmailJS exclusivamente (fallback a WhatsApp si falla)
+    let errorMessage = 'Hubo un error al procesar tu cotización.';
+
+    // Mensajes de error más específicos
+    if (error.message && error.message.includes('EmailJS')) {
+      errorMessage = 'Error de configuración del servicio de email. Te redirigimos a WhatsApp.';
+    } else if (error.message && error.message.includes('network')) {
+      errorMessage = 'Error de conexión. Verifica tu conexión a internet.';
+    } else if (error.message && error.message.includes('PDF')) {
+      errorMessage = 'Error al generar el PDF, pero tu cotización fue enviada.';
+    }
+
+    showNotification(errorMessage, 'error');
+
+    // Fallback: enviar por WhatsApp siempre en caso de error
     setTimeout(() => {
       sendToWhatsApp(data);
     }, 1000);
@@ -948,6 +1126,107 @@ function highlightContactFields() {
 
   // Enfocar el primer campo vacío
   if (emailInput) emailInput.focus();
+}
+
+// Validación de email
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Validación de teléfono uruguayo
+function isValidPhone(phone) {
+  // Limpiar el teléfono de caracteres no numéricos
+  const cleanPhone = phone.replace(/\D/g, '');
+
+  // Verificar formatos comunes de Uruguay
+  // 099 XXX XXX (9 dígitos)
+  // +598 99 XXX XXX (12 dígitos con código país)
+  // 59899XXXXXX (12 dígitos)
+  return cleanPhone.length === 9 || cleanPhone.length === 12;
+}
+
+// Validación en tiempo real del formulario
+function initializeRealTimeValidation() {
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const phoneInput = document.getElementById('phone');
+  const messageInput = document.getElementById('message');
+
+  // Validación de nombre
+  if (nameInput) {
+    nameInput.addEventListener('blur', function() {
+      if (this.value.trim() && this.value.trim().length < 2) {
+        showFieldError(this, 'El nombre debe tener al menos 2 caracteres');
+      } else {
+        clearFieldError(this);
+      }
+    });
+  }
+
+  // Validación de email
+  if (emailInput) {
+    emailInput.addEventListener('blur', function() {
+      if (this.value.trim() && !isValidEmail(this.value.trim())) {
+        showFieldError(this, 'Ingresa un correo electrónico válido');
+      } else {
+        clearFieldError(this);
+      }
+    });
+  }
+
+  // Validación de teléfono
+  if (phoneInput) {
+    phoneInput.addEventListener('blur', function() {
+      if (this.value.trim() && !isValidPhone(this.value.trim())) {
+        showFieldError(this, 'Ingresa un teléfono válido (ej: 099 XXX XXX)');
+      } else {
+        clearFieldError(this);
+      }
+    });
+  }
+
+  // Validación de mensaje
+  if (messageInput) {
+    messageInput.addEventListener('blur', function() {
+      if (this.value.trim() && this.value.trim().length < 10) {
+        showFieldError(this, 'Describe brevemente tu problema (mínimo 10 caracteres)');
+      } else {
+        clearFieldError(this);
+      }
+    });
+  }
+}
+
+// Mostrar error en campo específico
+function showFieldError(input, message) {
+  clearFieldError(input); // Limpiar errores previos
+
+  input.style.borderColor = '#e74c3c';
+  input.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.1)';
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'field-error';
+  errorDiv.textContent = message;
+  errorDiv.style.cssText = `
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+  `;
+
+  input.parentNode.appendChild(errorDiv);
+}
+
+// Limpiar error de campo
+function clearFieldError(input) {
+  input.style.borderColor = '';
+  input.style.boxShadow = '';
+
+  const errorDiv = input.parentNode.querySelector('.field-error');
+  if (errorDiv) {
+    errorDiv.remove();
+  }
 }
 
 // Mobile Menu
@@ -2129,7 +2408,7 @@ function initializeTestimonials() {
 
 // Calculator Functionality
 function initializeCalculator() {
-  const serviceListContainer = document.getElementById('service-list');
+  const serviceSelect = document.getElementById('service-type');
   const urgency = document.getElementById('calc-urgency');
   const warranty = document.getElementById('calc-warranty');
 
@@ -2146,90 +2425,59 @@ function initializeCalculator() {
   const urgencyBadgeEl = document.getElementById('urgency-badge');
   const warrantyBadgeEl = document.getElementById('warranty-badge');
 
-
-
-  if (!serviceListContainer || !urgency || !warranty || !basePriceEl || !urgencyPriceEl || !warrantyPriceEl || !totalPriceEl ||
+  if (!serviceSelect || !urgency || !warranty || !basePriceEl || !urgencyPriceEl || !warrantyPriceEl || !totalPriceEl ||
       !basePriceLabelEl || !urgencyPriceLabelEl || !warrantyPriceLabelEl) {
     console.warn('Calculator elements not found, skipping initialization');
     return;
   }
 
   function getSelectedServices() {
-    const checkboxes = Array.from(serviceListContainer.querySelectorAll('input[type="checkbox"]'));
-    return checkboxes.filter(cb => cb.checked).map(cb => ({
-      value: cb.value,
-      label: cb.closest('label')?.textContent.trim() || cb.value,
-      price: parseFloat(cb.dataset.price) || 0
-    }));
+    return Array.from(serviceSelect.selectedOptions).map(option => option.value);
   }
 
   function calculatePrice() {
-    const selected = getSelectedServices();
-    const servicePrice = selected.reduce((sum, item) => sum + item.price, 0);
+    const selectedServices = getSelectedServices();
+    const urgencyValue = urgency.value;
+    const warrantyValue = warranty.value;
 
-    const urgencyMultiplier = parseFloat(urgency.selectedOptions[0]?.dataset.multiplier) || 1;
-    const warrantyPrice = parseFloat(warranty.selectedOptions[0]?.dataset.price) || 0;
-
-    const urgencyCost = servicePrice * (urgencyMultiplier - 1);
-    const total = servicePrice + urgencyCost + warrantyPrice;
+    // Usar la función centralizada calcularPrecios
+    const prices = calcularPrecios(selectedServices, urgencyValue, warrantyValue);
 
     // Update labels with descriptive information
-    basePriceLabelEl.textContent = `Servicio base (${selected.length} servicio${selected.length !== 1 ? 's' : ''}):`;
+    basePriceLabelEl.textContent = `Servicio base (${selectedServices.length} servicio${selectedServices.length !== 1 ? 's' : ''}):`;
 
     const urgencyOption = urgency.selectedOptions[0];
-    if (urgencyOption && urgencyMultiplier > 1) {
-      const percentage = Math.round((urgencyMultiplier - 1) * 100);
+    if (urgencyOption && prices.urgencyPrice > 0) {
+      const percentage = Math.round((prices.urgencyPrice / prices.basePrice) * 100);
       urgencyPriceLabelEl.textContent = `Urgencia (${percentage}% adicional):`;
     } else {
       urgencyPriceLabelEl.textContent = 'Urgencia:';
     }
 
     const warrantyOption = warranty.selectedOptions[0];
-    if (warrantyOption && warrantyPrice > 0) {
-      warrantyPriceLabelEl.textContent = `Garantía (+$${warrantyPrice.toLocaleString()}):`;
+    if (warrantyOption && prices.warrantyPrice > 0) {
+      warrantyPriceLabelEl.textContent = `Garantía (+$${prices.warrantyPrice.toLocaleString()}):`;
     } else {
       warrantyPriceLabelEl.textContent = 'Garantía:';
     }
 
     console.log('Calculator update:', {
-      selectedServices: selected.length,
-      servicePrice,
-      urgencyMultiplier,
-      urgencyCost,
-      warrantyPrice,
-      total
+      selectedServices: selectedServices.length,
+      basePrice: prices.basePrice,
+      urgencyPrice: prices.urgencyPrice,
+      warrantyPrice: prices.warrantyPrice,
+      totalPrice: prices.totalPrice
     });
 
-    basePriceEl.textContent = `$${servicePrice.toLocaleString()}`;
-    urgencyPriceEl.textContent = `$${urgencyCost.toLocaleString()}`;
-    warrantyPriceEl.textContent = `$${warrantyPrice.toLocaleString()}`;
-    totalPriceEl.textContent = `$${total.toLocaleString()}`;
+    basePriceEl.textContent = `$${prices.basePrice.toLocaleString()}`;
+    urgencyPriceEl.textContent = `$${prices.urgencyPrice.toLocaleString()}`;
+    warrantyPriceEl.textContent = `$${prices.warrantyPrice.toLocaleString()}`;
+    totalPriceEl.textContent = `$${prices.totalPrice.toLocaleString()}`;
   }
 
-  if (serviceListContainer) {
-    // monitor checkbox changes
-    serviceListContainer.addEventListener('change', (evt) => {
-      if (evt.target && evt.target.type === 'checkbox') {
-        const lab = evt.target.closest('label');
-        if (lab) lab.classList.toggle('checked', evt.target.checked);
-      }
-      calculatePrice();
-    });
-    // keyboard navigation: arrow keys move between checkboxes
-    serviceListContainer.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        const cbs = Array.from(serviceListContainer.querySelectorAll('input[type="checkbox"]'));
-        const idx = cbs.indexOf(document.activeElement);
-        if (idx !== -1) {
-          let next = idx + (e.key === 'ArrowDown' ? 1 : -1);
-          if (next < 0) next = cbs.length - 1;
-          if (next >= cbs.length) next = 0;
-          cbs[next].focus();
-          e.preventDefault();
-        }
-      }
-    });
-  }
+  // monitor select changes
+  serviceSelect.addEventListener('change', calculatePrice);
+
   if (urgency) {
     urgency.addEventListener('change', () => {
       calculatePrice();
@@ -2261,11 +2509,15 @@ function initializeCalculator() {
     downloadPdfBtn.addEventListener('click', downloadQuotePdf);
   }
 
-  // initialize badges
+  // Agregar funcionalidad de selección múltiple sin teclas modificadoras
+  if (serviceSelect) {
+    // Crear sistema de selección múltiple personalizado
+    createCustomMultiSelect(serviceSelect);
+  }
+
+  // initialize badges and calculate initial price
   updateUrgencyBadge();
   updateWarrantyBadge();
-
-  // Calculate initial price on load
   calculatePrice();
 }
 
@@ -2333,32 +2585,59 @@ function animateCounter(element) {
 }
 
 function getCalculatorQuoteData() {
-  const serviceListContainer = document.getElementById('service-list');
+  const serviceSelect = document.getElementById('service-type');
   const urgency = document.getElementById('calc-urgency');
   const warranty = document.getElementById('calc-warranty');
 
-  const checkedBoxes = Array.from(serviceListContainer?.querySelectorAll('input[type="checkbox"]:checked') || []);
-  const servicios = checkedBoxes.map(cb => ({
-    name: cb.closest('label')?.textContent.trim() || cb.value,
-    price: parseFloat(cb.dataset.price) || 0
+  // Obtener servicios seleccionados del select múltiple
+  const selectedServices = Array.from(serviceSelect?.selectedOptions || []).map(option => option.value);
+
+  // Calcular precios usando la función centralizada
+  const urgencyValue = urgency?.value || 'normal';
+  const warrantyValue = warranty?.value || '30';
+  const prices = calcularPrecios(selectedServices, urgencyValue, warrantyValue);
+
+  // Crear array de servicios con nombres legibles
+  const serviceNames = {
+    'reparacion-basica': 'Reparación Básica',
+    'reparacion-avanzada': 'Reparación Avanzada',
+    'upgrade-ram': 'Upgrade de RAM',
+    'upgrade-gpu': 'Upgrade de GPU',
+    'upgrade-completo': 'Upgrade Completo',
+    'ensamblaje-basico': 'Ensamblaje Básico',
+    'ensamblaje-gaming': 'Ensamblaje Gaming',
+    'mantenimiento': 'Mantenimiento',
+    'asesoramiento': 'Asesoramiento Técnico',
+    'soporte-remoto': 'Soporte Técnico Remoto',
+    'instalacion-software': 'Instalación de Software',
+    'recuperacion-datos': 'Recuperación de Datos',
+    'configuracion-red': 'Configuración de Red',
+    'limpieza-profunda': 'Limpieza Profunda',
+    'diagnostico-completo': 'Diagnóstico Completo',
+    'optimizacion-sistema': 'Optimización de Sistema',
+    'backup-datos': 'Backup de Datos',
+    'limpieza-malware': 'Limpieza de Malware',
+    'reemplazo-pantalla': 'Reemplazo de Pantalla',
+    'instalacion-antivirus': 'Instalación de Antivirus'
+  };
+
+  const servicios = selectedServices.map(service => ({
+    name: serviceNames[service] || service,
+    price: calcularPrecios(service, urgencyValue, warrantyValue).basePrice
   }));
 
-  const basePrice = servicios.reduce((sum, s) => sum + s.price, 0);
   const urgencyMultiplier = parseFloat(urgency.selectedOptions[0]?.dataset.multiplier) || 1;
-  const warrantyPrice = parseFloat(warranty.selectedOptions[0]?.dataset.price) || 0;
-  const urgencyCost = basePrice * (urgencyMultiplier - 1);
-  const totalPrice = basePrice + urgencyCost + warrantyPrice;
 
   return {
     servicioTexto: servicios.map(s => s.name).join(', ') || 'Servicio',
     servicios,
-    urgencyText: urgency.selectedOptions[0]?.textContent || 'Normal',
+    urgencyText: urgency.selectedOptions[0]?.textContent || 'Normal (3-5 días)',
     warrantyText: warranty.selectedOptions[0]?.textContent || '30 días',
     urgencyMultiplier,
-    basePrice,
-    urgencyPrice: urgencyCost,
-    warrantyPrice,
-    totalPrice,
+    basePrice: prices.basePrice,
+    urgencyPrice: prices.urgencyPrice,
+    warrantyPrice: prices.warrantyPrice,
+    totalPrice: prices.totalPrice,
     descripcion: document.getElementById('problem-description')?.value || ''
   };
 }

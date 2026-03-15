@@ -63,10 +63,8 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
   }
 
   try {
-    // Detectar si viene de calculadora (múltiples servicios), el flag explícito o formulario (un servicio)
-    const isFromCalculator = datosFormulario.fromCalculator === true ||
-                            (datosFormulario.servicio && datosFormulario.servicio.includes(',')) ||
-                            (datosFormulario.selectedServices && datosFormulario.selectedServices > 1);
+    // Detectar si viene de calculadora usando el flag explícito (formulario de cotización NO debe activar este modo)
+    const isFromCalculator = datosFormulario.fromCalculator === true;
 
     // Detectar si es email para el cliente o para el negocio
     const isClientEmail = (() => {
@@ -82,8 +80,14 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
     console.log('🔍 DEBUG EMAIL:');
     console.log('• Email recibido:', datosFormulario.email);
     console.log('• isClientEmail:', isClientEmail);
-    console.log('• Servicio:', datosFormulario.servicio);
+    console.log('• Servicio:', Array.isArray(datosFormulario.servicio) ? datosFormulario.servicio.join(', ') : datosFormulario.servicio);
     console.log('• Viene de calculadora:', isFromCalculator);
+
+    // Normalizar servicios (puede ser array o string)
+    const serviciosArray = Array.isArray(datosFormulario.servicio) ? datosFormulario.servicio : (datosFormulario.servicio ? datosFormulario.servicio.split(',').filter(s => s.trim()) : []);
+    const serviciosString = serviciosArray.join(', ');
+
+    const folio = 'COT-' + Math.floor(Math.random() * 900000 + 100000);
 
     const templateParams = {
       // to_email se establece por payload específico (negocio vs cliente)
@@ -94,10 +98,10 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
       email: datosFormulario.email,             // alias simplificado
       userPhone: datosFormulario.telefono,
       phone: datosFormulario.telefono,           // alias simplificado
-      selectedServices: datosFormulario.selectedServices || (datosFormulario.servicio ? datosFormulario.servicio.split(',').length : 1),
-      servicesList: datosFormulario.servicio,
-      service_type: datosFormulario.servicio,          // alias para plantilla
-      service: datosFormulario.servicio,               // otro posible nombre
+      selectedServices: datosFormulario.selectedServices || serviciosArray.length,
+      servicesList: serviciosString,
+      service_type: serviciosString,          // alias para plantilla
+      service: serviciosString,               // otro posible nombre
       urgencyText: datosFormulario.urgency ? getUrgencyText(datosFormulario.urgency) : 'Normal (3-5 días)',
       urgencyMultiplier: datosFormulario.urgencyMultiplier || '1x',
       warrantyText: datosFormulario.warranty ? getWarrantyText(datosFormulario.warranty) : '30 días',
@@ -108,6 +112,7 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
       problemDescription: datosFormulario.mensaje,
       message: datosFormulario.mensaje,          // alias para cuerpo de mensaje
       currentDate: new Date().toLocaleDateString('es-ES'),
+      folio,
       preferred_date: datosFormulario.fechaPreferida,
       reply_to: isClientEmail ? 'devices.f02@gmail.com' : datosFormulario.email
     };
@@ -119,10 +124,8 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
     console.log(`📧 Enviando ${isFromCalculator ? 'calculadora' : 'formulario'} al negocio`);
     console.log('Template usado:', templateId);
 
-    // generar lista de destinatarios para el negocio
-    const businessRecipients = isClientEmail
-      ? `devices.f02@gmail.com,${datosFormulario.email}`
-      : 'devices.f02@gmail.com';
+    // generar lista de destinatarios para el negocio (solo negocio, no incluir cliente aquí)
+    const businessRecipients = 'devices.f02@gmail.com';
 
     const businessPayload = {
       service_id: EMAILJS_CONFIG.serviceId,
@@ -151,10 +154,39 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
 
     const businessJson = await businessRes.json().catch(() => ({}));
     console.log('✅ Email enviado al negocio exitosamente');
-    if (isClientEmail) {
-      console.log('✅ Cliente incluido en la lista de destinatarios');
-    }
 
+    // Enviar email separado al cliente con la factura si hay email válido
+    if (isClientEmail) {
+      console.log('📧 Enviando email con factura al cliente:', datosFormulario.email);
+      
+      const clientPayload = {
+        service_id: EMAILJS_CONFIG.serviceId,
+        template_id: clientTemplateId,
+        user_id: EMAILJS_CONFIG.publicKey,
+        template_params: {
+          ...templateParams,
+          to_email: datosFormulario.email,
+          reply_to: 'devices.f02@gmail.com'
+        }
+      };
+
+      try {
+        const clientRes = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clientPayload)
+        });
+
+        if (clientRes.ok) {
+          console.log('✅ Email con factura enviado al cliente exitosamente');
+        } else {
+          const clientText = await clientRes.text();
+          console.warn('⚠️ No se pudo enviar email al cliente:', { status: clientRes.status, text: clientText });
+        }
+      } catch (clientError) {
+        console.warn('⚠️ Error al enviar email al cliente:', clientError);
+      }
+    }
 
     // Si el correo se envió y tenemos PDF, intentar enviarlo por webhook
     if (pdfDataUrl) {

@@ -560,7 +560,7 @@
             <div class="form-group">
               <label for="service">Tipo de servicio (puedes seleccionar más de uno)</label>
               <select id="service" name="service" multiple size="10" style="min-height:220px;">
-                <option value="reparacion">Reparación Básica</option>
+                <option value="reparacion-basica">Reparación Básica</option>
                 <option value="reparacion-avanzada">Reparación Avanzada</option>
                 <option value="upgrade-ram">Upgrade de RAM</option>
                 <option value="upgrade-gpu">Upgrade de GPU</option>
@@ -568,15 +568,17 @@
                 <option value="ensamblaje-basico">Ensamblaje Básico</option>
                 <option value="ensamblaje-gaming">Ensamblaje Gaming</option>
                 <option value="mantenimiento">Mantenimiento</option>
-                <option value="limpieza-profunda">Limpieza Profunda</option>
-                <option value="configuracion-red">Configuración de Red</option>
+                <option value="asesoramiento">Asesoramiento Técnico</option>
+                <option value="soporte-remoto">Soporte Técnico Remoto</option>
                 <option value="instalacion-software">Instalación de Software</option>
                 <option value="recuperacion-datos">Recuperación de Datos</option>
-                <option value="asesoramiento">Asesoramiento Técnico</option>
+                <option value="configuracion-red">Configuración de Red</option>
+                <option value="limpieza-profunda">Limpieza Profunda</option>
+                <option value="diagnostico-completo">Diagnóstico Completo</option>
+                <option value="optimizacion-sistema">Optimización de Sistema</option>
                 <option value="backup-datos">Backup de Datos</option>
                 <option value="limpieza-malware">Limpieza de Malware</option>
                 <option value="reemplazo-pantalla">Reemplazo de Pantalla</option>
-                <option value="optimizacion-sistema">Optimización de Sistema</option>
                 <option value="instalacion-antivirus">Instalación de Antivirus</option>
               </select>
             </div>
@@ -611,8 +613,7 @@
             </div>
 
             <div class="quote-form-actions" style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-              <button type="submit" class="btn btn-primary btn-full" style="flex:1; min-width:170px;">Enviar Cotización</button>
-              <button type="button" id="btn-download-quote-form-pdf" class="btn btn-secondary" style="flex:1; min-width:170px;">Descargar Factura PDF</button>
+              <button type="submit" class="btn btn-primary btn-full" style="flex:1; min-width:170px;">Enviar Cotización y Descargar PDF</button>
             </div>
           </form>
         </div>
@@ -807,37 +808,29 @@
         <div class="calculator-container">
           <div class="calculator-form">
             <div class="form-group">
-              <label for="service-type">Tipo de Servicio (elige uno o más haciendo clic en las casillas)</label>
-              <div class="service-type-wrapper" id="service-wrapper">
-                <!-- reemplazamos el select múltiple por un conjunto de casillas para mejorar la experiencia
-                     el select queda oculto para compatibilidad, pero las casillas son la interfaz principal -->
-                <select id="service-type" name="service-type" multiple style="display:none" aria-hidden="true"></select>
-
-                <nav>
-                  <div id="service-list" class="service-list" role="listbox" aria-multiselectable="true">
-                  <label><input type="checkbox" value="reparacion-basica" data-price="500"> Reparación Básica</label>
-                  <label><input type="checkbox" value="reparacion-avanzada" data-price="1200"> Reparación Avanzada</label>
-                  <label><input type="checkbox" value="upgrade-ram" data-price="800"> Upgrade de RAM</label>
-                  <label><input type="checkbox" value="upgrade-gpu" data-price="2000"> Upgrade de GPU</label>
-                  <label><input type="checkbox" value="upgrade-completo" data-price="3500"> Upgrade Completo</label>
-                  <label><input type="checkbox" value="ensamblaje-basico" data-price="1500"> Ensamblaje Básico</label>
-                  <label><input type="checkbox" value="ensamblaje-gaming" data-price="2500"> Ensamblaje Gaming</label>
-                  <label><input type="checkbox" value="mantenimiento" data-price="300"> Mantenimiento</label>
-                  <label><input type="checkbox" value="asesoramiento" data-price="200"> Asesoramiento Técnico</label>
-                  <label><input type="checkbox" value="soporte-remoto" data-price="400"> Soporte Técnico Remoto</label>
-                  <label><input type="checkbox" value="instalacion-software" data-price="150"> Instalación de Software</label>
-                  <label><input type="checkbox" value="recuperacion-datos" data-price="800"> Recuperación de Datos</label>
-                  <label><input type="checkbox" value="configuracion-red" data-price="300"> Configuración de Red</label>
-                  <label><input type="checkbox" value="limpieza-profunda" data-price="250"> Limpieza Profunda</label>
-                  <label><input type="checkbox" value="diagnostico-completo" data-price="100"> Diagnóstico Completo</label>
-                  <label><input type="checkbox" value="optimizacion-sistema" data-price="350"> Optimización de Sistema</label>
-                  <label><input type="checkbox" value="backup-datos" data-price="200"> Backup de Datos</label>
-                  <label><input type="checkbox" value="limpieza-malware" data-price="550"> Limpieza de Malware</label>
-                  <label><input type="checkbox" value="reemplazo-pantalla" data-price="1800"> Reemplazo de Pantalla</label>
-                  <label><input type="checkbox" value="instalacion-antivirus" data-price="250"> Instalación de Antivirus</label>
-                </div>
-                </nav>
-              </div>
+              <label for="service-type">Tipo de Servicio (puedes seleccionar más de uno)</label>
+              <select id="service-type" name="service-type" multiple size="10" style="min-height:220px;">
+                <option value="reparacion-basica">Reparación Básica</option>
+                <option value="reparacion-avanzada">Reparación Avanzada</option>
+                <option value="upgrade-ram">Upgrade de RAM</option>
+                <option value="upgrade-gpu">Upgrade de GPU</option>
+                <option value="upgrade-completo">Upgrade Completo</option>
+                <option value="ensamblaje-basico">Ensamblaje Básico</option>
+                <option value="ensamblaje-gaming">Ensamblaje Gaming</option>
+                <option value="mantenimiento">Mantenimiento</option>
+                <option value="asesoramiento">Asesoramiento Técnico</option>
+                <option value="soporte-remoto">Soporte Técnico Remoto</option>
+                <option value="instalacion-software">Instalación de Software</option>
+                <option value="recuperacion-datos">Recuperación de Datos</option>
+                <option value="configuracion-red">Configuración de Red</option>
+                <option value="limpieza-profunda">Limpieza Profunda</option>
+                <option value="diagnostico-completo">Diagnóstico Completo</option>
+                <option value="optimizacion-sistema">Optimización de Sistema</option>
+                <option value="backup-datos">Backup de Datos</option>
+                <option value="limpieza-malware">Limpieza de Malware</option>
+                <option value="reemplazo-pantalla">Reemplazo de Pantalla</option>
+                <option value="instalacion-antivirus">Instalación de Antivirus</option>
+              </select>
             </div>
             <div class="form-group">
               <label for="calc-urgency">Urgencia <span class="urgency-badge" id="urgency-badge">1x</span></label>

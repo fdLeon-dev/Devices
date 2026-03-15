@@ -2370,126 +2370,84 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 /* service toggle wrapper */
 .service-type-wrapper {
   position: relative;
-  width: 100%;             /* ensure full width inside form */
+  width: 100%;
   display: flex;
   align-items: center;
-  min-width: 0;            /* allow contents to shrink gracefully */
+  min-width: 0;
 }
 
-/* scrollbar styling */
-.service-list::-webkit-scrollbar {
-  width: 6px;
-}
-.service-list::-webkit-scrollbar-track {
-  background: var(--background);
-}
-.service-list::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 3px;
-}
-
-.service-type-wrapper nav {
-  max-height: 240px; /* show roughly 3 items tall */
-  overflow-y: auto;
-  padding-right: 4px; /* space for scrollbar */
-}
-/* scrollbar within nav */
-.service-type-wrapper nav::-webkit-scrollbar {
-  width: 6px;
-}
-.service-type-wrapper nav::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 3px;
-}
 .service-type-wrapper select {
-  display: none !important;
-}
-
-
-
-/* new checkbox list styling: now part of the normal layout, always visible */
-.service-list {
-  /* visible block with scroll bar and smooth collapse animation */
-  position: relative;
   width: 100%;
-  margin-top: 4px;
-  background: var(--background);
+  padding: 8px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 8px;
-  box-sizing: border-box;
-  max-height: none; /* remove max height for grid */
-  overflow-y: visible; /* no scroll needed */
-  transition: max-height 0.4s ease, opacity 0.4s ease;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.service-list label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  padding: 12px;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: var(--card-background, #f8f9fa);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  min-height: 50px;
-  white-space: normal; /* allow wrapping */
-  text-align: left;
-}
-
-.service-list label:hover {
-  border-color: var(--primary-color);
-  background: var(--primary-light);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.service-list label.checked {
-  border-color: var(--primary-color);
-  background: var(--primary-light);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-.service-list input[type="checkbox"] {
-  margin-left: auto;
-  margin-right: 0;
-  transform: scale(1.2);
-}
-
-/* additional custom checkbox states */
-.service-list input[type="checkbox"]:checked {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.service-list input[type="checkbox"]:checked::after {
-  content: '\2713';
-  color: white;
+  background: var(--background);
+  color: var(--text-color);
   font-size: 14px;
-  position: absolute;
-  top: -1px;
-  left: 2px;
+  min-height: 220px;
+  box-sizing: border-box;
+  font-family: inherit;
 }
 
-/* highlight animation for programmatic selection */
-.service-list input[type="checkbox"].highlighted {
-  outline: 2px solid var(--primary-dark);
-  transition: outline 0.3s ease;
+.service-type-wrapper select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.1);
 }
 
-/* hide list when collapsed (toggle will add class if user clicks) */
-.service-type-wrapper.collapsed .service-list {
-  max-height: 0;
-  opacity: 0;
-  padding: 0;
-  border: none;
-  pointer-events: none;
+.service-type-wrapper select option {
+  padding: 8px;
+  background: var(--background);
+  color: var(--text-color);
+}
+
+.service-type-wrapper select option.selected-option {
+  background: #e6d6ff !important;
+  background-color: #e6d6ff !important;
+  color: #6a0dad !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 0 0 2px #8a2be2 !important;
+  border-radius: 3px !important;
+  padding: 2px 4px !important;
+}
+
+.service-type-wrapper select option.selected-option:hover {
+  background: #d6b8ff !important;
+  background-color: #d6b8ff !important;
+  color: #5a0d9d !important;
+}
+
+/* Estilos para el select del formulario de cotización */
+.quote-form select#service option.selected-option {
+  background: #e6d6ff !important;
+  background-color: #e6d6ff !important;
+  color: #6a0dad !important;
+  font-weight: 600 !important;
+  box-shadow: inset 0 0 0 2px #8a2be2 !important;
+  border-radius: 3px !important;
+  padding: 2px 4px !important;
+}
+
+.quote-form select#service option.selected-option:hover {
+  background: #d6b8ff !important;
+  background-color: #d6b8ff !important;
+  color: #5a0d9d !important;
+}
+
+
+
+/* Calculator form styling */
+.calculator-form select,
+.calculator-form .form-group {
+  margin-bottom: 15px;
+}
+
+.calculator-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--text-color);
+}
 }
 
 /* badges for urgency and warranty */
@@ -3526,3 +3484,10 @@ a:focus {
 .fas.fa-clock::before { content: "🕒"; }
 
 @keyframes fa-fallback-spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+
+/* Shake animation for form validation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
