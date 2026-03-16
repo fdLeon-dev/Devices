@@ -153,6 +153,9 @@ function initializeApp() {
   // Initialize navbar scroll effect
   try { initializeNavbarScroll(); } catch (e) { console.error('initializeNavbarScroll failed', e); showDebugBanner('Navbar init error: ' + e.message, 'error'); }
 
+  // Initialize footer visibility (DISABLED: Footer is now always visible)
+  // try { initializeFooterVisibility(); } catch (e) { console.error('initializeFooterVisibility failed', e); showDebugBanner('Footer visibility error: ' + e.message, 'error'); }
+
   // Initialize new features
   try { initializeTestimonials(); } catch (e) { console.error('initializeTestimonials failed', e); showDebugBanner('Testimonials init error: ' + e.message, 'error'); }
   try { initializeCalculator(); } catch (e) { console.error('initializeCalculator failed', e); showDebugBanner('Calculator init error: ' + e.message, 'error'); }
@@ -685,7 +688,7 @@ function initializeSuggestService() {
   const btnSuggest = document.getElementById('btn-suggest-service');
   const problemInput = document.getElementById('problem-description');
   const suggestionsContainer = document.getElementById('service-suggestions');
-  const serviceList = document.getElementById('service-list');
+  const serviceList = document.getElementById('service-type');
 
   if (!btnSuggest || !problemInput || !suggestionsContainer || !serviceList) return;
 
@@ -738,12 +741,24 @@ function selectServiceByValue(value) {
   option.selected = true;
   select.dispatchEvent(new Event('change'));
 
+  // Actualizar la interfaz visual del sistema personalizado
+  const customOption = select.parentElement?.querySelector(`.custom-option[data-value="${value}"]`);
+  if (customOption) {
+    customOption.classList.add('selected');
+    customOption.style.background = '#e6d6ff';
+    customOption.style.color = '#6a0dad';
+    customOption.style.fontWeight = '600';
+    customOption.style.border = '2px solid #8a2be2';
+  }
+
   // hacer scroll para que sea visible
   select.scrollIntoView({ block: 'center', behavior: 'smooth' });
 
   // animación de highlight (agregar clase CSS si existe)
-  option.classList.add('highlighted');
-  setTimeout(() => option.classList.remove('highlighted'), 900);
+  if (customOption) {
+    customOption.classList.add('highlighted');
+    setTimeout(() => customOption.classList.remove('highlighted'), 900);
+  }
 }
 
 // Función para crear un sistema de selección múltiple personalizado
@@ -1231,46 +1246,11 @@ function clearFieldError(input) {
 
 // Mobile Menu
 function initializeMobileMenu() {
-  // Crear elemento de previsualización
-  const menuPreview = document.createElement('div');
-  menuPreview.id = 'menu-preview';
-  menuPreview.className = 'menu-preview';
-  menuPreview.innerHTML = `
-    <div class="menu-preview-content">
-      <a href="#servicios">Servicios</a>
-      <a href="#trabajos">Trabajos</a>
-      <a href="#cotizar">Cotizar</a>
-      <a href="#contacto">Contacto</a>
-      <a href="#cursos" id="preview-cursos" style="display:none">Cursos</a>
-    </div>
-  `;
-  document.body.appendChild(menuPreview);
-
-  // Función para sincronizar la visibilidad del enlace de cursos
-  function syncCursosVisibility() {
-    const navCursos = document.getElementById('nav-cursos');
-    const previewCursos = document.getElementById('preview-cursos');
-    if (navCursos && previewCursos) {
-      previewCursos.style.display = navCursos.style.display;
-    }
-  }
-
-  // Sincronizar inicialmente y observar cambios
-  syncCursosVisibility();
-  const observer = new MutationObserver(syncCursosVisibility);
-  const navCursos = document.getElementById('nav-cursos');
-  if (navCursos) {
-    observer.observe(navCursos, { attributes: true, attributeFilter: ['style'] });
-  }
-
   navToggle.addEventListener('click', function () {
     const isActive = !navMenu.classList.contains('active');
     navMenu.classList.toggle('active');
     navToggle.classList.toggle('active');
     navToggle.setAttribute('aria-expanded', isActive ? 'true' : 'false');
-
-    // Ocultar preview cuando se abre el menú
-    menuPreview.classList.remove('visible');
 
     // Accessibility & UX: focus first link when opening, return focus to toggle when closing
     if (isActive) {
@@ -1281,31 +1261,11 @@ function initializeMobileMenu() {
     }
   });
 
-  // Mostrar preview al hacer hover
-  navToggle.addEventListener('mouseenter', function() {
-    if (!navMenu.classList.contains('active')) {
-      menuPreview.classList.add('visible');
-    }
-  });
-
-  navToggle.addEventListener('mouseleave', function() {
-    setTimeout(() => {
-      if (!menuPreview.matches(':hover')) {
-        menuPreview.classList.remove('visible');
-      }
-    }, 100);
-  });
-
-  menuPreview.addEventListener('mouseleave', function() {
-    menuPreview.classList.remove('visible');
-  });
-
   // Close menu when clicking outside
   document.addEventListener('click', function (e) {
-    if (!navToggle.contains(e.target) && !navMenu.contains(e.target) && !menuPreview.contains(e.target)) {
+    if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
       navMenu.classList.remove('active');
       navToggle.classList.remove('active');
-      menuPreview.classList.remove('visible');
     }
   });
 }
@@ -1347,6 +1307,46 @@ function initializeNavbarScroll() {
 
   window.addEventListener('scroll', requestTick, { passive: true });
 }
+
+// Footer Visibility on Scroll to Bottom
+// DISABLED: Footer is now always visible (static positioning)
+/*
+function initializeFooterVisibility() {
+  const footer = document.querySelector('.footer');
+  if (!footer) return;
+
+  let ticking = false;
+
+  function updateFooterVisibility() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    // Show footer when user is near the bottom (within 200px of bottom)
+    const isNearBottom = scrollTop + windowHeight >= documentHeight - 200;
+
+    if (isNearBottom) {
+      footer.classList.add('visible');
+    } else {
+      footer.classList.remove('visible');
+    }
+
+    ticking = false;
+  }
+
+  function requestTick() {
+    if (!ticking) {
+      requestAnimationFrame(updateFooterVisibility);
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', requestTick, { passive: true });
+
+  // Check initial state
+  updateFooterVisibility();
+}
+*/
 
 // Notification System
 function showNotification(message, type = 'info') {
@@ -2548,6 +2548,16 @@ function initializeWorkFilters() {
 }
 
 // Statistics Counter Animation
+function isElementInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+
 function initializeStats() {
   const observerOptions = {
     threshold: 0.5,
@@ -2558,17 +2568,34 @@ function initializeStats() {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         animateCounter(entry.target);
-        observer.unobserve(entry.target);
       }
     });
   }, observerOptions);
 
   statNumbers.forEach(stat => {
     observer.observe(stat);
+    // Check if already visible on load
+    if (isElementInViewport(stat)) {
+      animateCounter(stat);
+    }
   });
 }
 
+function isElementInViewport(el) {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
+
 function animateCounter(element) {
+  // Prevent multiple animations
+  if (element.dataset.animating === 'true') return;
+  element.dataset.animating = 'true';
+
   const target = parseInt(element.dataset.target);
   const duration = 2000; // 2 seconds
   const increment = target / (duration / 16); // 60fps
@@ -2579,6 +2606,7 @@ function animateCounter(element) {
     if (current >= target) {
       current = target;
       clearInterval(timer);
+      element.dataset.animating = 'false';
     }
     element.textContent = Math.floor(current);
   }, 16);
@@ -2662,9 +2690,31 @@ function downloadQuotePdf() {
     const link = document.createElement('a');
     link.href = pdfDataUrl;
     link.download = `cotizacion_${new Date().toISOString().slice(0,10)}.pdf`;
+    link.style.display = 'none';
     document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    // Compatible con Safari y otros navegadores
+    try {
+      // Intenta click() primero
+      if (typeof link.click === 'function') {
+        link.click();
+      } else {
+        // Fallback para algunos navegadores
+        link.dispatchEvent(new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        }));
+      }
+    } catch (e) {
+      // Si falla, abre en nueva ventana como último recurso
+      window.open(pdfDataUrl, '_blank');
+    }
+    
+    // Limpiar después de un delay
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 100);
   }).catch(err => {
     console.error('Error al generar descarga de PDF:', err);
     showNotification('No se pudo generar el PDF. Intenta de nuevo.', 'error');
@@ -3608,7 +3658,178 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+// Función de animación de ensamblaje con IA
+function initializeAssemblyAnimation() {
+  const pcCabinets = document.querySelectorAll('.pc-cabinet');
+
+  pcCabinets.forEach(cabinet => {
+    const aiAssistant = cabinet.querySelector('.ai-assistant');
+    const aiText = cabinet.querySelector('.ai-text');
+    const components = cabinet.querySelectorAll('.component');
+    const cabinetBody = cabinet.querySelector('.cabinet-body');
+
+    let currentStep = 0;
+    let assemblyInterval;
+    let energyParticles = [];
+
+    const isGaming = cabinet.classList.contains('gaming-cabinet');
+
+    const assemblySteps = isGaming ? [
+      { message: "🔌 Instalando fuente de poder 1000W Gold...", component: "psu", detail: "Conectando alimentación principal", compatible: true },
+      { message: "🖥️ Colocando motherboard Z790...", component: "motherboard", detail: "Base del sistema preparada", compatible: true },
+      { message: "🧠 Instalando Intel Core i9-14900K...", component: "cpu", detail: "Procesador de alto rendimiento listo", compatible: true },
+      { message: "💾 Agregando 64GB DDR5 RGB...", component: "ram", detail: "Memoria de velocidad extrema instalada", compatible: true },
+      { message: "🎮 Instalando RTX 4090 24GB...", component: "gpu", detail: "Tarjeta gráfica para gaming 4K", compatible: true },
+      { message: "💿 Conectando SSD NVMe 2TB Gen4...", component: "ssd", detail: "Almacenamiento ultrarrápido conectado", compatible: true },
+      { message: "🌊 Instalando enfriamiento líquido 360mm...", component: "cooler", detail: "Sistema de refrigeración avanzado", compatible: true },
+      { message: "⚡ ¡Ensamblaje completado! PC gaming lista para la acción extrema.", component: "complete", detail: "¡Sistema optimizado para rendimiento máximo!", compatible: true }
+    ] : [
+      { message: "🔌 Instalando fuente 750W 80+ Gold...", component: "psu", detail: "Alimentación confiable conectada", compatible: true },
+      { message: "🖥️ Colocando motherboard B650...", component: "motherboard", detail: "Plataforma empresarial preparada", compatible: true },
+      { message: "🧠 Instalando AMD Ryzen 9 7950X...", component: "cpu", detail: "Procesador workstation instalado", compatible: true },
+      { message: "💾 Agregando 32GB DDR5 ECC...", component: "ram", detail: "Memoria ECC para estabilidad", compatible: true },
+      { message: "💼 Instalando RTX 4070 Ti 12GB...", component: "gpu", detail: "Gráficos profesionales conectados", compatible: true },
+      { message: "💿 Conectando SSD NVMe 1TB Gen4...", component: "ssd", detail: "Almacenamiento empresarial listo", compatible: true },
+      { message: "🌬️ Instalando enfriamiento premium...", component: "cooler", detail: "Sistema de refrigeración silencioso", compatible: true },
+      { message: "📊 ¡Configuración completada! Workstation lista para productividad.", component: "complete", detail: "¡Sistema optimizado para trabajo profesional!", compatible: true }
+    ];
+
+    function checkCompatibility(component) {
+      // Simular verificación de compatibilidad inteligente
+      const compatibilityRules = {
+        cpu: { socket: "LGA1700", chipset: "Z790" },
+        gpu: { interface: "PCIe 5.0", power: "450W" },
+        ram: { type: "DDR5", speed: "5600MHz" },
+        motherboard: { socket: "LGA1700", chipset: "Z790" },
+        psu: { wattage: 1000, efficiency: "80+ Gold" },
+        ssd: { interface: "PCIe 4.0", form: "M.2" },
+        cooler: { socket: "LGA1700", type: "liquid" }
+      };
+
+      // Verificar compatibilidad básica (todos son compatibles en este ejemplo)
+      return component in compatibilityRules;
+    }
+
+    function updateCompatibilityIndicators() {
+      const components = cabinet.querySelectorAll('.component');
+      components.forEach(component => {
+        const componentType = component.classList[1]; // ej: 'cpu', 'gpu', etc.
+        const isCompatible = checkCompatibility(componentType);
+        const indicator = component.querySelector('.compatibility-indicator');
+
+        if (indicator) {
+          indicator.className = `compatibility-indicator ${isCompatible ? 'compatible' : 'incompatible'}`;
+          component.setAttribute('data-compatible', isCompatible);
+        }
+      });
+    }
+
+    function startAssembly() {
+      currentStep = 0;
+      clearInterval(assemblyInterval);
+
+      // Inicializar indicadores de compatibilidad
+      updateCompatibilityIndicators();
+
+      // Limpiar partículas anteriores
+      energyParticles.forEach(particle => {
+        if (particle.parentNode) {
+          particle.parentNode.removeChild(particle);
+        }
+      });
+      energyParticles = [];
+
+      assemblyInterval = setInterval(() => {
+        if (currentStep < assemblySteps.length) {
+          const step = assemblySteps[currentStep];
+          const compatibilityText = step.compatible ? "✅ Compatible" : "❌ Incompatible";
+          aiText.textContent = `${step.message} ${compatibilityText}`;
+
+          // Resaltar componente actual
+          components.forEach(comp => {
+            comp.classList.remove('current-assembly');
+          });
+
+          if (step.component !== 'complete') {
+            const currentComponent = cabinet.querySelector(`.component.${step.component}`);
+            if (currentComponent) {
+              currentComponent.classList.add('current-assembly');
+
+              // Actualizar indicador de compatibilidad
+              const indicator = currentComponent.querySelector('.compatibility-indicator');
+              if (indicator) {
+                indicator.className = `compatibility-indicator ${step.compatible ? 'compatible' : 'incompatible'}`;
+              }
+
+              // Crear efecto de energía
+              const rect = currentComponent.getBoundingClientRect();
+              const cabinetRect = cabinetBody.getBoundingClientRect();
+              const x = rect.left - cabinetRect.left + rect.width / 2;
+              const y = rect.top - cabinetRect.top + rect.height / 2;
+
+              createEnergyParticle(x, y);
+            }
+          }
+
+          currentStep++;
+        } else {
+          clearInterval(assemblyInterval);
+
+          // Efecto de encendido final
+          cabinet.classList.add('assembly-complete');
+
+          // Agregar efecto holograma a todos los componentes
+          components.forEach(comp => {
+            comp.classList.add('hologram');
+          });
+
+          setTimeout(() => {
+            aiText.textContent = isGaming ?
+              "🚀 ¡Sistema gaming listo para conquistar!" :
+              "💼 ¡Workstation empresarial operativa!";
+
+            // Remover efectos después de un tiempo
+            setTimeout(() => {
+              cabinet.classList.remove('assembly-complete');
+              components.forEach(comp => {
+                comp.classList.remove('hologram');
+              });
+            }, 3000);
+
+          }, 2000);
+        }
+      }, 1800);
+    }
+
+    function stopAssembly() {
+      clearInterval(assemblyInterval);
+      components.forEach(comp => {
+        comp.classList.remove('current-assembly');
+      });
+
+      // Limpiar partículas
+      energyParticles.forEach(particle => {
+        if (particle.parentNode) {
+          particle.parentNode.removeChild(particle);
+        }
+      });
+      energyParticles = [];
+
+      aiText.textContent = isGaming ?
+        "Iniciando ensamblaje inteligente..." :
+        "Optimizando configuración empresarial...";
+    }
+
+    // Eventos hover
+    cabinet.addEventListener('mouseenter', startAssembly);
+    cabinet.addEventListener('mouseleave', stopAssembly);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Pequeño delay para asegurar que Firebase se cargue primero
   setTimeout(initializeRealtimeTestimonials, 500);
+  // Inicializar animación de ensamblaje
+  initializeAssemblyAnimation();
 });
+
