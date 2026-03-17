@@ -57,12 +57,24 @@ function initEmailJS() {
 // Enviar email de cotización
 // pdfDataUrl: opcional, data URL (data:application/pdf;base64,...) generado por jsPDF
 async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
+  // Rate limiting check
+  if (!checkRateLimit('email')) {
+    console.warn('Rate limit exceeded for email submission');
+    return { success: false, error: 'Por favor espera antes de enviar otro email' };
+  }
+
   if (!EMAILJS_CONFIG.publicKey || EMAILJS_CONFIG.publicKey === 'TU_PUBLIC_KEY_AQUI') {
     console.warn('EmailJS no está configurado. Revisa emailjs-config.js');
     return { success: false, error: 'EmailJS no configurado' };
   }
 
   try {
+    // Validate input email before processing
+    if (datosFormulario.email && !validateEmail(datosFormulario.email)) {
+      console.warn('Invalid email format received:', datosFormulario.email);
+      return { success: false, error: 'Email inválido' };
+    }
+
     // Detectar si viene de calculadora usando el flag explícito (formulario de cotización NO debe activar este modo)
     const isFromCalculator = datosFormulario.fromCalculator === true;
 

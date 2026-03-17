@@ -6,6 +6,43 @@
 // 3. Ve a Configuración del proyecto > Tus apps > SDK de Firebase
 // 4. Copia la configuración y pégala aquí
 
+// ============ FUNCIONES DE VALIDACIÓN (cargar primero) ============
+try {
+  console.log('📝 Cargando firebase-config.js...');
+  console.log('📍 Location: ' + window.location.href);
+  console.log('📋 Script ejecutándose en:', document.currentScript?.src || 'unknown');
+} catch (e) {
+  console.warn('⚠️ Error en logging inicial:', e);
+}
+
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return '';
+  return input
+    .trim()
+    .replace(/[<>\"']/g, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '');
+}
+
+function validateEmail(email) {
+  const sanitized = sanitizeInput(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(sanitized) && sanitized.length <= 254;
+}
+
+function validatePhone(phone) {
+  const sanitized = sanitizeInput(phone);
+  const phoneRegex = /^[\d+\-\s()]+$/;
+  return phoneRegex.test(sanitized) && sanitized.length >= 7 && sanitized.length <= 20;
+}
+
+function validateName(name) {
+  const sanitized = sanitizeInput(name);
+  return sanitized.length >= 2 && sanitized.length <= 100;
+}
+
+// ============ CONFIGURACIÓN FIREBASE ============
+
 const firebaseConfig = {
   apiKey: "AIzaSyCOpKYq8zf09y3GFurGauAtI7H2-PxLWS8",
   authDomain: "devices-41420.firebaseapp.com",
@@ -212,4 +249,225 @@ async function deleteTestimonial(testimonioId, userId) {
     return { success: false, error: error.message };
   }
 }
+
+// ============ COTIZACIONES - Guardar en Firestore ============
+/**
+ * Guarda una cotización en Firestore
+ * @param {Object} datosFormulario - Datos del formulario de cotización
+ * @returns {Promise<Object>} - { success: true, id: "doc_id" } o { success: false, error: "mensaje" }
+ */
+async function guardarCotizacionEnFirebase(datosFormulario) {
+  // Validar que Firebase esté inicializado
+  if (!db) {
+    if (!initFirebase()) {
+      return { success: false, error: 'Firebase no está inicializado' };
+    }
+  }
+
+  try {
+    // Validar datos requeridos antes de guardar
+    if (!datosFormulario.nombre || !datosFormulario.nombre.trim()) {
+      return { success: false, error: 'El nombre es requerido' };
+    }
+
+    if (!datosFormulario.servicio || datosFormulario.servicio.length === 0) {
+      return { success: false, error: 'Debe seleccionar al menos un servicio' };
+    }
+
+    if (!datosFormulario.mensaje || !datosFormulario.mensaje.trim()) {
+      return { success: false, error: 'La descripción del problema es requerida' };
+    }
+
+    // Validar al menos email o teléfono
+    const tieneEmail = datosFormulario.email && datosFormulario.email.trim() !== '' && datosFormulario.email !== 'No proporcionado';
+    const tieneTelefono = datosFormulario.telefono && datosFormulario.telefono.trim() !== '' && datosFormulario.telefono !== 'No proporcionado';
+
+    if (!tieneEmail && !tieneTelefono) {
+      return { success: false, error: 'Se requiere al menos un email o teléfono' };
+    }
+
+    // Sanitizar y normalizar datos
+    const cotizacion = {
+      nombre: sanitizeInput(datosFormulario.nombre).trim(),
+      email: tieneEmail ? sanitizeInput(datosFormulario.email).toLowerCase().trim() : '',
+      telefono: tieneTelefono ? sanitizeInput(datosFormulario.telefono).trim() : '',
+      servicios: Array.isArray(datosFormulario.servicio) ? datosFormulario.servicio : [datosFormulario.servicio],
+      urgency: datosFormulario.urgency || 'normal',
+      warranty: datosFormulario.warranty || '30',
+      descripcion: sanitizeInput(datosFormulario.mensaje).trim(),
+      fechaPreferida: datosFormulario.fechaPreferida || '',
+      urgencyMultiplier: datosFormulario.urgencyMultiplier || '1x',
+      
+      // Información de precios si está disponible
+      basePrice: datosFormulario.precios?.basePrice || 0,
+      urgencyPrice: datosFormulario.precios?.urgencyPrice || 0,
+      warrantyPrice: datosFormulario.precios?.warrantyPrice || 0,
+      totalPrice: datosFormulario.precios?.totalPrice || 0,
+      
+      // Metadatos
+      fechaCreacion: firebase.firestore.FieldValue.serverTimestamp(),
+      ipAddress: 'web-form', // Seguridad: no se recopila IP del cliente
+      userAgent: navigator.userAgent,
+      status: 'pendiente', // Estados posibles: pendiente, contactado, completado, cancelado
+      notas: '' // Campo para notas internas del negocio
+    };
+
+    // Guardar en Firestore
+    const cotizacionesRef = db.collection('cotizaciones');
+    const docRef = await cotizacionesRef.add(cotizacion);
+
+    console.log('✅ Cotización guardada en Firestore con ID:', docRef.id);
+
+    return {
+      success: true,
+      id: docRef.id,
+      message: 'Cotización guardada correctamente'
+    };
+
+  } catch (error) {
+    console.error('❌ Error al guardar cotización en Firestore:', error);
+    return {
+      success: false,
+      error: error.message || 'Error desconocido al guardar cotización'
+    };
+  }
+}
+
+/**
+ * Obtiene todas las cotizaciones (para panel de administrador)
+ * Requiere autenticación
+ */
+async function obtenerCotizacionesAdmin() {
+  console.log('%c🔍 obtenerCotizacionesAdmin() iniciando...', 'color: #3498db; font-weight: bold;');
+  
+  if (!db) {
+    console.log('❌ db no existe, inicializando Firebase...');
+    if (!initFirebase()) {
+      console.error('❌ No se pudo inicializar Firebase');
+      return { success: false, error: 'Firebase no está inicializado' };
+    }
+  }
+  
+  console.log('✅ Firebase inicializado, db =', db);
+
+  try {
+    const cotizacionesRef = db.collection('cotizaciones');
+    console.log('📚 Referencia a colección "cotizaciones" creada');
+    
+    const snapshot = await cotizacionesRef
+      .orderBy('fechaCreacion', 'desc')
+      .limit(100)
+      .get();
+
+    console.log(`✅ Query completado: ${snapshot.size} documentos encontrados`);
+    
+    const cotizaciones = [];
+    snapshot.forEach((doc) => {
+      cotizaciones.push({
+        id: doc.id,
+        ...doc.data()
+      });
+      console.log(`  📄 ${doc.id}: ${doc.data().nombre}`);
+    });
+
+    console.log(`📊 Total cotizaciones cargadas: ${cotizaciones.length}`);
+    return { success: true, data: cotizaciones };
+  } catch (error) {
+    console.error('❌ Error al obtener cotizaciones:', error);
+    console.error('   Código:', error.code);
+    console.error('   Mensaje:', error.message);
+    console.error('   Stack:', error.stack);
+    
+    // Mensaje de ayuda específico
+    if (error.code === 'permission-denied') {
+      return { 
+        success: false, 
+        error: `❌ Permiso denegado. Verifica que las reglas de Firestore estén publicadas en Firebase Console.` 
+      };
+    }
+    
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Actualiza el estado de una cotización
+ * Estados válidos: pendiente, contactado, completado, cancelado
+ */
+async function actualizarEstadoCotizacion(cotizacionId, nuevoEstado, notas = '') {
+  console.log(`%c🔄 Actualizando cotización: ${cotizacionId}`, 'color: #3498db; font-weight: bold;');
+  
+  if (!db) {
+    if (!initFirebase()) {
+      return { success: false, error: 'Firebase no está inicializado' };
+    }
+  }
+
+  // Validar que el nuevo estado sea válido
+  const estadosValidos = ['pendiente', 'contactado', 'completado', 'cancelado'];
+  if (!estadosValidos.includes(nuevoEstado)) {
+    return { success: false, error: `Estado inválido: "${nuevoEstado}". Debe ser uno de: ${estadosValidos.join(', ')}` };
+  }
+
+  // Validar notas
+  if (typeof notas !== 'string') {
+    notas = '';
+  }
+  notas = sanitizeInput(notas).trim();
+
+  try {
+    const docRef = db.collection('cotizaciones').doc(cotizacionId);
+    
+    console.log(`  Status: ${nuevoEstado}`);
+    console.log(`  Notas: ${notas ? notas.substring(0, 50) + '...' : '(vacías)'}`);
+    
+    await docRef.update({
+      status: nuevoEstado,
+      notas: notas,
+      fechaActualizacion: firebase.firestore.FieldValue.serverTimestamp(),
+      ultimaActualizacionPor: 'admin-panel'
+    });
+
+    console.log(`✅ Cotización actualizada correctamente`);
+    return { success: true, message: 'Estado y notas actualizados correctamente' };
+  } catch (error) {
+    console.error('❌ Error al actualizar cotización:', error);
+    console.error('   Código:', error.code);
+    console.error('   Mensaje:', error.message);
+    
+    if (error.code === 'not-found') {
+      return { success: false, error: 'La cotización no existe en la base de datos' };
+    } else if (error.code === 'permission-denied') {
+      return { success: false, error: 'Permiso denegado. Verifica las reglas de Firestore.' };
+    } else {
+      return { success: false, error: error.message };
+    }
+  }
+}
+
+// ============ CONFIRMACIÓN DE CARGA ============
+console.log('%c✅ firebase-config.js cargado exitosamente', 'color: #27ae60; font-weight: bold; font-size: 13px;');
+console.log('📦 Funciones disponibles:', {
+  'initFirebase': typeof initFirebase,
+  'guardarCotizacionEnFirebase': typeof guardarCotizacionEnFirebase,
+  'obtenerCotizacionesAdmin': typeof obtenerCotizacionesAdmin,
+  'actualizarEstadoCotizacion': typeof actualizarEstadoCotizacion,
+  'sanitizeInput': typeof sanitizeInput,
+  'validateEmail': typeof validateEmail,
+  'validatePhone': typeof validatePhone,
+  'validateName': typeof validateName
+});
+
+// ============ EXPORTAR A WINDOW (garantizar accesibilidad global) ============
+window.initFirebase = initFirebase;
+window.guardarCotizacionEnFirebase = guardarCotizacionEnFirebase;
+window.obtenerCotizacionesAdmin = obtenerCotizacionesAdmin;
+window.actualizarEstadoCotizacion = actualizarEstadoCotizacion;
+window.sanitizeInput = sanitizeInput;
+window.validateEmail = validateEmail;
+window.validatePhone = validatePhone;
+window.validateName = validateName;
+
+console.log('%c✅ Todas las funciones de Firebase exportadas a window (global)', 'color: #2ecc71; font-weight: bold; display: block; margin-top: 5px;');
+
 

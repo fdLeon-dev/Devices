@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Cotizaciones | Devices F2</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Login Screen */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      font-size: 1.8em;
+      margin: 0 0 10px 0;
+      color: var(--text-color);
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-group-login {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group-login label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-color);
+    }
+
+    .form-group-login input {
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1em;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: border-color 0.3s;
+    }
+
+    .form-group-login input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .btn-login {
+      padding: 12px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-login:hover {
+      background: var(--accent-color);
+    }
+
+    .btn-login:active {
+      transform: scale(0.98);
+    }
+
+    .login-error {
+      background: #ff7675;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #panel-container {
+      display: none;
+    }
+
+    .logout-btn {
+      padding: 10px 18px;
+      background: #ff7675;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95em;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .logout-btn:hover {
+      background: #d63031;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 118, 117, 0.3);
+    }
+
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 15px;
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .admin-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-group label {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .filter-group select {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      cursor: pointer;
+    }
+
+    .btn-refresh {
+      padding: 8px 16px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .btn-refresh:hover {
+      background: var(--accent-color);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-number {
+      font-size: 2em;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+
+    .cotizaciones-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .cotizaciones-table thead {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .cotizaciones-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .cotizaciones-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cotizaciones-table tr:hover {
+      background: rgba(var(--primary-rgb), 0.05);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-pendiente {
+      background: #ffeaa7;
+      color: #2d3436;
+    }
+
+    .status-contactado {
+      background: #74b9ff;
+      color: #fff;
+    }
+
+    .status-completado {
+      background: #55efc4;
+      color: #2d3436;
+    }
+
+    .status-cancelado {
+      background: #ff7675;
+      color: #fff;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .btn-sm {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-view {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-view:hover {
+      background: var(--accent-color);
+    }
+
+    .btn-edit {
+      background: #6c5ce7;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #5f3dc4;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+
+    /* Modal para detalles de cotización */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #f5f3ff;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 650px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      border-radius: 12px 12px 0 0;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 15px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.5em;
+      color: var(--text-color);
+    }
+
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color 0.2s;
+      line-height: 1;
+      padding: 5px;
+    }
+
+    .btn-close:hover {
+      color: var(--primary-color);
+    }
+
+    .modal-field {
+      margin-bottom: 20px;
+    }
+
+    .modal-field.status-section {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+      margin-bottom: 25px;
+    }
+
+    .modal-field.status-section label {
+      color: white;
+      opacity: 0.9;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-field.status-section select {
+      background: white;
+      color: var(--primary-color);
+      border: 2px solid white;
+      font-weight: 600;
+      padding: 12px;
+      font-size: 1.05em;
+    }
+
+    .modal-field.status-section select:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .modal-field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-color);
+      font-size: 0.95em;
+    }
+
+    .modal-field input,
+    .modal-field select,
+    .modal-field textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: inherit;
+      font-size: 0.95em;
+      transition: border-color 0.2s;
+    }
+
+    .modal-field input:focus,
+    .modal-field select:focus,
+    .modal-field textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .modal-field textarea {
+      resize: vertical;
+      min-height: 120px;
+      font-size: 0.9em;
+    }
+
+    .modal-field small {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.85em;
+    }
+
+    .precio-info {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 8px;
+      margin: 25px 0;
+      border: 1px solid var(--border-color);
+    }
+
+    .precio-item {
+      text-align: center;
+    }
+
+    .precio-label {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 0.3px;
+    }
+
+    .precio-valor {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .precio-item:last-child .precio-valor {
+      font-size: 1.5em;
+      color: var(--primary-color);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid var(--border-color);
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 13px 20px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95em;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-cancel {
+      background: var(--border-color);
+      color: var(--text-color);
+    }
+
+    .btn-cancel:hover {
+      background: var(--text-muted);
+      color: white;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      color: white;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-save:active {
+      transform: translateY(0);
+    }
+
+    .btn-save:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .precio-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 15px;
+      background: rgba(var(--primary-rgb), 0.1);
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+
+    .precio-item {
+      text-align: center;
+    }
+
+    .precio-label {
+      font-size: 0.9em;
+      color: var(--text-muted);
+    }
+
+    .precio-valor {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    @media (max-width: 768px) {
+      .admin-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-group {
+        flex-direction: column;
+      }
+
+      .cotizaciones-table {
+        font-size: 0.9em;
+      }
+
+      .cotizaciones-table th,
+      .cotizaciones-table td {
+        padding: 8px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .login-box {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-container">
+    <div class="login-box">
+      <div class="login-header">
+        <h1>🔐 Admin Panel</h1>
+        <p>Devices F2 - Cotizaciones</p>
+      </div>
+
+      <div id="login-error" class="login-error"></div>
+
+      <form class="login-form" id="login-form" onsubmit="autenticar(event)">
+        <div class="form-group-login">
+          <label for="username">Usuario:</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Ingresa tu usuario"
+            required
+            autofocus
+          >
+        </div>
+
+        <div class="form-group-login">
+          <label for="password">Contraseña:</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Ingresa tu contraseña"
+            required
+          >
+        </div>
+
+        <button type="submit" class="btn-login">Acceder al Panel</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="panel-container">
+    <div class="admin-container">
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h1>📊 Panel de Cotizaciones</h1>
+          <p style="margin: 5px 0 0 0; color: var(--text-muted);">Devices F2 - Administrador</p>
+        </div>
+        <div class="admin-controls">
+          <div class="filter-group">
+            <input type="text" id="search-input" placeholder="🔍 Buscar por nombre, email o teléfono..." style="padding: 10px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.95em; flex: 1; max-width: 300px;">
+          </div>
+          <div class="filter-group">
+            <label for="filter-status">Estado:</label>
+            <select id="filter-status">
+              <option value="">Todos</option>
+              <option value="pendiente">📋 Pendiente</option>
+              <option value="contactado">📞 Contactado</option>
+              <option value="completado">✅ Completado</option>
+              <option value="cancelado">❌ Cancelado</option>
+            </select>
+          </div>
+          <button class="btn-refresh" onclick="cargarCotizaciones()">🔄 Actualizar</button>
+          <button class="logout-btn" onclick="cerrarSesion()">🚪 Salir</button>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-count">0</div>
+          <div class="stat-label">Total de Cotizaciones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="pendiente-count">0</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="contactado-count">0</div>
+          <div class="stat-label">Contactados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="completado-count">0</div>
+          <div class="stat-label">Completados</div>
+        </div>
+      </div>
+
+      <!-- Tabla de Cotizaciones -->
+      <div id="cotizaciones-container">
+        <div class="loading">Cargando cotizaciones...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Detalles -->
+  <div class="modal-overlay" id="modal-detalles">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Detalles de Cotización</h2>
+        <button class="btn-close" onclick="cerrarModal()">&times;</button>
+      </div>
+      
+      <div id="modal-body">
+        <!-- Se llenarán con JavaScript -->
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="cerrarModal()">Cerrar</button>
+        <button class="btn-save" onclick="guardarCambios()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <!-- Firebase SDK (DEBE ser antes de firebase-config.js) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <!-- Firebase Config con cache-busting -->
+  <script src="firebase-config.js?v=20260316-1"></script>
+  <script>
+    // ============ AUTENTICACIÓN + SEGURIDAD ============
+    // Las credenciales se cargan desde config-credentials.json (no versionado en git)
+    let ADMIN_CREDENTIALS = {
+      usuario: "admin",
+      contraseña: "demo"
+    };
+
+    // Cargar credenciales desde archivo seguro (no en GitHub)
+    (async () => {
+      try {
+        const response = await fetch('./config-credentials.json?v=' + Date.now());
+        if (response.ok) {
+          const config = await response.json();
+          if (config.admin && config.admin.usuario && config.admin.contraseña) {
+            ADMIN_CREDENTIALS = config.admin;
+            console.log('✅ Credenciales cargadas desde config-credentials.json');
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudieron cargar credenciales desde archivo de configuración');
+        console.warn('📝 Crea /public/config-credentials.json basándote en config-credentials.example.json');
+      }
+    })();
+
+    // ============ SANITIZACIÓN Y VALIDACIÓN (XSS Protection) ============
+    /**
+     * Escapa caracteres HTML peligrosos para prevenir XSS
+     * @param {string} str - String a escapar
+     * @returns {string} String escapado
+     */
+    function sanitizeHTML(str) {
+      if (!str || typeof str !== 'string') return '';
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+        '/': '&#x2F;'
+      };
+      return str.replace(/[&<>"'\/]/g, (char) => map[char]);
+    }
+
+    /**
+     * Sanitiza input de usuario (valida caracteres permitidos)
+     * @param {string} input - Input del usuario
+     * @param {string} type - Tipo de validación: 'text', 'email', 'number', 'notes'
+     * @returns {string} Input sanitizado
+     */
+    function sanitizeInput(input, type = 'text') {
+      if (!input || typeof input !== 'string') return '';
+      
+      let sanitized = input.trim();
+
+      switch (type) {
+        case 'email':
+          // Solo permite caracteres válidos para email
+          sanitized = sanitized.replace(/[^a-zA-Z0-9@._-]/g, '');
+          break;
+        case 'number':
+          sanitized = sanitized.replace(/[^0-9.-]/g, '');
+          break;
+        case 'phone':
+          sanitized = sanitized.replace(/[^0-9+\s\-()]/g, '');
+          break;
+        case 'notes':
+          // Permite más caracteres pero escapa HTML
+          sanitized = sanitizeHTML(sanitized);
+          break;
+        case 'text':
+        default:
+          // Escapa caracteres peligrosos
+          sanitized = sanitizeHTML(sanitized);
+          // Limita longitud máxima (255 caracteres)
+          sanitized = sanitized.substring(0, 255);
+      }
+
+      return sanitized;
+    }
+
+    /**
+     * Valida que un input no esté vacío
+     * @param {string} input - Input a validar
+     * @param {string} fieldName - Nombre del campo (para mensajes de error)
+     * @returns {object} { valid: boolean, error: string }
+     */
+    function validateInput(input, fieldName = 'Campo') {
+      if (!input || input.trim() === '') {
+        return { valid: false, error: `${fieldName} no puede estar vacío` };
+      }
+      return { valid: true, error: '' };
+    }
+
+    /**
+     * Valida email
+     * @param {string} email - Email a validar
+     * @returns {boolean} true si es válido
+     */
+    function validateEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    /**
+     * Escapa caracteres peligrosos en strings para prevenir inyección
+     * @param {string} str - String a proteger
+     * @returns {string} String protegido
+     */
+    function escapeString(str) {
+      if (!str || typeof str !== 'string') return '';
+      return str
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/'/g, "\\'")
+        .replace(/\0/g, '\\0');
+    }
+
+    /**
+     * Genera un token CSRF único por sesión
+     * @returns {string} Token CSRF
+     */
+    function generateCSRFToken() {
+      const token = Math.random().toString(36).substring(2, 15) + 
+                    Math.random().toString(36).substring(2, 15) +
+                    Date.now().toString(36);
+      sessionStorage.setItem('csrfToken', token);
+      return token;
+    }
+
+    /**
+     * Obtiene el token CSRF actual
+     * @returns {string} Token CSRF
+     */
+    function getCSRFToken() {
+      let token = sessionStorage.getItem('csrfToken');
+      if (!token) {
+        token = generateCSRFToken();
+      }
+      return token;
+    }
+
+    /**
+     * Valida el token CSRF
+     * @param {string} token - Token a validar
+     * @returns {boolean} true si el token es válido
+     */
+    function validateCSRFToken(token) {
+      const storedToken = sessionStorage.getItem('csrfToken');
+      return storedToken === token && token !== undefined && token !== '';
+    }
+
+    // ============ RATE LIMITING ============
+    const RATE_LIMIT_CONFIG = {
+      maxAttempts: 5,
+      blockDuration: 15 * 1000, // 15 segundos
+      attemptLimit: 5 // intentos permitidos
+    };
+    let loginAttempts = 0;
+    let loginBlocked = false;
+    let blockTimeout = null;
+
+    function actualizarEstadoLogin() {
+      const btnLogin = document.querySelector('.btn-login');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      
+      if (loginBlocked) {
+        btnLogin.disabled = true;
+        usernameInput.disabled = true;
+        passwordInput.disabled = true;
+        btnLogin.textContent = `⏳ Esperando ${Math.ceil(RATE_LIMIT_CONFIG.blockDuration / 1000)}s...`;
+      } else {
+        btnLogin.disabled = false;
+        usernameInput.disabled = false;
+        passwordInput.disabled = false;
+        btnLogin.textContent = 'Acceder al Panel';
+      }
+    }
+
+    function autenticar(event) {
+      event.preventDefault();
+      
+      // Verificar si está bloqueado
+      if (loginBlocked) {
+        console.warn('⚠️ Demasiados intentos. Intenta más tarde.');
+        document.getElementById('login-error').textContent = '⏳ Demasiados intentos. Intenta en unos segundos.';
+        document.getElementById('login-error').classList.add('show');
+        return;
+      }
+
+      console.log('%c🔐 Iniciando autenticación...', 'color: #f39c12; font-weight: bold;');
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      // Validar credenciales
+      if (username === ADMIN_CREDENTIALS.usuario && password === ADMIN_CREDENTIALS.contraseña) {
+        console.log('✅ Credenciales correctas');
+        
+        // Crear token de sesión
+        const token = btoa(username + ':' + Date.now());
+        sessionStorage.setItem('admin_token', token);
+        sessionStorage.setItem('admin_user', username);
+        sessionStorage.setItem('login_time', Date.now()); // Para timeout
+        console.log('✅ Token de sesión creado');
+
+        // Resetear intentos
+        loginAttempts = 0;
+
+        // Registrar login en auditoría
+        registrarAuditoria('LOGIN', { usuario: username }, 'success');
+
+        // Mostrar panel
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('panel-container').style.display = 'block';
+
+        // Limpiar formulario
+        document.getElementById('login-form').reset();
+
+        // Inicializar
+        console.log('🔥 Inicializando Firebase...');
+        const firebaseInitialized = initFirebase();
+        console.log('Firebase inicializado:', firebaseInitialized);
+        
+        console.log('📋 Cargando cotizaciones...');
+        cargarCotizaciones();
+
+        // Iniciar timeout de sesión
+        iniciarSessionTimeout();
+      } else {
+        // Incrementar intentos fallidos
+        loginAttempts++;
+        console.error(`❌ Intento fallido ${loginAttempts}/${RATE_LIMIT_CONFIG.maxAttempts}`);
+
+        // Registrar intento fallido en auditoría
+        registrarAuditoria('LOGIN_FALLIDO', { usuario: username, intento: loginAttempts }, 'failed');
+
+        // Si se alcanzó el máximo, bloquear
+        if (loginAttempts >= RATE_LIMIT_CONFIG.maxAttempts) {
+          loginBlocked = true;
+          actualizarEstadoLogin();
+
+          blockTimeout = setTimeout(() => {
+            loginBlocked = false;
+            loginAttempts = 0;
+            actualizarEstadoLogin();
+            console.log('✅ Bloqueo de login desbloqueado');
+          }, RATE_LIMIT_CONFIG.blockDuration);
+        }
+
+        // Mostrar error
+        const errorDiv = document.getElementById('login-error');
+        errorDiv.textContent = `❌ Credenciales inválidas (${loginAttempts}/${RATE_LIMIT_CONFIG.maxAttempts})`;
+        errorDiv.classList.add('show');
+
+        setTimeout(() => {
+          errorDiv.classList.remove('show');
+        }, 4000);
+
+        // Limpiar contraseña
+        document.getElementById('password').value = '';
+        document.getElementById('password').focus();
+      }
+    }
+
+    // ============ SESSION TIMEOUT (30 minutos) ============
+    const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutos
+    const WARNING_TIME = 25 * 60 * 1000; // Advertencia a los 25 minutos
+    let sessionTimeoutId = null;
+    let warningTimeoutId = null;
+
+    function iniciarSessionTimeout() {
+      // Limpiar timeouts anteriores
+      if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+      if (warningTimeoutId) clearTimeout(warningTimeoutId);
+
+      console.log('⏱️ Session timeout iniciado (30 minutos)');
+
+      // Advertencia a los 25 minutos
+      warningTimeoutId = setTimeout(() => {
+        console.warn('⚠️ Tu sesión expirará en 5 minutos por inactividad');
+        alert('⚠️ ADVERTENCIA: Tu sesión expirará en 5 minutos por inactividad.\n\nHaz clic en OK para continuar.');
+      }, WARNING_TIME);
+
+      // Cerrar sesión después de 30 minutos
+      sessionTimeoutId = setTimeout(() => {
+        console.warn('🔒 Sesión expirada por timeout');
+        registrarAuditoria('SESSION_TIMEOUT', {}, 'auto-logout');
+        cerrarSesionPorTimeout();
+      }, SESSION_TIMEOUT);
+    }
+
+    function resetSessionTimeout() {
+      // Se llama en cada interacción del usuario
+      const token = sessionStorage.getItem('admin_token');
+      if (token) {
+        iniciarSessionTimeout();
+      }
+    }
+
+    function cerrarSesionPorTimeout() {
+      sessionStorage.removeItem('admin_token');
+      sessionStorage.removeItem('admin_user');
+      sessionStorage.removeItem('login_time');
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('panel-container').style.display = 'none';
+      alert('🔒 Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.');
+    }
+
+    function cerrarSesion() {
+      if (confirm('¿Deseas cerrar sesión?')) {
+        registrarAuditoria('LOGOUT', { usuario: sessionStorage.getItem('admin_user') }, 'success');
+        sessionStorage.removeItem('admin_token');
+        sessionStorage.removeItem('admin_user');
+        sessionStorage.removeItem('login_time');
+        if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
+        if (warningTimeoutId) clearTimeout(warningTimeoutId);
+        location.reload();
+      }
+    }
+
+    // ============ AUDITORÍA ============
+    async function registrarAuditoria(accion, detalles = {}, estado = 'success') {
+      try {
+        const usuario = sessionStorage.getItem('admin_user') || 'desconocido';
+        const auditLog = {
+          accion,
+          usuario,
+          estado,
+          detalles,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+          ip: 'cliente' // En producción, obtener desde servidor
+        };
+
+        // Si Firebase está disponible, guardar en Firestore
+        if (typeof db !== 'undefined') {
+          try {
+            await db.collection('audit_logs').add(auditLog);
+            console.log(`📝 Auditoría registrada: ${accion}`);
+          } catch (firebaseError) {
+            console.warn('⚠️ No se pudo registrar en Firestore:', firebaseError);
+            // Guardar en localStorage como respaldo
+            guardarAuditoriaLocal(auditLog);
+          }
+        } else {
+          guardarAuditoriaLocal(auditLog);
+        }
+      } catch (err) {
+        console.error('❌ Error al registrar auditoría:', err);
+      }
+    }
+
+    function guardarAuditoriaLocal(log) {
+      try {
+        let logs = JSON.parse(localStorage.getItem('audit_logs_local') || '[]');
+        logs.push(log);
+        // Mantener solo últimos 100 registros
+        logs = logs.slice(-100);
+        localStorage.setItem('audit_logs_local', JSON.stringify(logs));
+      } catch (err) {
+        console.warn('No se pudo guardar auditoría local:', err);
+      }
+    }
+
+    // Detectar inactividad (resetear timeout en cada interacción)
+    document.addEventListener('click', resetSessionTimeout);
+    document.addEventListener('keypress', resetSessionTimeout);
+    document.addEventListener('mousemove', resetSessionTimeout);
+
+    // Verificar sesión al cargar
+    window.addEventListener('load', () => {
+      const token = sessionStorage.getItem('admin_token');
+      if (token) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('panel-container').style.display = 'block';
+        initFirebase();
+        cargarCotizaciones();
+        iniciarSessionTimeout(); // Reiniciar timer
+      } else {
+        document.getElementById('login-screen').style.display = 'flex';
+        document.getElementById('panel-container').style.display = 'none';
+      }
+    });
+
+    // ============ PANEL ADMIN ============
+    let cotizacionesData = [];
+    let cotizacionEditando = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Filtrar por estado
+      document.getElementById('filter-status').addEventListener('change', () => {
+        mostrarCotizaciones();
+      });
+      
+      // Búsqueda en tiempo real
+      document.getElementById('search-input').addEventListener('input', () => {
+        mostrarCotizaciones();
+      });
+    });
+
+    async function cargarCotizaciones() {
+      const container = document.getElementById('cotizaciones-container');
+      container.innerHTML = '<div class="loading">Cargando cotizaciones...</div>';
+
+      console.log('🔍 Verificando disponibilidad de obtenerCotizacionesAdmin...');
+      console.log('typeof obtenerCotizacionesAdmin =', typeof obtenerCotizacionesAdmin);
+      
+      if (typeof obtenerCotizacionesAdmin !== 'function') {
+        console.error('❌ obtenerCotizacionesAdmin no es una función. Disponible como:', typeof obtenerCotizacionesAdmin);
+        console.log('✅ Funciones disponibles en window:', Object.keys(window).filter(k => k.includes('firebase') || k.includes('Cotiz')));
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>❌ Error crítico: Firebase no se cargó correctamente</p>
+            <p>Por favor recarga la página (Cmd+Shift+R)</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await obtenerCotizacionesAdmin();
+
+      if (result.success) {
+        console.log(`✅ Cotizaciones cargadas: ${result.data.length} registros`);
+        cotizacionesData = result.data || [];
+        mostrarCotizaciones();
+        actualizarEstadisticas();
+      } else {
+        console.error('❌ Error al cargar cotizaciones:', result.error);
+        const errorMsg = sanitizeHTML(result.error || 'Error desconocido');
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>❌ Error al cargar cotizaciones</p>
+            <p>${errorMsg}</p>
+          </div>
+        `;
+      }
+    }
+
+    function mostrarCotizaciones() {
+      const container = document.getElementById('cotizaciones-container');
+      const statusFilter = document.getElementById('filter-status').value;
+      const searchTerm = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+      // Filtrar por estado
+      let cotizacionesFiltradas = cotizacionesData;
+      if (statusFilter) {
+        cotizacionesFiltradas = cotizacionesFiltradas.filter(c => c.status === statusFilter);
+      }
+
+      // Filtrar por búsqueda (nombre, email, teléfono)
+      if (searchTerm) {
+        cotizacionesFiltradas = cotizacionesFiltradas.filter(c => {
+          const nombre = (c.nombre || '').toLowerCase();
+          const email = (c.email || '').toLowerCase();
+          const telefono = (c.telefono || '').toLowerCase();
+          const id = (c.id || '').toLowerCase();
+          
+          return nombre.includes(searchTerm) || 
+                 email.includes(searchTerm) || 
+                 telefono.includes(searchTerm) ||
+                 id.includes(searchTerm);
+        });
+      }
+
+      if (cotizacionesFiltradas.length === 0) {
+        const mensajeSearch = sanitizeHTML(searchTerm);
+        const mensaje = searchTerm ? `📭 No hay resultados para "${mensajeSearch}"` : '📭 No hay cotizaciones para mostrar';
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>${mensaje}</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <table class="cotizaciones-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Contacto</th>
+              <th>Servicios</th>
+              <th>Total</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      cotizacionesFiltradas.forEach(cot => {
+        // SANITIZATION: All user-controlled data is escaped
+        const nombreSafe = sanitizeHTML(cot.nombre || '-');
+        const fecha = cot.fechaCreacion ? new Date(cot.fechaCreacion.seconds * 1000).toLocaleDateString('es-ES') : '-';
+        const emailSafe = sanitizeHTML(cot.email || '');
+        const telefonoSafe = sanitizeHTML(cot.telefono || '');
+        const contacto = emailSafe && emailSafe !== 'No proporcionado' ? emailSafe : (telefonoSafe && telefonoSafe !== 'No proporcionado' ? telefonoSafe : '-');
+        const serviciosRaw = Array.isArray(cot.servicios) ? cot.servicios.slice(0, 2).map(s => sanitizeHTML(s)).join(', ') : sanitizeHTML(cot.servicios || '-');
+        const total = cot.totalPrice ? `$${cot.totalPrice.toFixed(2)}` : '-';
+        const cotizacionIdSafe = sanitizeHTML(cot.id || '');
+        const statusSafe = sanitizeHTML(cot.status || 'pendiente');
+        const statusEmoji = {
+          'pendiente': '📋',
+          'contactado': '📞',
+          'completado': '✅',
+          'cancelado': '❌'
+        }[cot.status] || '❓';
+
+        html += `
+          <tr>
+            <td><strong>${nombreSafe}</strong></td>
+            <td>${contacto}</td>
+            <td><small>${serviciosRaw}${Array.isArray(cot.servicios) && cot.servicios.length > 2 ? '...' : ''}</small></td>
+            <td>${total}</td>
+            <td><span class="status-badge status-${statusSafe}">${statusEmoji} ${statusSafe}</span></td>
+            <td>${fecha}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-sm btn-view" data-cot-id="${cotizacionIdSafe}" onclick="abrirModal(this.getAttribute('data-cot-id'))">👁️ Ver</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+        </table>
+        <div style="padding: 15px; background: var(--border-color); text-align: center; color: var(--text-muted); font-size: 0.9em;">
+          Mostrando ${cotizacionesFiltradas.length} de ${cotizacionesData.length} cotizaciones
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function actualizarEstadisticas() {
+      const stats = {
+        total: cotizacionesData.length,
+        pendiente: cotizacionesData.filter(c => c.status === 'pendiente').length,
+        contactado: cotizacionesData.filter(c => c.status === 'contactado').length,
+        completado: cotizacionesData.filter(c => c.status === 'completado').length,
+        cancelado: cotizacionesData.filter(c => c.status === 'cancelado').length
+      };
+
+      document.getElementById('total-count').textContent = stats.total;
+      document.getElementById('pendiente-count').textContent = stats.pendiente;
+      document.getElementById('contactado-count').textContent = stats.contactado;
+      document.getElementById('completado-count').textContent = stats.completado;
+      
+      // Actualizar estado "cancelado" si existe en el HTML
+      const canceladoEl = document.getElementById('cancelado-count');
+      if (canceladoEl) {
+        canceladoEl.textContent = stats.cancelado;
+      }
+      
+      console.log(`📊 Estadísticas: Total=${stats.total}, Pendiente=${stats.pendiente}, Contactado=${stats.contactado}, Completado=${stats.completado}, Cancelado=${stats.cancelado}`);
+    }
+
+    function abrirModal(cotizacionId) {
+      cotizacionEditando = cotizacionesData.find(c => c.id === cotizacionId);
+      if (!cotizacionEditando) {
+        console.error('❌ Cotización no encontrada:', cotizacionId);
+        alert('Error: No se encontró la cotización');
+        return;
+      }
+
+      // Formatear fecha seguramente
+      let fecha = '-';
+      if (cotizacionEditando.fechaCreacion) {
+        try {
+          if (cotizacionEditando.fechaCreacion.seconds !== undefined) {
+            fecha = new Date(cotizacionEditando.fechaCreacion.seconds * 1000).toLocaleString('es-ES');
+          } else if (typeof cotizacionEditando.fechaCreacion === 'number') {
+            fecha = new Date(cotizacionEditando.fechaCreacion * 1000).toLocaleString('es-ES');
+          }
+        } catch (e) {
+          console.warn('⚠️ Error al formatear fecha:', e);
+        }
+      }
+
+      // Formatear servicios seguramente
+      let servicios = '-';
+      if (Array.isArray(cotizacionEditando.servicios) && cotizacionEditando.servicios.length > 0) {
+        servicios = cotizacionEditando.servicios.join(', ');
+      } else if (typeof cotizacionEditando.servicios === 'string') {
+        servicios = cotizacionEditando.servicios;
+      }
+
+      // Valores seguros con defaults - SANITIZADOS para XSS protection
+      const nombre = sanitizeHTML(cotizacionEditando.nombre || '-');
+      const email = sanitizeHTML((cotizacionEditando.email && cotizacionEditando.email !== 'No proporcionado') ? cotizacionEditando.email : '(No proporcionado)');
+      const telefono = sanitizeHTML((cotizacionEditando.telefono && cotizacionEditando.telefono !== 'No proporcionado') ? cotizacionEditando.telefono : '(No proporcionado)');
+      const descripcion = sanitizeHTML(cotizacionEditando.descripcion || '-');
+      const urgency = sanitizeHTML(cotizacionEditando.urgency || 'normal');
+      const warranty = sanitizeHTML(cotizacionEditando.warranty || '30');
+      const fechaPreferida = sanitizeHTML(cotizacionEditando.fechaPreferida || '-');
+      const cotizacionId = sanitizeHTML(cotizacionEditando.id || 'N/A');
+      const basePrice = (cotizacionEditando.basePrice || 0).toFixed(2);
+      const urgencyPrice = (cotizacionEditando.urgencyPrice || 0).toFixed(2);
+      const warrantyPrice = (cotizacionEditando.warrantyPrice || 0).toFixed(2);
+      const totalPrice = (cotizacionEditando.totalPrice || 0).toFixed(2);
+      const notas = sanitizeHTML(cotizacionEditando.notas || '');
+
+      let html = `
+        <!-- SECCIÓN 1: DATOS DEL CLIENTE (Compacto) -->
+        <div style="background: rgba(0,0,0,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">ID</span>
+              <div style="font-family: monospace; font-size: 0.9em; margin-top: 4px;">${cotizacionId}</div>
+            </div>
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">CLIENTE</span>
+              <div style="font-size: 1em; margin-top: 4px; font-weight: 500;">${nombre}</div>
+            </div>
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">EMAIL</span>
+              <div style="font-size: 0.9em; margin-top: 4px; ${!cotizacionEditando.email || cotizacionEditando.email === 'No proporcionado' ? 'color: #999;' : ''}">${email}</div>
+            </div>
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">TELÉFONO</span>
+              <div style="font-size: 0.9em; margin-top: 4px; ${!cotizacionEditando.telefono || cotizacionEditando.telefono === 'No proporcionado' ? 'color: #999;' : ''}">${telefono}</div>
+            </div>
+          </div>
+          <div style="border-top: 1px solid rgba(0,0,0,0.1); padding-top: 15px;">
+            <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">SERVICIOS</span>
+            <div style="font-size: 0.9em; margin-top: 4px; line-height: 1.4;">${servicios}</div>
+          </div>
+          <div style="border-top: 1px solid rgba(0,0,0,0.1); margin-top: 12px; padding-top: 12px;">
+            <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">DESCRIPCIÓN</span>
+            <div style="font-size: 0.9em; margin-top: 4px; line-height: 1.4;">${descripcion}</div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: DESGLOSE DE PRECIOS (Destacado) -->
+        <div class="precio-info" style="margin-bottom: 25px; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(139, 92, 246, 0.08)); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+          <div class="precio-item">
+            <div class="precio-label">Precio Base</div>
+            <div class="precio-valor">$${basePrice}</div>
+          </div>
+          <div class="precio-item">
+            <div class="precio-label">Urgencia (+${urgency})</div>
+            <div class="precio-valor">$${urgencyPrice}</div>
+          </div>
+          <div class="precio-item">
+            <div class="precio-label">Garantía (${warranty}d)</div>
+            <div class="precio-valor">$${warrantyPrice}</div>
+          </div>
+          <div class="precio-item">
+            <div class="precio-label" style="font-weight: bold; font-size: 1.1em;">💰 TOTAL</div>
+            <div class="precio-valor" style="font-weight: bold; font-size: 1.5em; color: var(--primary-color);">$${totalPrice}</div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 3: FECHAS Y PREFERENCIAS -->
+        <div style="background: rgba(0,0,0,0.02); padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">FECHA PREFERIDA</span>
+              <div style="font-size: 0.9em; margin-top: 4px;">${fechaPreferida}</div>
+            </div>
+            <div>
+              <span style="font-size: 0.85em; color: var(--text-muted); font-weight: 600;">FECHA CREACIÓN</span>
+              <div style="font-size: 0.9em; margin-top: 4px;">${fecha}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: CAMBIO DE ESTADO (Principal) -->
+        <div class="modal-field status-section" style="margin-bottom: 25px;">
+          <label style="font-size: 1.15em; margin-bottom: 12px; display: block;">📊 CAMBIAR ESTADO DE LA COTIZACIÓN</label>
+          <select id="edit-status" onchange="mostrarTransicionesValidas()" style="width: 100%; padding: 12px; font-size: 1em; background: rgba(255,255,255,0.15); color: white; border: 2px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer;">
+            <option value="pendiente" ${cotizacionEditando.status === 'pendiente' ? 'selected' : ''}>📋 Pendiente</option>
+            <option value="contactado" ${cotizacionEditando.status === 'contactado' ? 'selected' : ''}>📞 Contactado</option>
+            <option value="completado" ${cotizacionEditando.status === 'completado' ? 'selected' : ''}>✅ Completado</option>
+            <option value="cancelado" ${cotizacionEditando.status === 'cancelado' ? 'selected' : ''}>❌ Cancelado</option>
+          </select>
+          <small id="transiciones-info" style="color: white; opacity: 0.9; margin-top: 12px; display: block; font-size: 0.95em;">Transiciones válidas: ${(transicionesValidas[cotizacionEditando.status] || []).join(', ') || 'Ninguna disponible'}</small>
+        </div>
+
+        <!-- SECCIÓN 5: NOTAS INTERNAS -->
+        <div class="modal-field" style="margin-bottom: 20px;">
+          <label style="font-size: 1em; margin-bottom: 8px; display: block;">✍️ Notas Internas</label>
+          <textarea id="edit-notas" placeholder="Agrega notas sobre el seguimiento, acciones tomadas, resultado final, etc..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.95em;">${notas}</textarea>
+          <small id="notas-count" style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.85em;">0 caracteres</small>
+        </div>
+      `;
+
+      document.getElementById('modal-body').innerHTML = html;
+      document.getElementById('modal-detalles').classList.add('active');
+      
+      // Contador de caracteres en notas
+      const notasInput = document.getElementById('edit-notas');
+      const notasCount = document.getElementById('notas-count');
+      if (notasInput && notasCount) {
+        notasInput.addEventListener('input', () => {
+          notasCount.textContent = `${notasInput.value.length} caracteres`;
+        });
+      }
+      
+      console.log(`📖 Modal abierto para cotización: ${cotizacionId} (${nombre})`);
+    }
+
+    function cerrarModal() {
+      document.getElementById('modal-detalles').classList.remove('active');
+      cotizacionEditando = null;
+    }
+
+    function mostrarTransicionesValidas() {
+      const statusSelect = document.getElementById('edit-status');
+      const transicionesInfo = document.getElementById('transiciones-info');
+      if (!statusSelect || !transicionesInfo) return;
+
+      const nuevoEstado = statusSelect.value;
+      const transicionesPermitidas = transicionesValidas[nuevoEstado] || [];
+      
+      if (transicionesPermitidas.length === 0) {
+        transicionesInfo.textContent = '🔒 Este estado es final, no se puede cambiar';
+        transicionesInfo.style.color = '#ffcccc';
+      } else {
+        transicionesInfo.textContent = `📤 Desde aquí puedes cambiar a: ${transicionesPermitidas.join(', ')}`;
+        transicionesInfo.style.color = 'rgba(255,255,255,0.9)';
+      }
+    }
+
+    // ============ VALIDACIÓN DE TRANSICIONES DE ESTADO ============
+    const transicionesValidas = {
+      'pendiente': ['contactado', 'cancelado'],
+      'contactado': ['completado', 'cancelado'],
+      'completado': [], // No se puede cambiar desde completado
+      'cancelado': []   // No se puede cambiar desde cancelado
+    };
+
+    function esTransicionValida(estadoActual, nuevoEstado) {
+      // Si no cambia, es válido
+      if (estadoActual === nuevoEstado) {
+        return { valid: true, message: 'Sin cambios' };
+      }
+
+      const transicionesPermitidas = transicionesValidas[estadoActual] || [];
+      if (transicionesPermitidas.includes(nuevoEstado)) {
+        return { valid: true, message: 'Transición válida' };
+      }
+
+      return {
+        valid: false,
+        message: `No se puede cambiar de "${estadoActual}" a "${nuevoEstado}"`
+      };
+    }
+
+    async function guardarCambios() {
+      if (!cotizacionEditando) {
+        console.error('❌ No hay cotización editándose');
+        return;
+      }
+
+      // Verificar CSRF token
+      const csrfToken = getCSRFToken();
+      if (!csrfToken) {
+        console.error('❌ Error de seguridad: Token CSRF no disponible');
+        alert('❌ Error de seguridad. Por favor recarga la página.');
+        return;
+      }
+
+      const nuevoEstado = sanitizeHTML(document.getElementById('edit-status').value).trim();
+      const notas = sanitizeHTML(document.getElementById('edit-notas').value).trim();
+      const cotizacionId = sanitizeHTML(cotizacionEditando.id).trim();
+
+      // Validar que el estado es uno de los valores permitidos
+      const estadosPermitidos = ['pendiente', 'contactado', 'completado', 'cancelado'];
+      if (!estadosPermitidos.includes(nuevoEstado)) {
+        console.error('❌ Estado inválido');
+        alert('❌ Estado inválido. Por favor selecciona un estado válido.');
+        return;
+      }
+
+      // Validar que la cotización ID no está vacía
+      if (!cotizacionId || cotizacionId === '' || cotizacionId === 'N/A') {
+        console.error('❌ ID de cotización inválido');
+        alert('❌ Error: ID de cotización inválido.');
+        return;
+      }
+
+      // Validar que las notas no sean exesivamente largas (máximo 5000 caracteres)
+      if (notas.length > 5000) {
+        alert('❌ Las notas no pueden superar 5000 caracteres.');
+        return;
+      }
+
+      // Validar transición
+      const validacion = esTransicionValida(cotizacionEditando.status, nuevoEstado);
+      if (!validacion.valid) {
+        alert(`❌ ${validacion.message}\n\nTransiciones válidas:\n${(transicionesValidas[cotizacionEditando.status] || []).join(', ') || 'Ninguna'}`);
+        return;
+      }
+
+      // Validar que haya cambios reales
+      const hayEstadoNuevo = nuevoEstado !== cotizacionEditando.status;
+      const hayNotasNuevas = notas !== (cotizacionEditando.notas || '');
+
+      if (!hayEstadoNuevo && !hayNotasNuevas) {
+        alert('ℹ️ No hay cambios que guardar');
+        return;
+      }
+
+      // Mostrar indicador de carga
+      const btnGuardar = document.querySelector('.btn-save');
+      const textOriginal = btnGuardar?.textContent || 'Guardar Cambios';
+      if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = '⏳ Guardando...';
+      }
+
+      console.log(`📝 Actualizando cotización ${cotizacionId}...`);
+      console.log(`  Estado: ${cotizacionEditando.status} → ${nuevoEstado}`);
+      console.log(`  Notas: ${notas.substring(0, 50)}...`);
+
+      const result = await actualizarEstadoCotizacion(
+        cotizacionId,
+        nuevoEstado,
+        notas,
+        csrfToken
+      );
+
+      // Restaurar botón
+      if (btnGuardar) {
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = textOriginal;
+      }
+
+      if (result.success) {
+        console.log('✅ Cotización actualizada');
+        
+        // Registrar en auditoría
+        registrarAuditoria('CAMBIO_ESTADO_COTIZACION', {
+          cotizacionId: cotizacionId,
+          cliente: sanitizeHTML(cotizacionEditando.nombre),
+          estadoAnterior: cotizacionEditando.status,
+          estadoNuevo: nuevoEstado,
+          notasActualizadas: hayNotasNuevas,
+          csrfTokenValidado: true
+        }, 'success');
+        
+        // Actualizar a nivel local para no recargar todo
+        cotizacionEditando.status = nuevoEstado;
+        cotizacionEditando.notas = notas;
+        confirmacion.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: #27ae60;
+          color: white;
+          padding: 30px 50px;
+          border-radius: 8px;
+          font-size: 18px;
+          font-weight: bold;
+          z-index: 9999;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        `;
+        confirmacion.textContent = '✅ Cambios guardados correctamente';
+        document.body.appendChild(confirmacion);
+
+        setTimeout(() => {
+          confirmacion.remove();
+          cerrarModal();
+          cargarCotizaciones(); // Recargar para ver cambios
+        }, 1500);
+      } else {
+        console.error('❌ Error al actualizar:', result.error);
+        
+        // Registrar intento fallido en auditoría
+        registrarAuditoria('CAMBIO_ESTADO_COTIZACION', {
+          cotizacionId: cotizacionEditando.id,
+          cliente: cotizacionEditando.nombre,
+          estadoAnterior: cotizacionEditando.status,
+          estadoNuevo: nuevoEstado,
+          error: result.error
+        }, 'failed');
+        
+        alert(`❌ Error al guardar: ${result.error}`);
+      }
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.getElementById('modal-detalles').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-detalles') {
+        cerrarModal();
+      }
+    });
+  </script>
+</body>
+</html>

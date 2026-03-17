@@ -1,0 +1,52 @@
+# Netlify Configuration
+# https://docs.netlify.com/configure-builds/file-conventions/
+
+# Build settings
+[build]
+  base = "/"
+  command = "npm run build || echo 'No build script needed - static site'"
+  publish = "."
+
+# Redirects for SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Environment Variables
+# IMPORTANT: Set these in Netlify Dashboard UI as well
+# They should NOT be in this file if they're sensitive
+[build.environment]
+  # NOTE: Admin credentials should NEVER be hardcoded here
+  # Use Netlify Dashboard: Site settings → Build & deploy → Environment
+  # Variables: ADMIN_USER, ADMIN_PASS
+  NODE_ENV = "production"
+
+# Cache settings
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "no-referrer-when-downgrade"
+
+[[headers]]
+  for = "/public/config-credentials.example.json"
+  [headers.values]
+    Cache-Control = "public, max-age=2592000"
+
+[[headers]]
+  for = "/*.{js,css,svg,png,jpg,jpeg,gif,webp,woff,woff2}"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Functions (if needed in future)
+# [functions]
+#   directory = "functions"
+
+# Scheduled functions (if needed)
+# [[scheduled_functions]]
+#   function = "my-function"
+#   cron = "0 0 * * *"

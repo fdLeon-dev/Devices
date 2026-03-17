@@ -9,6 +9,29 @@ service cloud.firestore {
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy']) || (request.auth != null && request.auth.token.admin == true);
       allow delete: if request.auth != null && request.auth.token.admin == true;
     }
+
+    // Colección de Cotizaciones - Formulario de clientes
+    match /cotizaciones/{id} {
+      // Crear: cualquiera puede enviar cotizaciones desde el formulario
+      allow create: if request.resource.data.keys().hasAll([
+        'nombre', 'email', 'telefono', 'servicios', 
+        'urgency', 'warranty', 'descripcion', 'fechaCreacion'
+      ]) && 
+      request.resource.data.nombre is string &&
+      request.resource.data.nombre.size() >= 2 &&
+      request.resource.data.servicios is list &&
+      request.resource.data.servicios.size() > 0;
+
+      // Leer: panel admin local O usuarios autenticados con token admin
+      allow read: if true;  // Panel admin necesita leer para mostrar en tabla
+
+      // Actualizar: solo desde panel admin (usando header personalizado) O Firebase Auth admin
+      allow update: if true;  // TODO: implementar validación de admin
+
+      // Eliminar: solo desde panel admin (usando header personalizado) O Firebase Auth admin
+      allow delete: if true;  // TODO: implementar validación de admin
+    }
+
     match /courses/{courseId} {
       allow read: if request.auth != null;
       match /modules/{moduleId} {

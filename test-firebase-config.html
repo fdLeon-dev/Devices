@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - Firebase Config Loading | Devices F2</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.8em;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .test-section {
+      margin: 30px 0;
+      padding: 20px;
+      border-left: 4px solid #667eea;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .test-section h3 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+
+    .test-item {
+      margin: 12px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-icon {
+      font-size: 1.5em;
+      min-width: 30px;
+    }
+
+    .status-label {
+      flex: 1;
+    }
+
+    .status-value {
+      font-family: 'Courier New', monospace;
+      color: #667eea;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+
+    .success {
+      border-left-color: #27ae60;
+      background-color: #f0fdf4;
+    }
+
+    .success .status-icon {
+      color: #27ae60;
+    }
+
+    .error {
+      border-left-color: #e74c3c;
+      background-color: #fdf0f0;
+    }
+
+    .error .status-icon {
+      color: #e74c3c;
+    }
+
+    .warning {
+      border-left-color: #f39c12;
+      background-color: #fffbf0;
+    }
+
+    .warning .status-icon {
+      color: #f39c12;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      margin-top: 20px;
+      transition: background 0.3s;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85em;
+      line-height: 1.4;
+    }
+
+    .instructions {
+      background: #f0f5ff;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 4px;
+      margin-top: 30px;
+    }
+
+    .instructions h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .instructions ol {
+      margin-left: 20px;
+      color: #555;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 Firebase Config Loading Test</h1>
+    <p>Esta página verifica si <code>firebase-config.js</code> se está cargando correctamente.</p>
+
+    <div class="test-section">
+      <h3>📋 Estado de Carga</h3>
+      
+      <div class="test-item success" id="script-check">
+        <span class="status-icon">✅</span>
+        <span class="status-label">firebase-config.js en HTML</span>
+        <span class="status-value">present</span>
+      </div>
+
+      <div class="test-item" id="firebase-sdk-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">Firebase SDK</span>
+        <span class="status-value">checking...</span>
+      </div>
+
+      <div class="test-item" id="sanitize-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">sanitizeInput()</span>
+        <span class="status-value">checking...</span>
+      </div>
+
+      <div class="test-item" id="firebase-init-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">initFirebase()</span>
+        <span class="status-value">checking...</span>
+      </div>
+
+      <div class="test-item" id="guardar-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">guardarCotizacionEnFirebase()</span>
+        <span class="status-value">checking...</span>
+      </div>
+
+      <div class="test-item" id="obtener-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">obtenerCotizacionesAdmin()</span>
+        <span class="status-value">checking...</span>
+      </div>
+
+      <div class="test-item" id="actualizar-check">
+        <span class="status-icon">⏳</span>
+        <span class="status-label">actualizarEstadoCotizacion()</span>
+        <span class="status-value">checking...</span>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h3>🐛 Consola del Navegador</h3>
+      <p>Abre F12 → Console para ver mensajes de debugging. Los logs te mostrarán exactamente dónde está el problema.</p>
+      <button onclick="openConsole()">Abrir Console (F12)</button>
+    </div>
+
+    <div class="instructions">
+      <h4>¿Algo no funciona?</h4>
+      <ol>
+        <li>Presiona <strong>F12</strong> para abrir Developer Tools</li>
+        <li>Ve a la pestaña <strong>Console</strong></li>
+        <li>Busca mensajes rojos de error</li>
+        <li>Si hay un error en <code>firebase-config.js</code>, cópialo y comparte conmigo</li>
+        <li>Si no ves mensajes de carga, el archivo no se está cargando (problema de servidor)</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Test Script -->
+  <script>
+    function updateCheck(elementId, status, message) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+
+      const statusIcon = element.querySelector('.status-icon');
+      const statusValue = element.querySelector('.status-value');
+
+      if (status === 'success') {
+        element.className = 'test-item success';
+        statusIcon.textContent = '✅';
+        statusValue.textContent = message || 'OK';
+      } else if (status === 'error') {
+        element.className = 'test-item error';
+        statusIcon.textContent = '❌';
+        statusValue.textContent = message || 'ERROR';
+      } else if (status === 'warning') {
+        element.className = 'test-item warning';
+        statusIcon.textContent = '⚠️';
+        statusValue.textContent = message || 'WARNING';
+      }
+    }
+
+    // Test Firebase SDK
+    setTimeout(() => {
+      if (typeof firebase !== 'undefined') {
+        updateCheck('firebase-sdk-check', 'success', 'loaded');
+      } else {
+        updateCheck('firebase-sdk-check', 'error', 'no loaded');
+      }
+    }, 500);
+
+    // Test Validation Functions
+    setTimeout(() => {
+      if (typeof sanitizeInput === 'function') {
+        updateCheck('sanitize-check', 'success', 'loaded');
+      } else {
+        updateCheck('sanitize-check', 'error', 'not found');
+      }
+
+      if (typeof initFirebase === 'function') {
+        updateCheck('firebase-init-check', 'success', 'loaded');
+      } else {
+        updateCheck('firebase-init-check', 'error', 'not found');
+      }
+
+      if (typeof guardarCotizacionEnFirebase === 'function') {
+        updateCheck('guardar-check', 'success', 'loaded');
+      } else {
+        updateCheck('guardar-check', 'error', 'not found');
+      }
+
+      if (typeof obtenerCotizacionesAdmin === 'function') {
+        updateCheck('obtener-check', 'success', 'loaded');
+      } else {
+        updateCheck('obtener-check', 'error', 'not found');
+      }
+
+      if (typeof actualizarEstadoCotizacion === 'function') {
+        updateCheck('actualizar-check', 'success', 'loaded');
+      } else {
+        updateCheck('actualizar-check', 'error', 'not found');
+      }
+    }, 1000);
+
+    function openConsole() {
+      alert('Abre la Consola presionando F12 (Windows/Linux) o Cmd+Option+I (Mac)');
+    }
+  </script>
+</body>
+</html>

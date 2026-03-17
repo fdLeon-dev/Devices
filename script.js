@@ -19,6 +19,90 @@ const statNumbers = document.querySelectorAll('.stat-number');
 // Global variables for quiz editor
 let currentQuiz = [];
 
+// ============ SECURITY: Input Validation & Sanitization ============
+// Rate limiting for form submissions
+const rateLimitTracker = {
+  pdf: { lastTime: 0, minInterval: 2000 },
+  email: { lastTime: 0, minInterval: 3000 }
+};
+
+/**
+ * Escapa caracteres HTML peligrosos para prevenir XSS
+ * @param {string} str - String a escapar
+ * @returns {string} String escapado
+ */
+function sanitizeHTML(str) {
+  if (!str || typeof str !== 'string') return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+    '/': '&#x2F;'
+  };
+  return str.replace(/[&<>"'\/]/g, (char) => map[char]);
+}
+
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return '';
+  return sanitizeHTML(input)
+    .trim();
+}
+
+function validateEmail(email) {
+  const sanitized = sanitizeInput(email);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(sanitized) && sanitized.length <= 254;
+}
+
+function validatePhone(phone) {
+  const sanitized = sanitizeInput(phone);
+  const phoneRegex = /^[\d+\-\s()]+$/;
+  return phoneRegex.test(sanitized) && sanitized.length >= 7 && sanitized.length <= 20;
+}
+
+function validateName(name) {
+  const sanitized = sanitizeInput(name);
+  return sanitized.length >= 2 && sanitized.length <= 100;
+}
+
+function checkRateLimit(type) {
+  const now = Date.now();
+  if (now - rateLimitTracker[type].lastTime < rateLimitTracker[type].minInterval) {
+    return false;
+  }
+  rateLimitTracker[type].lastTime = now;
+  return true;
+}
+
+// ============ END SECURITY ============
+
+// ============ FALLBACK FUNCTIONS (si firebase-config.js no se carga) ============
+// Estas funciones se sobrescriben si firebase-config.js carga correctamente
+if (typeof guardarCotizacionEnFirebase === 'undefined') {
+  window.guardarCotizacionEnFirebase = async function(data) {
+    console.warn('⚠️ Usando fallback de guardarCotizacionEnFirebase (archivo no cargado)');
+    return { success: false, error: 'Firebase config no cargado' };
+  };
+}
+
+if (typeof obtenerCotizacionesAdmin === 'undefined') {
+  window.obtenerCotizacionesAdmin = async function() {
+    console.warn('⚠️ Usando fallback de obtenerCotizacionesAdmin');
+    return { success: false, error: 'Firebase config no cargado' };
+  };
+}
+
+if (typeof actualizarEstadoCotizacion === 'undefined') {
+  window.actualizarEstadoCotizacion = async function(id, status, notas) {
+    console.warn('⚠️ Usando fallback de actualizarEstadoCotizacion');
+    return { success: false, error: 'Firebase config no cargado' };
+  };
+}
+
+// ============ INITIALIZE ============
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function () {
   initializeApp();
@@ -63,9 +147,21 @@ function showToast(message, type = 'info', timeout = 4000) {
   const toast = document.createElement('div');
   toast.className = 'toast ' + type;
   toast.setAttribute('role', 'alert');
-  toast.innerHTML = `<span class="msg">${message}</span><button class="close" aria-label="Cerrar">×</button>`;
+  
+  // Create message span safely
+  const msgSpan = document.createElement('span');
+  msgSpan.className = 'msg';
+  msgSpan.textContent = message; // Safe - no HTML parsing
+  
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close';
+  closeBtn.setAttribute('aria-label', 'Cerrar');
+  closeBtn.textContent = '×';
+  
+  toast.appendChild(msgSpan);
+  toast.appendChild(closeBtn);
 
-  const closeBtn = toast.querySelector('.close');
   closeBtn.addEventListener('click', () => {
     toast.remove();
   });
@@ -993,6 +1089,44 @@ async function handleFormSubmit(e) {
   submitBtn.disabled = true;
 
   try {
+    // 🔥 GUARDADOR EN FIREBASE - Guardar cotización en base de datos
+    console.log('💾 Guardando cotización en Firestore...');
+    
+    // Verificar que Firebase esté inicializado y la función exista
+    if (typeof guardarCotizacionEnFirebase !== 'function') {
+      console.error('❌ guardarCotizacionEnFirebase no está disponible');
+      console.log('📌 Iniciando Firebase manualmente...');
+      
+      // Intentar inicializar Firebase
+      if (typeof initFirebase === 'function') {
+        const firebaseOk = initFirebase();
+        console.log('Firebase init result:', firebaseOk);
+      } else {
+        console.error('❌ initFirebase tampoco está disponible - firebase-config.js no se cargó');
+      }
+      
+      // Esperar un momento para que Firebase se inicialice
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // Si la función existe ahora, usarla
+    if (typeof guardarCotizacionEnFirebase === 'function') {
+      const firebaseResult = await guardarCotizacionEnFirebase(data);
+      
+      if (firebaseResult.success) {
+        console.log('✅ Cotización guardada en Firestore con ID:', firebaseResult.id);
+        // Agregar ID de Firebase al objeto data para referencia
+        data.firebaseId = firebaseResult.id;
+      } else {
+        console.warn('⚠️ Advertencia guardar cotización:', firebaseResult.error);
+        // Continuar aunque falle Firestore, no es bloqueante
+      }
+    } else {
+      console.warn('⚠️ Firebase SDK no completamente cargado, continuando sin guardar en BD');
+      console.warn('ℹ️ Intenta recargar la página (F5) si el problema persiste');
+      showNotification('La cotización será procesada (sin respaldo en BD)', 'warning');
+    }
+
     console.log('typeof enviarEmailCotizacion =', typeof enviarEmailCotizacion);
     const emailResult = await enviarEmailCotizacion(data, null); // Enviar email sin PDF primero
     console.log('emailResult recibido:', emailResult);
@@ -1357,15 +1491,44 @@ function showNotification(message, type = 'info') {
   const notification = document.createElement('div');
   notification.className = `notification notification-${type}`;
   const iconName = (type === 'success') ? 'check-circle' : 'info-circle';
-  notification.innerHTML = `
-        <div class="notification-content">
-            <svg class="icon icon-${iconName}" aria-hidden="true"><use href="#i-${iconName}"></use></svg>
-            <span>${message}</span>
-        </div>
-        <button class="notification-close" onclick="this.parentElement.remove()">
-            <svg class="icon icon-times" aria-hidden="true"><use href="#i-times"></use></svg>
-        </button>
-    `;
+  
+  // Create content safely without innerHTML
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'notification-content';
+  
+  // Create SVG icon (safe - no user input)
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.classList.add('icon', `icon-${iconName}`);
+  svg.setAttribute('aria-hidden', 'true');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', `#i-${iconName}`);
+  svg.appendChild(use);
+  
+  // Create message span (safe - uses textContent)
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = message; // Safe - no HTML parsing
+  
+  contentDiv.appendChild(svg);
+  contentDiv.appendChild(msgSpan);
+  notification.appendChild(contentDiv);
+  
+  // Create close button
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'notification-close';
+  closeBtn.addEventListener('click', function() {
+    this.parentElement.remove();
+  });
+  
+  // Create SVG for close button
+  const closeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  closeSvg.classList.add('icon', 'icon-times');
+  closeSvg.setAttribute('aria-hidden', 'true');
+  const closeUse = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  closeUse.setAttribute('href', '#i-times');
+  closeSvg.appendChild(closeUse);
+  
+  closeBtn.appendChild(closeSvg);
+  notification.appendChild(closeBtn);
 
   // Add styles
   notification.style.cssText = `
@@ -2671,11 +2834,36 @@ function getCalculatorQuoteData() {
 }
 
 function downloadQuotePdf() {
+  // Rate limiting check
+  if (!checkRateLimit('pdf')) {
+    showToast('Por favor espera antes de descargar otro PDF', 'error', 3000);
+    return;
+  }
+
+  // Get and validate form inputs
+  const nameInput = document.getElementById('quote-name')?.value || '';
+  const emailInput = document.getElementById('quote-email')?.value || '';
+  const phoneInput = document.getElementById('quote-phone')?.value || '';
+  
+  // Validate inputs
+  if (!validateName(nameInput)) {
+    showToast('Por favor ingresa un nombre válido (2-100 caracteres)', 'error');
+    return;
+  }
+  if (!validateEmail(emailInput)) {
+    showToast('Por favor ingresa un email válido', 'error');
+    return;
+  }
+  if (!validatePhone(phoneInput)) {
+    showToast('Por favor ingresa un teléfono válido (7-20 caracteres)', 'error');
+    return;
+  }
+
   const datos = getCalculatorQuoteData();
   const datosFactura = {
-    userName: document.getElementById('quote-name')?.value || 'Cliente Web',
-    userEmail: document.getElementById('quote-email')?.value || 'no-reply@devices.f2',
-    userPhone: document.getElementById('quote-phone')?.value || 'No proporcionado',
+    userName: sanitizeInput(nameInput) || 'Cliente Web',
+    userEmail: sanitizeInput(emailInput) || 'no-reply@devices.f2',
+    userPhone: sanitizeInput(phoneInput) || 'No proporcionado',
     servicios: datos.servicios,
     urgency: datos.urgencyText,
     warranty: datos.warrantyText,
@@ -2683,7 +2871,7 @@ function downloadQuotePdf() {
     urgencyPrice: datos.urgencyPrice,
     warrantyPrice: datos.warrantyPrice,
     totalPrice: datos.totalPrice,
-    descripcion: datos.descripcion
+    descripcion: sanitizeInput(datos.descripcion)
   };
 
   generarPdfCotizacion(datosFactura).then(pdfDataUrl => {

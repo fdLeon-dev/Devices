@@ -3,6 +3,11 @@ serviceAccountKey.json
 firebase-debug.log
 firestore-debug.log
 
+# Credentials (security - never commit)
+config-credentials.json
+config-credentials.local.json
+.env.credentials
+
 # Node.js
 node_modules/
 npm-debug.log*
