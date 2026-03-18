@@ -1359,7 +1359,7 @@
       const urgency = sanitizeHTML(cotizacionEditando.urgency || 'normal');
       const warranty = sanitizeHTML(cotizacionEditando.warranty || '30');
       const fechaPreferida = sanitizeHTML(cotizacionEditando.fechaPreferida || '-');
-      const cotizacionId = sanitizeHTML(cotizacionEditando.id || 'N/A');
+      cotizacionId = sanitizeHTML(cotizacionEditando.id || 'N/A');
       const basePrice = (cotizacionEditando.basePrice || 0).toFixed(2);
       const urgencyPrice = (cotizacionEditando.urgencyPrice || 0).toFixed(2);
       const warrantyPrice = (cotizacionEditando.warrantyPrice || 0).toFixed(2);
@@ -1529,7 +1529,7 @@
 
       const nuevoEstado = sanitizeHTML(document.getElementById('edit-status').value).trim();
       const notas = sanitizeHTML(document.getElementById('edit-notas').value).trim();
-      const cotizacionId = sanitizeHTML(cotizacionEditando.id).trim();
+      cotizacionId = sanitizeHTML(cotizacionEditando.id).trim();
 
       // Validar que el estado es uno de los valores permitidos
       const estadosPermitidos = ['pendiente', 'contactado', 'completado', 'cancelado'];
