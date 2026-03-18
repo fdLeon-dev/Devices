@@ -761,27 +761,43 @@
   <script src="firebase-config.js?v=20260316-1"></script>
   <script>
     // ============ AUTENTICACIÓN + SEGURIDAD ============
-    // Las credenciales se cargan desde config-credentials.json (no versionado en git)
+    // Las credenciales se cargan desde variables de entorno (Netlify) o archivo local
     let ADMIN_CREDENTIALS = {
       usuario: "admin",
       contraseña: "demo"
     };
 
-    // Cargar credenciales desde archivo seguro (no en GitHub)
+    // Cargar credenciales desde variables de entorno o archivo
     (async () => {
+      // Primero: Intentar desde variables de entorno (PRODUCCIÓN - Netlify)
+      // En Netlify, inject variables via function o edge context
+      if (window.ADMIN_USER && window.ADMIN_PASS) {
+        ADMIN_CREDENTIALS = {
+          usuario: window.ADMIN_USER,
+          contraseña: window.ADMIN_PASS
+        };
+        console.log('✅ Credenciales cargadas desde variables de entorno Netlify');
+        return;
+      }
+      
+      // Segundo: Intentar desde archivo (LOCAL/configuración manual)
       try {
-        const response = await fetch('./config-credentials.json?v=' + Date.now());
+        const response = await fetch('./public/config-credentials.json?v=' + Date.now());
         if (response.ok) {
           const config = await response.json();
           if (config.admin && config.admin.usuario && config.admin.contraseña) {
             ADMIN_CREDENTIALS = config.admin;
             console.log('✅ Credenciales cargadas desde config-credentials.json');
+            return;
           }
         }
       } catch (error) {
-        console.warn('⚠️ No se pudieron cargar credenciales desde archivo de configuración');
-        console.warn('📝 Crea /public/config-credentials.json basándote en config-credentials.example.json');
+        // Silenciar en caso de no encontrar archivo
       }
+      
+      console.warn('⚠️ Credenciales no configuradas');
+      console.warn('📝 NETLIFY: Configura ADMIN_USER y ADMIN_PASS en Site settings → Build & deploy → Environment');
+      console.warn('📝 LOCAL: Crea /public/config-credentials.json desde config-credentials.example.json');
     })();
 
     // ============ SANITIZACIÓN Y VALIDACIÓN (XSS Protection) ============
