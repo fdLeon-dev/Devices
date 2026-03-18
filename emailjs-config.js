@@ -9,7 +9,8 @@ console.log('%c[DEV] emailjs-config.js cargado', 'color: #6A4CDB; font-weight: b
 // 4. Crea otra plantilla de email para el cliente (clientTemplateId) - usa campos como {{to_email}}, {{userName}}, {{userEmail}}, {{servicesList}}, {{total}}, {{currentDate}}
 // 5. Copia tus credenciales aquí
 
-const EMAILJS_CONFIG = {
+// Usar variables de entorno de Netlify si están disponibles, sino usar defaults
+const EMAILJS_CONFIG = window.EMAILJS_CONFIG_ENV || {
   publicKey: 'y9GCD4RwWJbp-dnRO',     // Reemplaza con tu Public Key
   serviceId: 'service_yapkcmx',     // Reemplaza con tu Service ID
   templateId: 'template_o9khfnz',    // Template para el negocio (cotización formulario)

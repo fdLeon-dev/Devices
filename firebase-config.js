@@ -43,7 +43,8 @@ function validateName(name) {
 
 // ============ CONFIGURACIÓN FIREBASE ============
 
-const firebaseConfig = {
+// Usar variables de entorno de Netlify si están disponibles, sino usar defaults
+const firebaseConfig = window.FIREBASE_CONFIG_ENV || {
   apiKey: "AIzaSyCOpKYq8zf09y3GFurGauAtI7H2-PxLWS8",
   authDomain: "devices-41420.firebaseapp.com",
   projectId: "devices-41420",

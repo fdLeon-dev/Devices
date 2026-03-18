@@ -757,48 +757,53 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <!-- Cargar configuración desde variables de entorno PRIMERO -->
+  <script src="config-loader.js?v=20260318"></script>
   <!-- Firebase Config con cache-busting -->
   <script src="firebase-config.js?v=20260316-1"></script>
   <script>
     // ============ AUTENTICACIÓN + SEGURIDAD ============
-    // Las credenciales se cargan desde variables de entorno (Netlify) o archivo local
+    // Las credenciales se cargan desde config-loader.js (variables de entorno de Netlify)
     let ADMIN_CREDENTIALS = {
-      usuario: "admin",
-      contraseña: "demo"
+      usuario: window.ADMIN_USER || "",
+      contraseña: window.ADMIN_PASS || ""
     };
 
-    // Cargar credenciales desde variables de entorno o archivo
-    (async () => {
-      // Primero: Intentar desde variables de entorno (PRODUCCIÓN - Netlify)
-      // En Netlify, inject variables via function o edge context
-      if (window.ADMIN_USER && window.ADMIN_PASS) {
-        ADMIN_CREDENTIALS = {
-          usuario: window.ADMIN_USER,
-          contraseña: window.ADMIN_PASS
-        };
-        console.log('✅ Credenciales cargadas desde variables de entorno Netlify');
-        return;
-      }
-      
-      // Segundo: Intentar desde archivo (LOCAL/configuración manual)
-      try {
-        const response = await fetch('./public/config-credentials.json?v=' + Date.now());
-        if (response.ok) {
-          const config = await response.json();
-          if (config.admin && config.admin.usuario && config.admin.contraseña) {
-            ADMIN_CREDENTIALS = config.admin;
-            console.log('✅ Credenciales cargadas desde config-credentials.json');
-            return;
+    // Si config-loader.js ya las cargó, no hacer nada más
+    if (window.__CONFIG_LOADED__) {
+      console.log('✅ Credenciales ya cargadas por config-loader.js');
+    } else {
+      // Fallback: intentar cargar desde función Netlify (para casos edge)
+      (async () => {
+        try {
+          const response = await fetch('/.netlify/functions/inject-env');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.admin && data.admin.usuario && data.admin.contraseña) {
+              ADMIN_CREDENTIALS = data.admin;
+              console.log('✅ Credenciales cargadas desde función Netlify');
+              return;
+            }
           }
+        } catch (error) {
+          // Ignorar
         }
-      } catch (error) {
-        // Silenciar en caso de no encontrar archivo
-      }
-      
-      console.warn('⚠️ Credenciales no configuradas');
-      console.warn('📝 NETLIFY: Configura ADMIN_USER y ADMIN_PASS en Site settings → Build & deploy → Environment');
-      console.warn('📝 LOCAL: Crea /public/config-credentials.json desde config-credentials.example.json');
-    })();
+        
+        // Fallback: intentar desde archivo local
+        try {
+          const response = await fetch('./public/config-credentials.json?v=' + Date.now());
+          if (response.ok) {
+            const config = await response.json();
+            if (config.admin && config.admin.usuario && config.admin.contraseña) {
+              ADMIN_CREDENTIALS = config.admin;
+              console.log('✅ Credenciales cargadas desde config-credentials.json');
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ No se analizó el archivo de credenciales');
+        }
+      })();
+    }
 
     // ============ SANITIZACIÓN Y VALIDACIÓN (XSS Protection) ============
     /**
