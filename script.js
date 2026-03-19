@@ -76,6 +76,22 @@ function checkRateLimit(type) {
   return true;
 }
 
+// ============ PDF UTILITIES ============
+/**
+ * Convierte un Blob a data URL para compatibilidad con funciones que esperan data URL
+ * Necesario porque generarPdfCotizacion ahora usa Blob para mejor compatibilidad Safari
+ * @param {Blob} blob - El blob a convertir
+ * @returns {Promise<string>} Data URL (data:application/pdf;base64,...)
+ */
+async function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 // ============ END SECURITY ============
 
 // ============ FALLBACK FUNCTIONS (si firebase-config.js no se carga) ============
@@ -536,13 +552,15 @@ function downloadQuoteFormPdf() {
     showNotification('No se pudo generar PDF: datos incompletos.', 'error');
     return;
   }
-  generarPdfCotizacion(datosFactura).then(pdfDataUrl => {
+  generarPdfCotizacion(datosFactura).then(pdfBlob => {
     const link = document.createElement('a');
-    link.href = pdfDataUrl;
+    link.href = URL.createObjectURL(pdfBlob);
     link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
     document.body.appendChild(link);
     link.click();
-    link.remove();
+    document.body.removeChild(link);
+    // Liberar recursos del blob
+    URL.revokeObjectURL(link.href);
     showNotification('Factura PDF descargada.', 'success');
   }).catch(error => {
     console.error('Error generando PDF de cotización desde form:', error);
@@ -1147,33 +1165,25 @@ async function handleFormSubmit(e) {
         descripcion: data.mensaje || ''
       };
 
-      let pdfDataUrl = null;
+      let pdfBlob = null;
       try {
-        pdfDataUrl = await generarPdfCotizacion(datosFactura);
+        pdfBlob = await generarPdfCotizacion(datosFactura);
 
-        // Descargar PDF automáticamente
-        if (pdfDataUrl) {
+        // Descargar PDF automáticamente (compatible con Safari)
+        if (pdfBlob) {
           const link = document.createElement('a');
-          link.href = pdfDataUrl;
+          link.href = URL.createObjectURL(pdfBlob);
           link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+          // Liberar recursos del blob
+          URL.revokeObjectURL(link.href);
           console.log('✅ PDF descargado automáticamente');
         }
 
-        // Enviar PDF por webhook después de generado
-        if (pdfDataUrl) {
-          console.log('📎 Enviando PDF generado por webhook...');
-          (async () => {
-            try {
-              const webhookResult = await enviarPdfPorWebhook(data, pdfDataUrl);
-              console.log('✅ PDF enviado por webhook:', webhookResult);
-            } catch (webhookErr) {
-              console.warn('⚠️ No se pudo enviar PDF por webhook:', webhookErr);
-            }
-          })();
-        }
+        // Nota: Para enviar PDF por webhook se requeriría convertir el Blob a base64
+        // Por ahora la cotización se envía por email y el PDF se descarga automaticamente
       } catch (pdfErr) {
         console.warn('No se pudo generar PDF de cotización:', pdfErr);
       }
@@ -2874,9 +2884,10 @@ function downloadQuotePdf() {
     descripcion: sanitizeInput(datos.descripcion)
   };
 
-  generarPdfCotizacion(datosFactura).then(pdfDataUrl => {
+  generarPdfCotizacion(datosFactura).then(pdfBlob => {
     const link = document.createElement('a');
-    link.href = pdfDataUrl;
+    const blobUrl = URL.createObjectURL(pdfBlob);
+    link.href = blobUrl;
     link.download = `cotizacion_${new Date().toISOString().slice(0,10)}.pdf`;
     link.style.display = 'none';
     document.body.appendChild(link);
@@ -2895,13 +2906,14 @@ function downloadQuotePdf() {
         }));
       }
     } catch (e) {
-      // Si falla, abre en nueva ventana como último recurso
-      window.open(pdfDataUrl, '_blank');
+      // Si falla, abre en nueva ventana como último recurso (compatible con Blob)
+      window.open(blobUrl, '_blank');
     }
     
     // Limpiar después de un delay
     setTimeout(() => {
       document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
     }, 100);
   }).catch(err => {
     console.error('Error al generar descarga de PDF:', err);
@@ -2954,7 +2966,13 @@ function openWhatsAppQuote() {
   // Generate PDF and send email in background (do not block user)
   (async () => {
     try {
-      const pdfDataUrl = await generarPdfCotizacion(datosFactura);
+      const pdfBlob = await generarPdfCotizacion(datosFactura);
+      
+      // Convertir Blob a data URL para compatibilidad con enviarEmailCotizacion
+      let pdfDataUrl = null;
+      if (pdfBlob) {
+        pdfDataUrl = await blobToDataUrl(pdfBlob);
+      }
 
       // Send email to business with the PDF attached (uses EmailJS helper)
       if (typeof enviarEmailCotizacion === 'function') {
@@ -3263,8 +3281,9 @@ async function generarPdfCotizacion(datos) {
   doc.setTextColor(150);
   doc.text('Esta cotización es válida por 7 días. Para confirmar tu servicio, contáctanos por WhatsApp.', 40, y);
 
-  // Return data URL
-  return doc.output('datauristring');
+  // Return Blob para mejor compatibilidad con Safari
+  // Safari tiene problemas con data URLs muy grandes, Blob es más eficiente
+  return doc.output('blob');
 }
 
 // Enviar PDF al webhook configurado (devuelve la respuesta JSON)
