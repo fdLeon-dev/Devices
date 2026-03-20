@@ -3030,14 +3030,32 @@ function openWhatsAppQuote() {
         }
       };
 
-      // Enviar email vía servidor seguro (sin exponer credenciales)
-      console.log('📧 Enviando cotización de calculadora via servidor...');
-      const res = await sendEmailViaServer(datosFormulario, pdfBlob);
-      
-      if (res.success) {
-        console.log('✅ Cotización enviada exitosamente:', res.response);
-      } else {
-        console.warn('⚠️ No se pudo enviar cotización por email:', res.error);
+      // Enviar email con EmailJS directamente (legacy) -- evita dependencias serverless para este flujo
+      console.log('📧 Enviando cotización de calculadora via EmailJS...');
+      datosFormulario.fromCalculator = true;
+
+      // Convertir PDF Blob a data URL para que enviarEmailCotizacion lo use (adjunto opcional)
+      let pdfDataUrl = null;
+      try {
+        pdfDataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(pdfBlob);
+        });
+      } catch (convertErr) {
+        console.warn('⚠️ No se pudo convertir PDF a dataURL (seguimos sin adjunto):', convertErr);
+      }
+
+      try {
+        const res = await enviarEmailCotizacion(datosFormulario, pdfDataUrl);
+        if (res.success) {
+          console.log('✅ Cotización enviada exitosamente:', res.response);
+        } else {
+          console.warn('⚠️ No se pudo enviar cotización por email:', res.error);
+        }
+      } catch (err) {
+        console.error('❌ Error crítico al enviar cotización por EmailJS:', err);
       }
     } catch (err) {
       console.error('Error generando/enviando cotización:', err);

@@ -13,13 +13,18 @@ console.log('%c[LEGACY] emailjs-config.js cargado - Usar email-client.js en su l
 
 // Usar credenciales desde variables globales configuradas por config-loader.js
 // config-loader.js las carga desde /.netlify/functions/inject-env (Netlify)
+const configFromEnv = (window.__ENV_CONFIG__ && window.__ENV_CONFIG__.emailjs) ? window.__ENV_CONFIG__.emailjs : {};
 const EMAILJS_CONFIG = window.EMAILJS_CONFIG_ENV || {
-  publicKey: '',      // ⚠️ NO hardcodear por seguridad
-  serviceId: '',      // ⚠️ Se cargan desde config-loader.js
-  templateId: '',     // ⚠️ (variables de entorno de Netlify)
-  calculatorTemplateId: '',
-  clientTemplateId: ''
+  publicKey: configFromEnv.publicKey || 'y9GCD4RwWJbp-dnRO',
+  serviceId: configFromEnv.serviceId || 'service_yapkcmx',
+  templateId: configFromEnv.templateId || 'template_o9khfnz',
+  calculatorTemplateId: configFromEnv.calculatorTemplateId || 'template_h72ctck',
+  clientTemplateId: configFromEnv.clientTemplateId || 'template_h72ctck'
 };
+
+if (!window.EMAILJS_CONFIG_ENV) {
+  console.warn('%c[LEGACY] EMAILJS_CONFIG_ENV no está definido; usando valores fallback', 'color: #ff9800; font-weight: bold;');
+}
 
 // Helper functions for form data processing
 function getUrgencyText(urgencyValue) {
