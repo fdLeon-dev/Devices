@@ -373,7 +373,7 @@ function calcularPrecios(servicio, urgency, warranty) {
     upgrade: 2000,
     'upgrade-ram': 800,
     'upgrade-gpu': 2000,
-    'upgrade-motherboard': 2800,
+    'upgrade-motherboard': 1600,
     'upgrade-ssd': 1200,
     'upgrade-cpu': 2500,
     'upgrade-completo': 3500,
