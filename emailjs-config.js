@@ -1,21 +1,24 @@
 // Configuración de EmailJS para Devices F2
-console.log('%c[DEV] emailjs-config.js cargado', 'color: #6A4CDB; font-weight: bold;');
-// IMPORTANTE: Debes configurar EmailJS para que funcione
+console.log('%c[LEGACY] emailjs-config.js cargado - Usar email-client.js en su lugar', 'color: #ff9800; font-weight: bold;');
 
-// Instrucciones de configuración:
-// 1. Ve a https://www.emailjs.com/ y crea una cuenta gratis
-// 2. Crea un servicio de email (Gmail, Outlook, etc.)
-// 3. Crea una plantilla de email para el negocio (templateId)
-// 4. Crea otra plantilla de email para el cliente (clientTemplateId) - usa campos como {{to_email}}, {{userName}}, {{userEmail}}, {{servicesList}}, {{total}}, {{currentDate}}
-// 5. Copia tus credenciales aquí
+/**
+ * ⚠️ ARCHIVO LEGACY - USAR email-client.js EN SU LUGAR
+ * 
+ * Este archivo está aquí como fallback para compatibilidad.
+ * Las credenciales de EmailJS se cargan desde config-loader.js (variables de entorno Netlify)
+ * 
+ * RECOMENDACIÓN: Usar sendEmailViaServer() en email-client.js
+ * Eso NO expone ninguna credencial en el navegador.
+ */
 
-// Usar variables de entorno de Netlify si están disponibles, sino usar defaults
+// Usar credenciales desde variables globales configuradas por config-loader.js
+// config-loader.js las carga desde /.netlify/functions/inject-env (Netlify)
 const EMAILJS_CONFIG = window.EMAILJS_CONFIG_ENV || {
-  publicKey: 'y9GCD4RwWJbp-dnRO',     // Reemplaza con tu Public Key
-  serviceId: 'service_yapkcmx',     // Reemplaza con tu Service ID
-  templateId: 'template_o9khfnz',    // Template para el negocio (cotización formulario)
-  calculatorTemplateId: 'template_h72ctck', // Template para la calculadora
-  clientTemplateId: 'template_h72ctck' // Template para el cliente (calculadora) - formulario usa templateId
+  publicKey: '',      // ⚠️ NO hardcodear por seguridad
+  serviceId: '',      // ⚠️ Se cargan desde config-loader.js
+  templateId: '',     // ⚠️ (variables de entorno de Netlify)
+  calculatorTemplateId: '',
+  clientTemplateId: ''
 };
 
 // Helper functions for form data processing

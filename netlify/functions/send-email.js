@@ -1,7 +1,6 @@
 // Netlify Function para enviar emails de forma segura
 // El cliente NO tiene acceso a las credenciales de EmailJS
-
-const emailjs = require('@emailjs/nodejs');
+// Usa la API REST de EmailJS directamente (no requiere dependencia)
 
 exports.handler = async (event, context) => {
   // CORS - Solo aceptar desde tu dominio
@@ -20,11 +19,6 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ error: 'CORS Error: Origen no permitido' })
     };
   }
-
-  // Rate limiting por IP
-  const clientIP = event.headers['client-ip'] || event.headers['x-forwarded-for'];
-  const rateLimitKey = `email_${clientIP}`;
-  // Aquí podrías usar DynamoDB o localStorage del servidor para tracking
 
   try {
     // Solo aceptar POST
@@ -70,14 +64,12 @@ exports.handler = async (event, context) => {
     const emailjsClientTemplateId = process.env.EMAILJS_CLIENT_TEMPLATE_ID;
 
     if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
+      console.error('❌ Falta configuración de EmailJS');
       return {
         statusCode: 500,
         body: JSON.stringify({ error: 'Configuración de EmailJS no disponible' })
       };
     }
-
-    // Inicializar EmailJS con credenciales del servidor
-    emailjs.init(emailjsPublicKey);
 
     // Preparar parámetros del email
     const templateParams = {
@@ -96,7 +88,7 @@ exports.handler = async (event, context) => {
       reply_to: data.userEmail || 'devices.f02@gmail.com'
     };
 
-    // Enviar al negocio
+    // Enviar al negocio via API REST de EmailJS
     const businessPayload = {
       service_id: emailjsServiceId,
       template_id: emailjsTemplateId,
@@ -107,33 +99,47 @@ exports.handler = async (event, context) => {
       }
     };
 
-    // Enviar email
-    const response = await emailjs.send(
-      emailjsServiceId,
-      emailjsTemplateId,
-      templateParams,
-      { publicKey: emailjsPublicKey }
-    );
+    console.log('📧 Enviando email al negocio...');
+    const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(businessPayload)
+    });
 
-    console.log('📧 Email enviado exitosamente:', response.status);
+    if (!businessResponse.ok) {
+      const error = await businessResponse.text();
+      console.error('❌ Error EmailJS:', error);
+      throw new Error(`EmailJS error: ${businessResponse.status}`);
+    }
+
+    console.log('✅ Email al negocio enviado exitosamente');
 
     // Si viene un email de cliente, enviar confirmación
     if (data.userEmail && data.userEmail.includes('@')) {
       try {
+        console.log('📧 Enviando email de confirmación al cliente...');
         const clientPayload = {
-          ...templateParams,
-          to_email: data.userEmail,
-          message: `Gracias por tu cotización. Los servicios solicitados fueron: ${data.servicesList}`
+          service_id: emailjsServiceId,
+          template_id: emailjsClientTemplateId || emailjsTemplateId,
+          user_id: emailjsPublicKey,
+          template_params: {
+            ...templateParams,
+            to_email: data.userEmail,
+            message: `Gracias por tu cotización. Los servicios solicitados fueron: ${data.servicesList}`
+          }
         };
 
-        await emailjs.send(
-          emailjsServiceId,
-          emailjsClientTemplateId || emailjsTemplateId,
-          clientPayload,
-          { publicKey: emailjsPublicKey }
-        );
+        const clientResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clientPayload)
+        });
 
-        console.log('📧 Email de confirmación enviado al cliente');
+        if (clientResponse.ok) {
+          console.log('✅ Email de confirmación enviado al cliente');
+        } else {
+          console.warn('⚠️ No se pudo enviar email de confirmación');
+        }
       } catch (clientErr) {
         console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr);
         // No es error crítico, continuar
