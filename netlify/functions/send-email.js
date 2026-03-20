@@ -142,26 +142,32 @@ exports.handler = async (event, context) => {
     console.log('📧 [send-email] Enviando email al negocio...');
     console.log('📧 [send-email] Payload:', JSON.stringify(businessPayload).substring(0, 200) + '...');
     
-    const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(businessPayload)
-    });
+    let businessResponse;
+    try {
+      businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(businessPayload)
+      });
 
-    console.log('📧 [send-email] Respuesta de EmailJS:', businessResponse.status);
+      console.log('📧 [send-email] Respuesta de EmailJS:', businessResponse.status);
 
-    if (!businessResponse.ok) {
-      const error = await businessResponse.text();
-      console.error('❌ [send-email] Error de EmailJS:', businessResponse.status, error);
-      throw new Error(`EmailJS error: ${businessResponse.status} - ${error}`);
+      if (!businessResponse.ok) {
+        const error = await businessResponse.text();
+        console.error('❌ [send-email] Error de EmailJS:', businessResponse.status, error);
+        throw new Error(`EmailJS error: ${businessResponse.status} - ${error}`);
+      }
+
+      console.log('✅ [send-email] Email al negocio enviado exitosamente');
+    } catch (fetchErr) {
+      console.error('❌ [send-email] Error en fetch a EmailJS:', fetchErr.message);
+      throw fetchErr;
     }
 
-    console.log('✅ [send-email] Email al negocio enviado exitosamente');
-
-    // Si viene un email de cliente válido, enviar confirmación
+    // Si viene un email de cliente válido, enviar confirmación (no es crítico si falla)
     if (data.userEmail && data.userEmail.includes('@') && emailRegex.test(data.userEmail)) {
       try {
-        console.log('📧 Enviando email de confirmación al cliente...');
+        console.log('📧 Enviando email de confirmación al cliente:', data.userEmail);
         const clientPayload = {
           service_id: emailjsServiceId,
           template_id: emailjsClientTemplateId || emailjsTemplateId,
@@ -182,14 +188,14 @@ exports.handler = async (event, context) => {
         if (clientResponse.ok) {
           console.log('✅ Email de confirmación enviado al cliente:', data.userEmail);
         } else {
-          console.warn('⚠️ No se pudo enviar email de confirmación al cliente');
+          console.warn('⚠️ No se pudo enviar email de confirmación (status:', clientResponse.status + ')');
         }
       } catch (clientErr) {
-        console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr.message);
-        // No es error crítico, continuar
+        console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr?.message || 'Unknown error');
+        // No es error crítico, continuar igual
       }
     } else {
-      console.log('📌 [send-email] No se envía email de confirmación al cliente (email no válido o no proporcionado)');
+      console.log('📌 [send-email] No se envía email de confirmación (email no válido o no proporcionado)');
     }
 
     return {
@@ -208,8 +214,13 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ [send-email] ERROR CRÍTICO:', error.message);
-    console.error('❌ [send-email] Stack:', error.stack);
+    console.error('❌ [send-email] ERROR CRÍTICO:', error?.message || 'Unknown error');
+    if (error?.stack) {
+      console.error('❌ [send-email] Stack:', error.stack.substring(0, 500));
+    }
+
+    const errorMessage = error?.message || 'Error desconocido';
+    const errorDetails = errorMessage.substring(0, 200);
 
     return {
       statusCode: 502,
@@ -217,7 +228,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: false,
         error: 'Error al enviar email',
-        details: error.message.substring(0, 200),
+        details: errorDetails,
         timestamp: new Date().toISOString()
       })
     };
