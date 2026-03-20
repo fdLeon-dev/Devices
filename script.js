@@ -1232,16 +1232,16 @@ async function handleFormSubmit(e) {
     console.log('📢 [4/4] Mostrando resultado final...');
     if (emailSent && pdfGenerado) {
       console.log('✅ [4/4] ÉXITO COMPLETO - Email y PDF');
-      showNotification('✅ Cotización enviada y PDF descargado. Te contactaremos pronto.', 'success');
+      showNotification('¡Cotización enviada y PDF descargado! Te contactaremos pronto.', 'success');
     } else if (pdfGenerado && !emailSent) {
       console.log('⚠️ [4/4] PDF OK, Email falló');
-      showNotification('✅ PDF descargado correctamente. Estamos procesando tu cotización.', 'warning');
+      showNotification('¡PDF descargado! Estamos procesando tu cotización.', 'warning');
     } else if (emailSent && !pdfGenerado) {
       console.log('⚠️ [4/4] Email OK, PDF falló');
-      showNotification('✅ Cotización enviada. El PDF se generará en un momento.', 'warning');
+      showNotification('¡Cotización enviada! Te contactaremos pronto.', 'success');
     } else {
       console.log('❌ [4/4] FRACASO TOTAL - Nada funcionó');
-      showNotification('Hubo un problema. Intenta nuevamente o usa WhatsApp.', 'error');
+      showNotification('Hubo un problema. Intenta de nuevo o usa WhatsApp.', 'error');
     }
 
     // Reset form si funcionó al menos algo
