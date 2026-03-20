@@ -28,6 +28,7 @@ exports.handler = async (event, context) => {
     
     // Solo aceptar POST
     if (event.httpMethod !== 'POST') {
+      console.error('❌ [send-email] Method no es POST:', event.httpMethod);
       return {
         statusCode: 405,
         body: JSON.stringify({ error: 'Método no permitido' })
@@ -37,11 +38,7 @@ exports.handler = async (event, context) => {
     let data;
     try {
       data = JSON.parse(event.body);
-      console.log('📨 [send-email] Datos recibidos:', { 
-        to_email: data.to_email,
-        userName: data.userName,
-        servicesList: data.servicesList
-      });
+      console.log('📨 [send-email] Datos recibidos bien');
     } catch (parseErr) {
       console.error('❌ [send-email] Error parseando JSON:', parseErr.message);
       return {
@@ -61,7 +58,14 @@ exports.handler = async (event, context) => {
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Campos requeridos faltantes', received: { to_email: data.to_email, userName: data.userName, servicesList: data.servicesList } })
+        body: JSON.stringify({ 
+          error: 'Campos requeridos faltantes',
+          received: { 
+            to_email: data.to_email, 
+            userName: data.userName, 
+            servicesList: data.servicesList 
+          }
+        })
       };
     }
 
@@ -73,6 +77,7 @@ exports.handler = async (event, context) => {
 
     // Validar límite de caracteres
     if (data.userName.length > 100 || data.servicesList.length > 1000) {
+      console.error('❌ [send-email] Datos demasiado largos');
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Datos exceden límite permitido' })
@@ -86,13 +91,13 @@ exports.handler = async (event, context) => {
     const emailjsClientTemplateId = process.env.EMAILJS_CLIENT_TEMPLATE_ID;
 
     console.log('🔑 [send-email] Verificando variables de entorno:');
-    console.log('   ✓ EMAILJS_PUBLIC_KEY:', emailjsPublicKey ? '✅ Set' : '❌ Missing');
-    console.log('   ✓ EMAILJS_SERVICE_ID:', emailjsServiceId ? '✅ Set' : '❌ Missing');
-    console.log('   ✓ EMAILJS_TEMPLATE_ID:', emailjsTemplateId ? '✅ Set' : '❌ Missing');
-    console.log('   ✓ EMAILJS_CLIENT_TEMPLATE_ID:', emailjsClientTemplateId ? '✅ Set (opcional)' : '⚠️ Not set (optional)');
+    console.log('   ✓ EMAILJS_PUBLIC_KEY:', emailjsPublicKey ? `${emailjsPublicKey.substring(0,10)}...` : '❌ Missing');
+    console.log('   ✓ EMAILJS_SERVICE_ID:', emailjsServiceId ? `${emailjsServiceId.substring(0,10)}...` : '❌ Missing');
+    console.log('   ✓ EMAILJS_TEMPLATE_ID:', emailjsTemplateId ? `${emailjsTemplateId.substring(0,10)}...` : '❌ Missing');
+    console.log('   ✓ EMAILJS_CLIENT_TEMPLATE_ID:', emailjsClientTemplateId ? '✅ Set' : '⚠️ Not set');
 
     if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
-      console.error('❌ Falta configuración de EmailJS');
+      console.error('❌ [send-email] FALTA configuración de EmailJS');
       return {
         statusCode: 500,
         body: JSON.stringify({ 
@@ -134,20 +139,24 @@ exports.handler = async (event, context) => {
       }
     };
 
-    console.log('📧 Enviando email al negocio...');
+    console.log('📧 [send-email] Enviando email al negocio...');
+    console.log('📧 [send-email] Payload:', JSON.stringify(businessPayload).substring(0, 200) + '...');
+    
     const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(businessPayload)
     });
 
+    console.log('📧 [send-email] Respuesta de EmailJS:', businessResponse.status);
+
     if (!businessResponse.ok) {
       const error = await businessResponse.text();
-      console.error('❌ Error EmailJS:', businessResponse.status, error);
-      throw new Error(`EmailJS error: ${businessResponse.status}`);
+      console.error('❌ [send-email] Error de EmailJS:', businessResponse.status, error);
+      throw new Error(`EmailJS error: ${businessResponse.status} - ${error}`);
     }
 
-    console.log('✅ Email al negocio enviado exitosamente');
+    console.log('✅ [send-email] Email al negocio enviado exitosamente');
 
     // Si viene un email de cliente válido, enviar confirmación
     if (data.userEmail && data.userEmail.includes('@') && emailRegex.test(data.userEmail)) {
@@ -198,16 +207,17 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ [send-email] Error al enviar email:', error.message);
+    console.error('❌ [send-email] ERROR CRÍTICO:', error.message);
     console.error('❌ [send-email] Stack:', error.stack);
 
     return {
-      statusCode: 500,
+      statusCode: 502,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         success: false,
-        error: 'Error al procesar solicitud de email',
-        details: process.env.NODE_ENV === 'production' ? 'Ver logs en Netlify' : error.message
+        error: 'Error al enviar email',
+        details: error.message.substring(0, 200),
+        timestamp: new Date().toISOString()
       })
     };
   }
