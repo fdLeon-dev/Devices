@@ -3067,8 +3067,17 @@ function fetchImageAsDataUrl(url) {
 
 // Generar PDF de cotización y devolver dataURL (data:application/pdf;base64,...)
 async function generarPdfCotizacion(datos) {
-  // Ensure jsPDF is available
-  if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF no cargado');
+  // Ensure jsPDF is available - wait if needed
+  let attempts = 0;
+  while ((!window.jspdf || !window.jspdf.jsPDF) && attempts < 50) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+    attempts++;
+  }
+  
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    throw new Error('jsPDF no cargado después de esperar');
+  }
+  
   const { jsPDF } = window.jspdf;
   // A4 vertical fijo
   const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
