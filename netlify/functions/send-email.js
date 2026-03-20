@@ -8,6 +8,7 @@ exports.handler = async (event, context) => {
   const allowedOrigins = [
     'https://devices-f2.com',
     'https://www.devices-f2.com',
+    'https://devicesf2.netlify.app',  // Netlify preview
     'http://localhost:8000',  // Para desarrollo
     'http://localhost:3000'
   ];
