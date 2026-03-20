@@ -1147,90 +1147,96 @@ async function handleFormSubmit(e) {
 
     // Usar la función segura de email desde email-client.js (vía serverless)
     console.log('🚀 Intentando enviar email vía servidor seguro...');
-    const emailResult = await sendEmailViaServer({
-      nombre: data.nombre,
-      email: data.email,
-      telefono: data.telefono,
-      servicio: data.servicio || 'Consulta general',
-      mensaje: data.mensaje,
-      urgency: getUrgencyText(data.urgency),
-      warranty: getWarrantyText(data.warranty)
-    });
-    console.log('📧 Email resultado:', emailResult);
-
-    if (emailResult.success) {
-      // 1. Generar PDF de la cotización usando los datos del formulario
-      const datosFactura = {
-        userName: data.nombre,
-        userEmail: data.email,
-        userPhone: data.telefono,
-        servicios: data.servicio ? [data.servicio] : ['Servicio personalizado'],
+    let emailSent = false;
+    let emailError = null;
+    
+    try {
+      const emailResult = await sendEmailViaServer({
+        nombre: data.nombre,
+        email: data.email,
+        telefono: data.telefono,
+        servicio: data.servicio || 'Consulta general',
+        mensaje: data.mensaje,
         urgency: getUrgencyText(data.urgency),
-        warranty: getWarrantyText(data.warranty),
-        basePrice: precios.basePrice,
-        urgencyPrice: precios.urgencyPrice,
-        warrantyPrice: precios.warrantyPrice,
-        totalPrice: precios.totalPrice,
-        descripcion: data.mensaje || ''
-      };
+        warranty: getWarrantyText(data.warranty)
+      });
+      console.log('📧 Email resultado:', emailResult);
+      emailSent = emailResult?.success === true;
+      emailError = emailResult?.error;
+    } catch (err) {
+      console.error('❌ Error capturado al enviar email:', err);
+      emailSent = false;
+      emailError = err.message;
+    }
 
-      let pdfBlob = null;
-      try {
-        pdfBlob = await generarPdfCotizacion(datosFactura);
+    // IMPORTANTE: Generar y descargar PDF SIEMPRE (independientemente del email)
+    console.log('📄 Generando y descargando PDF...');
+    const datosFactura = {
+      userName: data.nombre,
+      userEmail: data.email,
+      userPhone: data.telefono,
+      servicios: data.servicio ? [data.servicio] : ['Servicio personalizado'],
+      urgency: getUrgencyText(data.urgency),
+      warranty: getWarrantyText(data.warranty),
+      basePrice: precios.basePrice,
+      urgencyPrice: precios.urgencyPrice,
+      warrantyPrice: precios.warrantyPrice,
+      totalPrice: precios.totalPrice,
+      descripcion: data.mensaje || ''
+    };
 
-        // Descargar PDF automáticamente (compatible con Safari)
-        if (pdfBlob) {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(pdfBlob);
-          link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          // Liberar recursos del blob
-          URL.revokeObjectURL(link.href);
-          console.log('✅ PDF descargado automáticamente');
-        }
+    let pdfGenerado = false;
+    try {
+      const pdfBlob = await generarPdfCotizacion(datosFactura);
 
-        // Nota: Para enviar PDF por webhook se requeriría convertir el Blob a base64
-        // Por ahora la cotización se envía por email y el PDF se descarga automaticamente
-      } catch (pdfErr) {
-        console.warn('No se pudo generar PDF de cotización:', pdfErr);
+      // Descargar PDF automáticamente (compatible con Safari)
+      if (pdfBlob) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(pdfBlob);
+        link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Liberar recursos del blob
+        URL.revokeObjectURL(link.href);
+        console.log('✅ PDF descargado automáticamente');
+        pdfGenerado = true;
       }
+    } catch (pdfErr) {
+      console.error('❌ Error generando PDF:', pdfErr);
+      pdfGenerado = false;
+    }
 
-      // Show success message
-      showNotification('¡Cotización enviada y PDF descargado! Te contactaremos pronto.', 'success');
+    // Mostrar mensaje apropiado
+    if (emailSent && pdfGenerado) {
+      showNotification('✅ Cotización enviada y PDF descargado. Te contactaremos pronto.', 'success');
+    } else if (pdfGenerado && !emailSent) {
+      showNotification('✅ PDF descargado correctamente. Estamos procesando tu cotización.', 'warning');
+    } else if (emailSent && !pdfGenerado) {
+      showNotification('✅ Cotización enviada. El PDF se generará en un momento.', 'warning');
+    } else {
+      showNotification('Hubo un problema. Intenta nuevamente o usa WhatsApp.', 'error');
+    }
 
-      // Reset form
+    // Reset form si funcionó al menos algo
+    if (pdfGenerado) {
       quoteForm.reset();
 
       // Track evento
       trackEvent('quote_submitted', {
         service: data.servicio,
-        method: 'email',
+        method: pdfGenerado ? 'pdf_download' : 'form_submit',
         has_email: tieneEmail,
-        has_phone: tieneTelefono
+        has_phone: tieneTelefono,
+        emailSent: emailSent,
+        pdfDownloaded: pdfGenerado
       });
-
-      // 2. Abrir WhatsApp del negocio con los datos (siempre)
-      setTimeout(() => {
-        sendToWhatsApp(data);
-      }, 1000);
-
-    } else {
-      // Si el email falló, mostrar error
-      console.error('❌ Error al enviar email:', emailResult.error);
-      showNotification('Error al enviar cotización. Intenta de nuevo o usa WhatsApp.', 'error');
-
-      // Reset form
-      quoteForm.reset();
-
-      // Intent: enviar por EmailJS exclusivamente (fallback a WhatsApp si falla)
-
-      // Enviar por WhatsApp (fallback)
-      setTimeout(() => {
-        sendToWhatsApp(data);
-      }, 1000);
     }
+
+    // Enviar por WhatsApp siempre como canal adicional
+    setTimeout(() => {
+      sendToWhatsApp(data);
+    }, 1500);
 
   } catch (error) {
     console.error('Error al enviar cotización:', error);
