@@ -43,8 +43,8 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
     console.log('   📌 userName:', emailData.userName);
     console.log('   📌 servicesList:', emailData.servicesList);
 
-    // Llamar función serverless en Netlify
-    const response = await fetch('/.netlify/functions/send-email', {
+    // Llamar función serverless en Netlify (usando nodemailer)
+    const response = await fetch('/.netlify/functions/send-email-nodemailer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

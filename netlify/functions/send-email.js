@@ -190,6 +190,7 @@ exports.handler = async (event, context) => {
       }
     } else {
       console.log('📌 [send-email] No se envía email de confirmación al cliente (email no válido o no proporcionado)');
+    }
 
     return {
       statusCode: 200,
