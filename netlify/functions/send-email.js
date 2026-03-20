@@ -22,6 +22,10 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('📨 [send-email] Función iniciada');
+    console.log('📨 [send-email] Method:', event.httpMethod);
+    console.log('📨 [send-email] Origin:', origin);
+    
     // Solo aceptar POST
     if (event.httpMethod !== 'POST') {
       return {
@@ -30,14 +34,34 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const data = JSON.parse(event.body);
-
-    // Validar campos requeridos
-    if (!data.to_email || !data.userName || !data.servicesList) {
+    let data;
+    try {
+      data = JSON.parse(event.body);
+      console.log('📨 [send-email] Datos recibidos:', { 
+        to_email: data.to_email,
+        userName: data.userName,
+        servicesList: data.servicesList
+      });
+    } catch (parseErr) {
+      console.error('❌ [send-email] Error parseando JSON:', parseErr.message);
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Campos requeridos faltantes' })
+        body: JSON.stringify({ error: 'JSON inválido' })
+      };
+    }
+
+    // Validar campos requeridos
+    if (!data.to_email || !data.userName || !data.servicesList) {
+      console.error('❌ [send-email] Campos faltantes:', {
+        to_email: !!data.to_email,
+        userName: !!data.userName,
+        servicesList: !!data.servicesList
+      });
+      return {
+        statusCode: 400,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Campos requeridos faltantes', received: { to_email: data.to_email, userName: data.userName, servicesList: data.servicesList } })
       };
     }
 
@@ -64,11 +88,24 @@ exports.handler = async (event, context) => {
     const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
     const emailjsClientTemplateId = process.env.EMAILJS_CLIENT_TEMPLATE_ID;
 
+    console.log('🔑 [send-email] Verificando variables de entorno:');
+    console.log('   ✓ EMAILJS_PUBLIC_KEY:', emailjsPublicKey ? '✅ Set' : '❌ Missing');
+    console.log('   ✓ EMAILJS_SERVICE_ID:', emailjsServiceId ? '✅ Set' : '❌ Missing');
+    console.log('   ✓ EMAILJS_TEMPLATE_ID:', emailjsTemplateId ? '✅ Set' : '❌ Missing');
+    console.log('   ✓ EMAILJS_CLIENT_TEMPLATE_ID:', emailjsClientTemplateId ? '✅ Set (opcional)' : '⚠️ Not set (optional)');
+
     if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
       console.error('❌ Falta configuración de EmailJS');
       return {
         statusCode: 500,
-        body: JSON.stringify({ error: 'Configuración de EmailJS no disponible' })
+        body: JSON.stringify({ 
+          error: 'Configuración de EmailJS no disponible',
+          missingVars: {
+            EMAILJS_PUBLIC_KEY: !emailjsPublicKey,
+            EMAILJS_SERVICE_ID: !emailjsServiceId,
+            EMAILJS_TEMPLATE_ID: !emailjsTemplateId
+          }
+        })
       };
     }
 
@@ -109,7 +146,7 @@ exports.handler = async (event, context) => {
 
     if (!businessResponse.ok) {
       const error = await businessResponse.text();
-      console.error('❌ Error EmailJS:', error);
+      console.error('❌ Error EmailJS:', businessResponse.status, error);
       throw new Error(`EmailJS error: ${businessResponse.status}`);
     }
 
@@ -163,7 +200,8 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('❌ Error al enviar email:', error);
+    console.error('❌ [send-email] Error al enviar email:', error.message);
+    console.error('❌ [send-email] Stack:', error.stack);
 
     return {
       statusCode: 500,
@@ -171,7 +209,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({
         success: false,
         error: 'Error al procesar solicitud de email',
-        details: process.env.NODE_ENV === 'production' ? 'Ver logs' : error.message
+        details: process.env.NODE_ENV === 'production' ? 'Ver logs en Netlify' : error.message
       })
     };
   }
