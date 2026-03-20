@@ -2,12 +2,13 @@
 // Proporciona funcionalidades PWA básicas
 
 const CACHE_NAME = 'devices-f2-v1';
+// SOLO cachear recursos locales
+// NO incluir URLs externas que puedan ser bloqueadas por CSP
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
   '/public/vendor/fontawesome/css/all.min.css'
 ];
 
