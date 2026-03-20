@@ -1,7 +1,8 @@
 // Service Worker para Devices F2
 // Proporciona funcionalidades PWA básicas
+// IMPORTANTE: NO cachear URLs externas (CSP las bloquea)
 
-const CACHE_NAME = 'devices-f2-v1';
+const CACHE_NAME = 'devices-f2-v2';
 // SOLO cachear recursos locales
 // NO incluir URLs externas que puedan ser bloqueadas por CSP
 const urlsToCache = [
@@ -18,7 +19,19 @@ self.addEventListener('install', function (event) {
     caches.open(CACHE_NAME)
       .then(function (cache) {
         console.log('%c📦 Cache del Service Worker abierto', 'color: #6f42c1; font-weight: bold;');
-        return cache.addAll(urlsToCache);
+        // Usar Promise.allSettled para que falle gracefully si alguna URL no se puede cachear
+        return Promise.allSettled(
+          urlsToCache.map(url => cache.add(url))
+        ).then(results => {
+          const failed = results.filter(r => r.status === 'rejected');
+          if (failed.length > 0) {
+            console.warn('⚠️ Algunos recursos no pudieron ser cacheados:', failed);
+          }
+          return Promise.resolve();
+        });
+      })
+      .catch(err => {
+        console.error('Error en cache install:', err);
       })
   );
 });
@@ -39,8 +52,15 @@ self.addEventListener('activate', function (event) {
   );
 });
 
-// Interceptar requests
+// Interceptar requests - SOLO para recursos locales
 self.addEventListener('fetch', function (event) {
+  // NO interceptar requests a dominios externos para evitar problemas con CSP
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin) {
+    // Dejar que el navegador maneje requests externas automáticamente
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function (response) {
@@ -79,7 +99,25 @@ self.addEventListener('fetch', function (event) {
             });
 
           return response;
+        }).catch(function (error) {
+          // Si falla el fetch, intentar devolver desde cache
+          return caches.match(event.request)
+            .then(function (response) {
+              if (response) {
+                return response;
+              }
+              // Si es una imagen y no hay cache, devolver placeholder
+              if (event.request.destination === 'image') {
+                const placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140" viewBox="0 0 200 140" role="img" aria-label="placeholder"><rect width="100%" height="100%" fill="#eee"/><g fill="#bbb"><rect x="24" y="36" width="152" height="68" rx="6"/></g></svg>';
+                return new Response(placeholderSvg, { headers: { 'Content-Type': 'image/svg+xml' } });
+              }
+              console.warn('Service Worker fetch failed:', error);
+              throw error;
+            });
         });
+      })
+      .catch(err => {
+        console.warn('Error en Service Worker:', err);
       })
   );
 });
