@@ -1146,7 +1146,7 @@ async function handleFormSubmit(e) {
     }
 
     // Usar la función segura de email desde email-client.js (vía serverless)
-    console.log('🚀 Intentando enviar email vía servidor seguro...');
+    console.log('🚀 [1/4] Intentando enviar email vía servidor seguro...');
     let emailSent = false;
     let emailError = null;
     
@@ -1160,17 +1160,20 @@ async function handleFormSubmit(e) {
         urgency: getUrgencyText(data.urgency),
         warranty: getWarrantyText(data.warranty)
       });
-      console.log('📧 Email resultado:', emailResult);
+      console.log('✅ [1/4] Email resultado:', emailResult);
       emailSent = emailResult?.success === true;
       emailError = emailResult?.error;
+      if (!emailSent) {
+        console.warn('⚠️ Email no se envió:', emailError);
+      }
     } catch (err) {
-      console.error('❌ Error capturado al enviar email:', err);
+      console.error('❌ [1/4] Error capturado al enviar email:', err);
       emailSent = false;
       emailError = err.message;
     }
 
     // IMPORTANTE: Generar y descargar PDF SIEMPRE (independientemente del email)
-    console.log('📄 Generando y descargando PDF...');
+    console.log('📄 [2/4] Generando PDF...');
     const datosFactura = {
       userName: data.nombre,
       userEmail: data.email,
@@ -1184,13 +1187,17 @@ async function handleFormSubmit(e) {
       totalPrice: precios.totalPrice,
       descripcion: data.mensaje || ''
     };
+    console.log('📄 [2/4] Datos para PDF:', datosFactura);
 
     let pdfGenerado = false;
     try {
+      console.log('📄 [2/4] Llamando a generarPdfCotizacion...');
       const pdfBlob = await generarPdfCotizacion(datosFactura);
+      console.log('📄 [2/4] PDF Blob generado:', pdfBlob?.size || 'sin tamaño');
 
       // Descargar PDF automáticamente (compatible con Safari)
       if (pdfBlob) {
+        console.log('📄 [3/4] Descargando PDF...');
         const link = document.createElement('a');
         link.href = URL.createObjectURL(pdfBlob);
         link.download = `cotizacion_form_${new Date().toISOString().slice(0,10)}.pdf`;
@@ -1199,22 +1206,31 @@ async function handleFormSubmit(e) {
         document.body.removeChild(link);
         // Liberar recursos del blob
         URL.revokeObjectURL(link.href);
-        console.log('✅ PDF descargado automáticamente');
+        console.log('✅ [3/4] PDF descargado automáticamente');
         pdfGenerado = true;
+      } else {
+        console.warn('⚠️ [3/4] pdfBlob es null o undefined');
+        pdfGenerado = false;
       }
     } catch (pdfErr) {
-      console.error('❌ Error generando PDF:', pdfErr);
+      console.error('❌ [2/4] Error generando o descargando PDF:', pdfErr);
+      console.error('❌ [2/4] Stack:', pdfErr.stack);
       pdfGenerado = false;
     }
 
     // Mostrar mensaje apropiado
+    console.log('📢 [4/4] Mostrando resultado final...');
     if (emailSent && pdfGenerado) {
+      console.log('✅ [4/4] ÉXITO COMPLETO - Email y PDF');
       showNotification('✅ Cotización enviada y PDF descargado. Te contactaremos pronto.', 'success');
     } else if (pdfGenerado && !emailSent) {
+      console.log('⚠️ [4/4] PDF OK, Email falló');
       showNotification('✅ PDF descargado correctamente. Estamos procesando tu cotización.', 'warning');
     } else if (emailSent && !pdfGenerado) {
+      console.log('⚠️ [4/4] Email OK, PDF falló');
       showNotification('✅ Cotización enviada. El PDF se generará en un momento.', 'warning');
     } else {
+      console.log('❌ [4/4] FRACASO TOTAL - Nada funcionó');
       showNotification('Hubo un problema. Intenta nuevamente o usa WhatsApp.', 'error');
     }
 
@@ -1234,6 +1250,7 @@ async function handleFormSubmit(e) {
     }
 
     // Enviar por WhatsApp siempre como canal adicional
+    console.log('💬 Abriendo WhatsApp...');
     setTimeout(() => {
       sendToWhatsApp(data);
     }, 1500);
