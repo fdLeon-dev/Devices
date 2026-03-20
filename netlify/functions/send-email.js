@@ -31,16 +31,27 @@ exports.handler = async (event, context) => {
       console.error('❌ [send-email] Method no es POST:', event.httpMethod);
       return {
         statusCode: 405,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: 'Método no permitido' })
       };
     }
 
     let data;
     try {
+      // Netlify podría no incluir body si está vacío - verificar
+      if (!event.body) {
+        console.error('❌ [send-email] event.body está vacío');
+        return {
+          statusCode: 400,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'Request body no puede estar vacío' })
+        };
+      }
+      
       data = JSON.parse(event.body);
       console.log('📨 [send-email] Datos recibidos bien');
     } catch (parseErr) {
-      console.error('❌ [send-email] Error parseando JSON:', parseErr.message);
+      console.error('❌ [send-email] Error parseando JSON:', parseErr?.message || 'Unknown parse error');
       return {
         statusCode: 400,
         headers: { 'Content-Type': 'application/json' },
