@@ -1155,20 +1155,23 @@ async function handleFormSubmit(e) {
       showNotification('La cotización será procesada (sin respaldo en BD)', 'warning');
     }
 
-    // Usar la función segura de email desde email-client.js (vía serverless)
-    console.log('🚀 [1/4] Intentando enviar email vía servidor seguro...');
+    // Usar EmailJS directamente (enviarEmailCotizacion desde emailjs-config.js)
+    console.log('🚀 [1/4] Intentando enviar email con EmailJS...');
     let emailSent = false;
     let emailError = null;
     
     try {
-      const emailResult = await sendEmailViaServer({
+      const emailResult = await enviarEmailCotizacion({
         nombre: data.nombre,
         email: data.email,
         telefono: data.telefono,
-        servicio: data.servicio || 'Consulta general',
+        servicio: data.servicio || [],
         mensaje: data.mensaje,
-        urgency: getUrgencyText(data.urgency),
-        warranty: getWarrantyText(data.warranty)
+        urgency: data.urgency,
+        warranty: data.warranty,
+        precios: data.precios,
+        selectedServices: data.servicio ? data.servicio.length : 0,
+        fechaPreferida: data.fechaPreferida
       });
       console.log('✅ [1/4] Email resultado:', emailResult);
       emailSent = emailResult?.success === true;
