@@ -65,14 +65,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Validar que el email sea válido
+    // Validar que el email sea válido (si se proporcionó)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.to_email)) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Email inválido' })
-      };
-    }
+    const to_email = data.to_email && emailRegex.test(data.to_email) ? data.to_email : 'devices.f02@gmail.com';
+    
+    console.log('📨 [send-email] Email destino:', to_email);
 
     // Validar límite de caracteres
     if (data.userName.length > 100 || data.servicesList.length > 1000) {
@@ -111,7 +108,7 @@ exports.handler = async (event, context) => {
 
     // Preparar parámetros del email
     const templateParams = {
-      to_email: data.to_email || 'devices.f02@gmail.com',
+      to_email: to_email,
       userName: data.userName,
       userEmail: data.userEmail || 'no-reply@devices.f2',
       userPhone: data.userPhone || 'No proporcionado',
@@ -152,8 +149,8 @@ exports.handler = async (event, context) => {
 
     console.log('✅ Email al negocio enviado exitosamente');
 
-    // Si viene un email de cliente, enviar confirmación
-    if (data.userEmail && data.userEmail.includes('@')) {
+    // Si viene un email de cliente válido, enviar confirmación
+    if (data.userEmail && data.userEmail.includes('@') && emailRegex.test(data.userEmail)) {
       try {
         console.log('📧 Enviando email de confirmación al cliente...');
         const clientPayload = {
@@ -174,15 +171,16 @@ exports.handler = async (event, context) => {
         });
 
         if (clientResponse.ok) {
-          console.log('✅ Email de confirmación enviado al cliente');
+          console.log('✅ Email de confirmación enviado al cliente:', data.userEmail);
         } else {
-          console.warn('⚠️ No se pudo enviar email de confirmación');
+          console.warn('⚠️ No se pudo enviar email de confirmación al cliente');
         }
       } catch (clientErr) {
-        console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr);
+        console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr.message);
         // No es error crítico, continuar
       }
-    }
+    } else {
+      console.log('📌 [send-email] No se envía email de confirmación al cliente (email no válido o no proporcionado)');
 
     return {
       statusCode: 200,

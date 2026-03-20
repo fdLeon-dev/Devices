@@ -21,9 +21,9 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
   try {
     // Preparar datos para enviar al servidor
     const emailData = {
-      to_email: datosFormulario.email || 'devices.f02@gmail.com',
+      to_email: datosFormulario.email && datosFormulario.email !== 'No proporcionado' ? datosFormulario.email : 'devices.f02@gmail.com',
       userName: datosFormulario.nombre,
-      userEmail: datosFormulario.email,
+      userEmail: datosFormulario.email && datosFormulario.email !== 'No proporcionado' ? datosFormulario.email : 'no-reply@devices.f2',
       userPhone: datosFormulario.telefono || 'No proporcionado',
       servicesList: Array.isArray(datosFormulario.servicio) 
         ? datosFormulario.servicio.join(', ') 
@@ -39,6 +39,9 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
     };
 
     console.log('📧 Enviando email via servidor seguro...');
+    console.log('   📌 to_email:', emailData.to_email);
+    console.log('   📌 userName:', emailData.userName);
+    console.log('   📌 servicesList:', emailData.servicesList);
 
     // Llamar función serverless en Netlify
     const response = await fetch('/.netlify/functions/send-email', {
