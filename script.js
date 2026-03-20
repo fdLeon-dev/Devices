@@ -3067,20 +3067,39 @@ function fetchImageAsDataUrl(url) {
 
 // Generar PDF de cotización y devolver dataURL (data:application/pdf;base64,...)
 async function generarPdfCotizacion(datos) {
-  // Ensure jsPDF is available - wait if needed
+  // Asegurar que jsPDF esté disponible - esperar si es necesario
+  let jsPDFLibrary = null;
   let attempts = 0;
-  while ((!window.jspdf || !window.jspdf.jsPDF) && attempts < 50) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+  
+  while (!jsPDFLibrary && attempts < 100) {
+    // Intentar múltiples formas de acceder a jsPDF
+    if (window.jspdf && window.jspdf.jsPDF) {
+      jsPDFLibrary = window.jspdf.jsPDF;
+      console.log('✅ jsPDF cargado desde window.jspdf.jsPDF');
+      break;
+    }
+    if (window.jsPDF) {
+      jsPDFLibrary = window.jsPDF;
+      console.log('✅ jsPDF cargado desde window.jsPDF');
+      break;
+    }
+    if (typeof jsPDF !== 'undefined') {
+      jsPDFLibrary = jsPDF;
+      console.log('✅ jsPDF cargado desde global jsPDF');
+      break;
+    }
+    
+    // Esperar 50ms antes de intentar de nuevo
+    await new Promise(resolve => setTimeout(resolve, 50));
     attempts++;
   }
   
-  if (!window.jspdf || !window.jspdf.jsPDF) {
+  if (!jsPDFLibrary) {
+    console.error('❌ jsPDF no disponible después de', attempts * 50, 'ms');
     throw new Error('jsPDF no cargado después de esperar');
   }
   
-  const { jsPDF } = window.jspdf;
-  // A4 vertical fijo
-  const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait' });
+  const doc = new jsPDFLibrary({ unit: 'pt', format: 'a4', orientation: 'portrait' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 36;
