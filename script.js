@@ -1145,9 +1145,18 @@ async function handleFormSubmit(e) {
       showNotification('La cotización será procesada (sin respaldo en BD)', 'warning');
     }
 
-    console.log('typeof enviarEmailCotizacion =', typeof enviarEmailCotizacion);
-    const emailResult = await enviarEmailCotizacion(data, null); // Enviar email sin PDF primero
-    console.log('emailResult recibido:', emailResult);
+    // Usar la función segura de email desde email-client.js (vía serverless)
+    console.log('🚀 Intentando enviar email vía servidor seguro...');
+    const emailResult = await sendEmailViaServer({
+      nombre: data.nombre,
+      email: data.email,
+      telefono: data.telefono,
+      servicio: data.servicio || 'Consulta general',
+      mensaje: data.mensaje,
+      urgency: getUrgencyText(data.urgency),
+      warranty: getWarrantyText(data.warranty)
+    });
+    console.log('📧 Email resultado:', emailResult);
 
     if (emailResult.success) {
       // 1. Generar PDF de la cotización usando los datos del formulario
@@ -1208,9 +1217,9 @@ async function handleFormSubmit(e) {
       }, 1000);
 
     } else {
-      // Si EmailJS no está configurado, usar fallback de WhatsApp
-      console.warn('EmailJS no configurado, usando fallback de WhatsApp');
-      showNotification('Te redirigimos a WhatsApp para completar tu cotización.', 'success');
+      // Si el email falló, mostrar error
+      console.error('❌ Error al enviar email:', emailResult.error);
+      showNotification('Error al enviar cotización. Intenta de nuevo o usa WhatsApp.', 'error');
 
       // Reset form
       quoteForm.reset();
@@ -2968,63 +2977,34 @@ function openWhatsAppQuote() {
     try {
       const pdfBlob = await generarPdfCotizacion(datosFactura);
       
-      // Convertir Blob a data URL para compatibilidad con enviarEmailCotizacion
-      let pdfDataUrl = null;
-      if (pdfBlob) {
-        pdfDataUrl = await blobToDataUrl(pdfBlob);
-      }
+      // Preparar datos para enviar vía servidor seguro
+      const datosFormulario = {
+        nombre: userName,
+        email: userEmail || 'devices.f02@gmail.com',
+        telefono: userPhone || 'No proporcionado',
+        servicio: serviceListText,
+        mensaje: document.getElementById('problem-description')?.value || `Cotización de calculadora web. Servicios seleccionados: ${serviceListText}. Urgencia: ${urgencyText}. Garantía: ${warrantyText}.`,
+        urgency: urgencyText,
+        warranty: warrantyText,
+        precios: {
+          basePrice: basePrice,
+          urgencyPrice: urgencyPrice,
+          warrantyPrice: warrantyPrice,
+          totalPrice: totalPrice
+        }
+      };
 
-      // Send email to business with the PDF attached (uses EmailJS helper)
-      if (typeof enviarEmailCotizacion === 'function') {
-        const datosFormulario = {
-          nombre: userName,
-          email: userEmail || 'no-reply@devices.f2',
-          telefono: userPhone || 'No proporcionado',
-          servicio: serviceListText,
-          mensaje: document.getElementById('problem-description')?.value || `Cotización de calculadora web. Servicios seleccionados: ${serviceListText}. Urgencia: ${urgencyText}. Garantía: ${warrantyText}.`,
-          // Indicar explícitamente que esto viene de la calculadora
-          fromCalculator: true,
-          // Datos específicos de la calculadora para la plantilla
-          urgency: urgencyText,
-          urgencyMultiplier: `${urgencyMultiplier}x`,
-          warranty: warrantyText,
-          precios: {
-            basePrice: basePrice,
-            urgencyPrice: urgencyPrice,
-            warrantyPrice: warrantyPrice,
-            totalPrice: totalPrice
-          },
-          fechaPreferida: new Date().toLocaleDateString('es-ES')
-        };
-
-        // Fire-and-forget: no await, but catch errors
-        enviarEmailCotizacion(datosFormulario, pdfDataUrl).then(async (res) => {
-          console.log('Email al negocio enviado:', res);
-
-          // Enviar email de confirmación al cliente si proporcionó email válido
-          if (userEmail && userEmail !== 'no-reply@devices.f2' && userEmail.includes('@')) {
-            try {
-              console.log('Enviando email de confirmación al cliente:', userEmail);
-
-              // Preparar datos para el cliente (usando el mismo template que el negocio)
-              const clienteDatos = {
-                ...datosFormulario,
-                email: userEmail // Asegurar que el email del cliente sea el destinatario
-              };
-
-              // Enviar email al cliente usando la misma función pero con datos modificados
-              const clienteRes = await enviarEmailCotizacion(clienteDatos, null);
-              console.log('Email al cliente enviado:', clienteRes);
-            } catch (clienteErr) {
-              console.error('Error enviando email al cliente:', clienteErr);
-            }
-          }
-        }).catch(err => console.error('Error enviando email con PDF:', err));
+      // Enviar email vía servidor seguro (sin exponer credenciales)
+      console.log('📧 Enviando cotización de calculadora via servidor...');
+      const res = await sendEmailViaServer(datosFormulario, pdfBlob);
+      
+      if (res.success) {
+        console.log('✅ Cotización enviada exitosamente:', res.response);
       } else {
-        console.warn('enviarEmailCotizacion no está disponible. Configura EmailJS.');
+        console.warn('⚠️ No se pudo enviar cotización por email:', res.error);
       }
     } catch (err) {
-      console.error('Error generando/enviando PDF de cotización:', err);
+      console.error('Error generando/enviando cotización:', err);
     }
   })();
 
