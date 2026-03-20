@@ -390,6 +390,16 @@ function calcularPrecios(servicio, urgency, warranty) {
     'limpieza-malware': 550,
     'reemplazo-pantalla': 1800,
     'instalacion-antivirus': 250,
+    'clonacion-so': 1200,
+    'clonacion-disco': 1500,
+    'migracion-datos': 2000,
+    'instalacion-so': 500,
+    'particionamiento': 400,
+    'formatteo-disco': 250,
+    'recuperacion-particion': 1000,
+    'actualización-firmware': 300,
+    'sincronización-cloud': 350,
+    'configuración-vpn': 450,
     otro: 1800
   };
 
