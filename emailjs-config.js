@@ -108,6 +108,18 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
     const serviciosArray = Array.isArray(datosFormulario.servicio) ? datosFormulario.servicio : (datosFormulario.servicio ? datosFormulario.servicio.split(',').filter(s => s.trim()) : []);
     const serviciosString = serviciosArray.join(', ');
 
+    // Crear desglose detallado de servicios con precios
+    let servicesBreakdown = '';
+    if (datosFormulario.precios && datosFormulario.precios.servicios && Array.isArray(datosFormulario.precios.servicios)) {
+      servicesBreakdown = datosFormulario.precios.servicios.map(s => `${s.name}: $${s.price.toLocaleString('es-UY')}`).join('<br>');
+    } else if (serviciosArray.length > 0 && datosFormulario.precios && datosFormulario.precios.basePrice) {
+      // Si no hay desglose individual, distribuir el precio base
+      const precioPorServicio = Math.round(datosFormulario.precios.basePrice / serviciosArray.length);
+      servicesBreakdown = serviciosArray.map(s => `${s}: $${precioPorServicio.toLocaleString('es-UY')}`).join('<br>');
+    } else {
+      servicesBreakdown = serviciosString;
+    }
+
     const folio = 'COT-' + Math.floor(Math.random() * 900000 + 100000);
 
     const templateParams = {
@@ -121,6 +133,7 @@ async function enviarEmailCotizacion(datosFormulario, pdfDataUrl) {
       phone: datosFormulario.telefono,           // alias simplificado
       selectedServices: datosFormulario.selectedServices || serviciosArray.length,
       servicesList: serviciosString,
+      servicesBreakdown: servicesBreakdown,
       service_type: serviciosString,          // alias para plantilla
       service: serviciosString,               // otro posible nombre
       urgencyText: datosFormulario.urgency ? getUrgencyText(datosFormulario.urgency) : 'Normal (3-5 días)',

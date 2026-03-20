@@ -1111,6 +1111,16 @@ async function handleFormSubmit(e) {
   // Calcular precios usando los valores reales del formulario
   const precios = calcularPrecios(data.servicio, data.urgency, data.warranty); // ahora `servicio` puede ser array
 
+  // Crear array de servicios con nombres y precios individuales
+  const serviciosArray = Array.isArray(data.servicio) ? data.servicio : [data.servicio];
+  const servicios = serviciosArray.map(servicio => ({
+    name: servicio,
+    price: calcularPrecios(servicio, data.urgency, data.warranty).basePrice
+  }));
+
+  // Agregar servicios al objeto precios
+  precios.servicios = servicios;
+
   // Sugerir fecha de cita si no se proporcionó
   if (!data.fechaPreferida || data.fechaPreferida.trim() === '') {
     data.fechaPreferida = sugerirFechaCita();
@@ -3047,7 +3057,8 @@ function openWhatsAppQuote() {
           basePrice: basePrice,
           urgencyPrice: urgencyPrice,
           warrantyPrice: warrantyPrice,
-          totalPrice: totalPrice
+          totalPrice: totalPrice,
+          servicios: datos.servicios
         }
       };
 

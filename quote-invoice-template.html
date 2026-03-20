@@ -73,27 +73,31 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Concepto</th>
-                        <th style="text-align:right;">Monto</th>
+                        <th>Servicio</th>
+                        <th style="text-align:right;">Precio</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <!-- Services will be inserted here dynamically -->
                     <tr>
-                        <td>Precio base del servicio</td>
-                        <td style="text-align:right;">$ {{servicePrice}}</td>
-                    </tr>
-                    <tr>
-                        <td>Recargo por urgencia</td>
-                        <td style="text-align:right;">$ {{urgencyCost}}</td>
-                    </tr>
-                    <tr>
-                        <td>Incremento por garantía</td>
-                        <td style="text-align:right;">$ {{warrantyPrice}}</td>
+                        <td colspan="2" style="text-align: center; font-style: italic;">{{servicesBreakdown}}</td>
                     </tr>
                 </tbody>
             </table>
 
             <div class="totals">
+                <div class="row">
+                    <div class="label">Subtotal servicios</div>
+                    <div class="value">$ {{servicePrice}}</div>
+                </div>
+                <div class="row">
+                    <div class="label">Recargo por urgencia</div>
+                    <div class="value">$ {{urgencyCost}}</div>
+                </div>
+                <div class="row">
+                    <div class="label">Incremento por garantía</div>
+                    <div class="value">$ {{warrantyPrice}}</div>
+                </div>
                 <div class="row">
                     <div class="label">Total estimado</div>
                     <div class="value">$ {{total}}</div>
