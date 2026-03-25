@@ -64,6 +64,17 @@ function initFirebase() {
     return true;
   }
 
+  const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'appId'];
+  const hasPlaceholderConfig = requiredKeys.some((key) => {
+    const value = String((firebaseConfig && firebaseConfig[key]) || '');
+    return !value || value.includes('CONFIGURE_IN_SERVER_ONLY');
+  });
+
+  if (hasPlaceholderConfig) {
+    console.warn('⚠️ Firebase no configurado: completa firebase-config.js con credenciales web públicas del proyecto.');
+    return false;
+  }
+
   // Verificar si Firebase está cargado
   if (typeof firebase === 'undefined') {
     console.error('Firebase SDK no está cargado');

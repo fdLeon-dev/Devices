@@ -76,15 +76,17 @@
     });
   }
 
-  function initFirebase() {
-    return false;
-  }
-
   window.guardarCotizacionEnFirebase = guardarCotizacionEnFirebase;
   window.obtenerCotizacionesAdmin = obtenerCotizacionesAdmin;
   window.actualizarEstadoCotizacion = actualizarEstadoCotizacion;
   window.adminLogin = adminLogin;
   window.adminSession = adminSession;
   window.adminLogout = adminLogout;
-  window.initFirebase = initFirebase;
+
+  // Fallback seguro: solo si no existe implementación real de Firebase.
+  if (typeof window.initFirebase !== 'function') {
+    window.initFirebase = function initFirebaseFallback() {
+      return false;
+    };
+  }
 })();
