@@ -24,7 +24,7 @@
   # Defensive flag: this repository is a static site, not Next.js.
   # If @netlify/plugin-nextjs is still attached from Netlify UI,
   # this avoids Next runtime prebuild checks from breaking deploys.
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+
 
 # Cache settings
 [[headers]]
