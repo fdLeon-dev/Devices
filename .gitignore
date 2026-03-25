@@ -5,6 +5,7 @@ firestore-debug.log
 
 # Credentials (security - never commit)
 config-credentials.json
+public/config-credentials.json
 config-credentials.local.json
 .env.credentials
 

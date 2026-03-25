@@ -753,57 +753,10 @@
   </div>
 
   <!-- Scripts -->
-  <!-- Firebase SDK (DEBE ser antes de firebase-config.js) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <!-- Cargar configuración desde variables de entorno PRIMERO -->
-  <script src="config-loader.js?v=20260318"></script>
-  <!-- Firebase Config con cache-busting -->
-  <script src="firebase-config.js?v=20260316-1"></script>
+  <script src="api-client.js?v=20260324-1"></script>
   <script>
     // ============ AUTENTICACIÓN + SEGURIDAD ============
-    // Las credenciales se cargan desde config-loader.js (variables de entorno de Netlify)
-    let ADMIN_CREDENTIALS = {
-      usuario: window.ADMIN_USER || "",
-      contraseña: window.ADMIN_PASS || ""
-    };
-
-    // Si config-loader.js ya las cargó, no hacer nada más
-    if (window.__CONFIG_LOADED__) {
-      console.log('✅ Credenciales ya cargadas por config-loader.js');
-    } else {
-      // Fallback: intentar cargar desde función Netlify (para casos edge)
-      (async () => {
-        try {
-          const response = await fetch('/.netlify/functions/inject-env');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.admin && data.admin.usuario && data.admin.contraseña) {
-              ADMIN_CREDENTIALS = data.admin;
-              console.log('✅ Credenciales cargadas desde función Netlify');
-              return;
-            }
-          }
-        } catch (error) {
-          // Ignorar
-        }
-        
-        // Fallback: intentar desde archivo local
-        try {
-          const response = await fetch('./public/config-credentials.json?v=' + Date.now());
-          if (response.ok) {
-            const config = await response.json();
-            if (config.admin && config.admin.usuario && config.admin.contraseña) {
-              ADMIN_CREDENTIALS = config.admin;
-              console.log('✅ Credenciales cargadas desde config-credentials.json');
-            }
-          }
-        } catch (error) {
-          console.warn('⚠️ No se analizó el archivo de credenciales');
-        }
-      })();
-    }
+    // Autenticación backend-only vía cookie httpOnly.
 
     // ============ SANITIZACIÓN Y VALIDACIÓN (XSS Protection) ============
     /**
@@ -960,7 +913,7 @@
       }
     }
 
-    function autenticar(event) {
+    async function autenticar(event) {
       event.preventDefault();
       
       // Verificar si está bloqueado
@@ -976,16 +929,12 @@
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
 
-      // Validar credenciales
-      if (username === ADMIN_CREDENTIALS.usuario && password === ADMIN_CREDENTIALS.contraseña) {
-        console.log('✅ Credenciales correctas');
-        
-        // Crear token de sesión
-        const token = btoa(username + ':' + Date.now());
-        sessionStorage.setItem('admin_token', token);
+      try {
+        await adminLogin(username, password);
+        console.log('✅ Sesion admin iniciada en backend');
+
         sessionStorage.setItem('admin_user', username);
-        sessionStorage.setItem('login_time', Date.now()); // Para timeout
-        console.log('✅ Token de sesión creado');
+        sessionStorage.setItem('login_time', Date.now());
 
         // Resetear intentos
         loginAttempts = 0;
@@ -1000,17 +949,12 @@
         // Limpiar formulario
         document.getElementById('login-form').reset();
 
-        // Inicializar
-        console.log('🔥 Inicializando Firebase...');
-        const firebaseInitialized = initFirebase();
-        console.log('Firebase inicializado:', firebaseInitialized);
-        
         console.log('📋 Cargando cotizaciones...');
         cargarCotizaciones();
 
         // Iniciar timeout de sesión
         iniciarSessionTimeout();
-      } else {
+      } catch (error) {
         // Incrementar intentos fallidos
         loginAttempts++;
         console.error(`❌ Intento fallido ${loginAttempts}/${RATE_LIMIT_CONFIG.maxAttempts}`);
@@ -1075,14 +1019,13 @@
 
     function resetSessionTimeout() {
       // Se llama en cada interacción del usuario
-      const token = sessionStorage.getItem('admin_token');
+      const token = sessionStorage.getItem('admin_user');
       if (token) {
         iniciarSessionTimeout();
       }
     }
 
     function cerrarSesionPorTimeout() {
-      sessionStorage.removeItem('admin_token');
       sessionStorage.removeItem('admin_user');
       sessionStorage.removeItem('login_time');
       document.getElementById('login-screen').style.display = 'flex';
@@ -1090,10 +1033,14 @@
       alert('🔒 Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.');
     }
 
-    function cerrarSesion() {
+    async function cerrarSesion() {
       if (confirm('¿Deseas cerrar sesión?')) {
         registrarAuditoria('LOGOUT', { usuario: sessionStorage.getItem('admin_user') }, 'success');
-        sessionStorage.removeItem('admin_token');
+        try {
+          await adminLogout();
+        } catch (error) {
+          console.warn('⚠️ No se pudo cerrar sesión en backend:', error.message);
+        }
         sessionStorage.removeItem('admin_user');
         sessionStorage.removeItem('login_time');
         if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
@@ -1116,19 +1063,7 @@
           ip: 'cliente' // En producción, obtener desde servidor
         };
 
-        // Si Firebase está disponible, guardar en Firestore
-        if (typeof db !== 'undefined') {
-          try {
-            await db.collection('audit_logs').add(auditLog);
-            console.log(`📝 Auditoría registrada: ${accion}`);
-          } catch (firebaseError) {
-            console.warn('⚠️ No se pudo registrar en Firestore:', firebaseError);
-            // Guardar en localStorage como respaldo
-            guardarAuditoriaLocal(auditLog);
-          }
-        } else {
-          guardarAuditoriaLocal(auditLog);
-        }
+        guardarAuditoriaLocal(auditLog);
       } catch (err) {
         console.error('❌ Error al registrar auditoría:', err);
       }
@@ -1152,23 +1087,44 @@
     document.addEventListener('mousemove', resetSessionTimeout);
 
     // Verificar sesión al cargar
-    window.addEventListener('load', () => {
-      const token = sessionStorage.getItem('admin_token');
-      if (token) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('panel-container').style.display = 'block';
-        initFirebase();
-        cargarCotizaciones();
-        iniciarSessionTimeout(); // Reiniciar timer
-      } else {
-        document.getElementById('login-screen').style.display = 'flex';
-        document.getElementById('panel-container').style.display = 'none';
+    window.addEventListener('load', async () => {
+      try {
+        const session = await adminSession();
+        if (session.authenticated) {
+          sessionStorage.setItem('admin_user', session.user || 'admin');
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('panel-container').style.display = 'block';
+          cargarCotizaciones();
+          iniciarSessionTimeout();
+          return;
+        }
+      } catch (error) {
+        console.log('ℹ️ Sesión admin no activa');
       }
+
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('panel-container').style.display = 'none';
     });
 
     // ============ PANEL ADMIN ============
     let cotizacionesData = [];
     let cotizacionEditando = null;
+
+    function formatFecha(fechaValor, includeTime = false) {
+      if (!fechaValor) return '-';
+
+      let dateObj = null;
+      if (typeof fechaValor === 'string' || typeof fechaValor === 'number') {
+        dateObj = new Date(fechaValor);
+      } else if (fechaValor.seconds !== undefined) {
+        dateObj = new Date(fechaValor.seconds * 1000);
+      } else if (fechaValor._seconds !== undefined) {
+        dateObj = new Date(fechaValor._seconds * 1000);
+      }
+
+      if (!dateObj || Number.isNaN(dateObj.getTime())) return '-';
+      return includeTime ? dateObj.toLocaleString('es-ES') : dateObj.toLocaleDateString('es-ES');
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
       // Filtrar por estado
@@ -1191,10 +1147,10 @@
       
       if (typeof obtenerCotizacionesAdmin !== 'function') {
         console.error('❌ obtenerCotizacionesAdmin no es una función. Disponible como:', typeof obtenerCotizacionesAdmin);
-        console.log('✅ Funciones disponibles en window:', Object.keys(window).filter(k => k.includes('firebase') || k.includes('Cotiz')));
+        console.log('✅ Funciones disponibles en window:', Object.keys(window).filter(k => k.includes('Cotiz') || k.includes('admin')));
         container.innerHTML = `
           <div class="empty-state">
-            <p>❌ Error crítico: Firebase no se cargó correctamente</p>
+            <p>❌ Error crítico: API de cotizaciones no está disponible</p>
             <p>Por favor recarga la página (Cmd+Shift+R)</p>
           </div>
         `;
@@ -1276,7 +1232,7 @@
       cotizacionesFiltradas.forEach(cot => {
         // SANITIZATION: All user-controlled data is escaped
         const nombreSafe = sanitizeHTML(cot.nombre || '-');
-        const fecha = cot.fechaCreacion ? new Date(cot.fechaCreacion.seconds * 1000).toLocaleDateString('es-ES') : '-';
+        const fecha = formatFecha(cot.fechaCreacion, false);
         const emailSafe = sanitizeHTML(cot.email || '');
         const telefonoSafe = sanitizeHTML(cot.telefono || '');
         const contacto = emailSafe && emailSafe !== 'No proporcionado' ? emailSafe : (telefonoSafe && telefonoSafe !== 'No proporcionado' ? telefonoSafe : '-');
@@ -1351,18 +1307,7 @@
       }
 
       // Formatear fecha seguramente
-      let fecha = '-';
-      if (cotizacionEditando.fechaCreacion) {
-        try {
-          if (cotizacionEditando.fechaCreacion.seconds !== undefined) {
-            fecha = new Date(cotizacionEditando.fechaCreacion.seconds * 1000).toLocaleString('es-ES');
-          } else if (typeof cotizacionEditando.fechaCreacion === 'number') {
-            fecha = new Date(cotizacionEditando.fechaCreacion * 1000).toLocaleString('es-ES');
-          }
-        } catch (e) {
-          console.warn('⚠️ Error al formatear fecha:', e);
-        }
-      }
+      const fecha = formatFecha(cotizacionEditando.fechaCreacion, true);
 
       // Formatear servicios seguramente
       let servicios = '-';
@@ -1630,6 +1575,7 @@
         // Actualizar a nivel local para no recargar todo
         cotizacionEditando.status = nuevoEstado;
         cotizacionEditando.notas = notas;
+        const confirmacion = document.createElement('div');
         confirmacion.style.cssText = `
           position: fixed;
           top: 50%;

@@ -1138,41 +1138,19 @@ async function handleFormSubmit(e) {
   submitBtn.disabled = true;
 
   try {
-    // 🔥 GUARDADOR EN FIREBASE - Guardar cotización en base de datos
-    console.log('💾 Guardando cotización en Firestore...');
-    
-    // Verificar que Firebase esté inicializado y la función exista
-    if (typeof guardarCotizacionEnFirebase !== 'function') {
-      console.error('❌ guardarCotizacionEnFirebase no está disponible');
-      console.log('📌 Iniciando Firebase manualmente...');
-      
-      // Intentar inicializar Firebase
-      if (typeof initFirebase === 'function') {
-        const firebaseOk = initFirebase();
-        console.log('Firebase init result:', firebaseOk);
-      } else {
-        console.error('❌ initFirebase tampoco está disponible - firebase-config.js no se cargó');
-      }
-      
-      // Esperar un momento para que Firebase se inicialice
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-
-    // Si la función existe ahora, usarla
+    // Guardar cotización en backend server-side.
+    console.log('💾 Guardando cotización en backend...');
     if (typeof guardarCotizacionEnFirebase === 'function') {
-      const firebaseResult = await guardarCotizacionEnFirebase(data);
-      
-      if (firebaseResult.success) {
-        console.log('✅ Cotización guardada en Firestore con ID:', firebaseResult.id);
-        // Agregar ID de Firebase al objeto data para referencia
-        data.firebaseId = firebaseResult.id;
+      const apiResult = await guardarCotizacionEnFirebase(data);
+
+      if (apiResult.success) {
+        console.log('✅ Cotización guardada con ID:', apiResult.id);
+        data.firebaseId = apiResult.id;
       } else {
-        console.warn('⚠️ Advertencia guardar cotización:', firebaseResult.error);
-        // Continuar aunque falle Firestore, no es bloqueante
+        console.warn('⚠️ Advertencia guardar cotización:', apiResult.error);
       }
     } else {
-      console.warn('⚠️ Firebase SDK no completamente cargado, continuando sin guardar en BD');
-      console.warn('ℹ️ Intenta recargar la página (F5) si el problema persiste');
+      console.warn('⚠️ API de cotizaciones no disponible, continuando sin respaldo en BD');
       showNotification('La cotización será procesada (sin respaldo en BD)', 'warning');
     }
 
@@ -3001,7 +2979,7 @@ function downloadQuotePdf() {
 // Envío de cotización desde la calculadora
 // esta función construye los datos y, al usar enviarEmailCotizacion,
 // se marca `fromCalculator: true` para que EmailJS utilice
-// el template identificado como template_h72ctck (EMAILJS_CONFIG.calculatorTemplateId).
+// el template identificado como EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER (EMAILJS_CONFIG.calculatorTemplateId).
 function openWhatsAppQuote() {
   const datos = getCalculatorQuoteData();
   const userEmail = document.getElementById('quote-email')?.value || '';

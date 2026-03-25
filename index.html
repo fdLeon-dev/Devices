@@ -35,13 +35,7 @@
     gtag('config', 'G-69VRCVVGXD');
   </script>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <!-- Configuración sensible movida a funciones server-side -->
 </head>
 
 <body>
@@ -1119,12 +1113,7 @@
 
   <!-- JavaScript -->
   <!-- Dev: Forzar actualización/desregistro del Service Worker (eliminado por petición) -->
-  <!-- Cargar configuración desde variables de entorno PRIMERO -->
-  <script src="config-loader.js?v=20260318"></script>
-  <script src="firebase-config.js?v=20260316-1"></script>
-  <!-- EmailJS SDK (required for enviarEmailCotizacion) -->
-  <!-- EmailJS SDK (CDN oficial) -->
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script src="api-client.js?v=20260324-1"></script>
   <script src="emailjs-config.js"></script>
   <!-- Email Client Seguro - Envia emails via servidor (no expone Public Key) -->
   <script src="email-client.js?v=20260320"></script>

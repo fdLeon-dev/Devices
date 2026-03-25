@@ -30,9 +30,9 @@ const datosCalculadora = {
 
 // Configuración de EmailJS
 const EMAILJS_CONFIG = {
-  templateId: 'template_o9khfnz',    // Template para formulario
-  calculatorTemplateId: 'template_h72ctck', // Template para calculadora
-  clientTemplateId: 'template_h72ctck' // Template para cliente (calculadora)
+  templateId: 'EMAILJS_TEMPLATE_ID_PLACEHOLDER',    // Template para formulario
+  calculatorTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER', // Template para calculadora
+  clientTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER' // Template para cliente (calculadora)
 };
 
 // Función de detección
@@ -87,4 +87,4 @@ console.log('fromCalculator?:', datosCalcUno.fromCalculator);
 const resultadoCalcUno = detectarTemplates(datosCalcUno);
 console.log('Resultado:', resultadoCalcUno);
 
-console.log('\n✅ Si el formulario usa template_o9khfnz y la calculadora usa template_h72ctck, está correcto.');
+console.log('\n✅ Si el formulario usa EMAILJS_TEMPLATE_ID_PLACEHOLDER y la calculadora usa EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER, está correcto.');

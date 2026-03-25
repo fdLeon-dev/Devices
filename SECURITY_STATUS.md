@@ -94,9 +94,9 @@
 
 En **Netlify Dashboard → Site settings → Build & deploy → Environment**:
 ```
-ADMIN_USER = ngk92ortc5
-ADMIN_PASS = 1b7cd9e5feb77e5cce48
-FIREBASE_API_KEY = AIzaSyCOpKYq8zf09y3GFurGauAtI7H2-PxLWS8
+ADMIN_USER = ADMIN_USER_PLACEHOLDER
+ADMIN_PASS = ADMIN_PASS_PLACEHOLDER
+FIREBASE_API_KEY = FIREBASE_API_KEY_PLACEHOLDER
 ... (más 10 variables)
 ```
 

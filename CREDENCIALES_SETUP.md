@@ -28,8 +28,8 @@ cp public/config-credentials.example.json public/config-credentials.json
 ```json
 {
   "admin": {
-    "usuario": "ngk92ortc5",
-    "contraseña": "1b7cd9e5feb77e5cce48"
+    "usuario": "ADMIN_USER_PLACEHOLDER",
+    "contraseña": "ADMIN_PASS_PLACEHOLDER"
   }
 }
 ```
@@ -55,8 +55,8 @@ git status  # config-credentials.json NO debe aparecer
   status = 200
 
 [build.environment]
-  ADMIN_USER = "ngk92ortc5"
-  ADMIN_PASS = "1b7cd9e5feb77e5cce48"
+  ADMIN_USER = "ADMIN_USER_PLACEHOLDER"
+  ADMIN_PASS = "ADMIN_PASS_PLACEHOLDER"
 ```
 
 2. Crea `build.sh`:

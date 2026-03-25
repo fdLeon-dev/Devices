@@ -21,8 +21,8 @@
    - Agrega nuevas variables:
 
 ```
-ADMIN_USER = ngk92ortc5
-ADMIN_PASS = 1b7cd9e5feb77e5cce48
+ADMIN_USER = ADMIN_USER_PLACEHOLDER
+ADMIN_PASS = ADMIN_PASS_PLACEHOLDER
 ```
 
 > ⚠️ IMPORTANTE: No guardes estas en el repositorio GitHub. Solo en Netlify Dashboard.

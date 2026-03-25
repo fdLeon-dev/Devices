@@ -104,10 +104,10 @@ Netlify Dashboard → Site settings → Build & deploy → Environment
 
 Debe tener:
 ```
-EMAILJS_PUBLIC_KEY = y9GCD4RwWJbp-dnRO
-EMAILJS_SERVICE_ID = service_yapkcmx
-EMAILJS_TEMPLATE_ID = template_o9khfnz
-EMAILJS_CLIENT_TEMPLATE_ID = template_h72ctck
+EMAILJS_PUBLIC_KEY = EMAILJS_PUBLIC_KEY_PLACEHOLDER
+EMAILJS_SERVICE_ID = EMAILJS_SERVICE_ID_PLACEHOLDER
+EMAILJS_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_PLACEHOLDER
+EMAILJS_CLIENT_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER
 ```
 
 ### 3. Deploy a Netlify
@@ -133,9 +133,9 @@ Abrir Console:
 **ANTES:**
 ```javascript
 // Expone Public Key
-emailjs.init('y9GCD4RwWJbp-dnRO');  // ← Visible en navegador
-emailjs.send('service_yapkcmx', 'template_o9khfnz', data, {
-  publicKey: 'y9GCD4RwWJbp-dnRO'  // ← Visible en DevTools
+emailjs.init('EMAILJS_PUBLIC_KEY_PLACEHOLDER');  // ← Visible en navegador
+emailjs.send('EMAILJS_SERVICE_ID_PLACEHOLDER', 'EMAILJS_TEMPLATE_ID_PLACEHOLDER', data, {
+  publicKey: 'EMAILJS_PUBLIC_KEY_PLACEHOLDER'  // ← Visible en DevTools
 });
 ```
 

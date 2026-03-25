@@ -3,7 +3,7 @@ console.log('🔍 CHECKLIST: Verificación de EmailJS');
 console.log('=====================================');
 
 // Template ID actual
-const templateId = 'template_h72ctck';
+const templateId = 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER';
 
 console.log(`\n📧 Template a verificar: ${templateId}`);
 console.log('\n🔧 ACCIONES EN EMAILJS DASHBOARD:');

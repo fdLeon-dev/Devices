@@ -43,15 +43,15 @@ function validateName(name) {
 
 // ============ CONFIGURACIÓN FIREBASE ============
 
-// Usar variables de entorno de Netlify si están disponibles, sino usar defaults
+// Seguridad: no incluir credenciales reales en cliente.
 const firebaseConfig = window.FIREBASE_CONFIG_ENV || {
-  apiKey: "AIzaSyCOpKYq8zf09y3GFurGauAtI7H2-PxLWS8",
-  authDomain: "devices-41420.firebaseapp.com",
-  projectId: "devices-41420",
-  storageBucket: "devices-41420.firebasestorage.app",
-  messagingSenderId: "921739795305",
-  appId: "1:921739795305:web:9cd3558137eb748006bbf8",
-  measurementId: "G-G4DX09CSR3"
+  apiKey: "CONFIGURE_IN_SERVER_ONLY",
+  authDomain: "CONFIGURE_IN_SERVER_ONLY",
+  projectId: "CONFIGURE_IN_SERVER_ONLY",
+  storageBucket: "CONFIGURE_IN_SERVER_ONLY",
+  messagingSenderId: "CONFIGURE_IN_SERVER_ONLY",
+  appId: "CONFIGURE_IN_SERVER_ONLY",
+  measurementId: "CONFIGURE_IN_SERVER_ONLY"
 };
 // Inicializar Firebase
 let db;

@@ -2,6 +2,8 @@
 // El cliente NO tiene acceso a las credenciales de EmailJS
 // Usa la API REST de EmailJS directamente (no requiere dependencia)
 
+const { checkRateLimit, getClientIp } = require('./_shared/security');
+
 exports.handler = async (event, context) => {
   // CORS - Solo aceptar desde tu dominio
   const origin = event.headers.origin;
@@ -22,6 +24,15 @@ exports.handler = async (event, context) => {
   }
 
   try {
+        const ip = getClientIp(event);
+        if (!checkRateLimit(`send-email:${ip}`, 10, 60 * 60 * 1000)) {
+          return {
+            statusCode: 429,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: 'Demasiadas solicitudes. Intenta mas tarde.' })
+          };
+        }
+
     console.log('📨 [send-email] Función iniciada');
     console.log('📨 [send-email] Method:', event.httpMethod);
     console.log('📨 [send-email] Origin:', origin);
@@ -101,11 +112,7 @@ exports.handler = async (event, context) => {
     const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
     const emailjsClientTemplateId = process.env.EMAILJS_CLIENT_TEMPLATE_ID;
 
-    console.log('🔑 [send-email] Verificando variables de entorno:');
-    console.log('   ✓ EMAILJS_PUBLIC_KEY:', emailjsPublicKey ? `${emailjsPublicKey.substring(0,10)}...` : '❌ Missing');
-    console.log('   ✓ EMAILJS_SERVICE_ID:', emailjsServiceId ? `${emailjsServiceId.substring(0,10)}...` : '❌ Missing');
-    console.log('   ✓ EMAILJS_TEMPLATE_ID:', emailjsTemplateId ? `${emailjsTemplateId.substring(0,10)}...` : '❌ Missing');
-    console.log('   ✓ EMAILJS_CLIENT_TEMPLATE_ID:', emailjsClientTemplateId ? '✅ Set' : '⚠️ Not set');
+    console.log('🔑 [send-email] Variables de entorno verificadas');
 
     if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
       console.error('❌ [send-email] FALTA configuración de EmailJS');

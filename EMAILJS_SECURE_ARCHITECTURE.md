@@ -7,8 +7,8 @@ Originalmente, el código exponía la **EmailJS Public Key** en el navegador:
 ```javascript
 // ❌ INSEGURO - Public Key visible en DevTools
 const EMAILJS_CONFIG = {
-  publicKey: 'y9GCD4RwWJbp-dnRO',  // Cualquiera puede verla
-  serviceId: 'service_yapkcmx'
+  publicKey: 'EMAILJS_PUBLIC_KEY_PLACEHOLDER',  // Cualquiera puede verla
+  serviceId: 'EMAILJS_SERVICE_ID_PLACEHOLDER'
 };
 
 emailjs.send(EMAILJS_CONFIG.serviceId, templateId, data, {
@@ -194,10 +194,10 @@ npm install @emailjs/nodejs
 Site settings → Build & deploy → Environment:
 
 ```
-EMAILJS_PUBLIC_KEY = y9GCD4RwWJbp-dnRO
-EMAILJS_SERVICE_ID = service_yapkcmx
-EMAILJS_TEMPLATE_ID = template_o9khfnz
-EMAILJS_CLIENT_TEMPLATE_ID = template_h72ctck
+EMAILJS_PUBLIC_KEY = EMAILJS_PUBLIC_KEY_PLACEHOLDER
+EMAILJS_SERVICE_ID = EMAILJS_SERVICE_ID_PLACEHOLDER
+EMAILJS_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_PLACEHOLDER
+EMAILJS_CLIENT_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER
 ```
 
 ### Paso 3: Probar Función

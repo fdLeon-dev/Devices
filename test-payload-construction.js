@@ -29,11 +29,11 @@ const datosFormularioCalcFlag = {
 
 // Configuración
 const EMAILJS_CONFIG = {
-  publicKey: 'y9GCD4RwWJbp-dnRO',
-  serviceId: 'service_yapkcmx',
-  templateId: 'template_o9khfnz',
-  calculatorTemplateId: 'template_h72ctck',
-  clientTemplateId: 'template_h72ctck'
+  publicKey: 'EMAILJS_PUBLIC_KEY_PLACEHOLDER',
+  serviceId: 'EMAILJS_SERVICE_ID_PLACEHOLDER',
+  templateId: 'EMAILJS_TEMPLATE_ID_PLACEHOLDER',
+  calculatorTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER',
+  clientTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER'
 };
 
 // Funciones helper

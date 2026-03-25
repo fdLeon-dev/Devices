@@ -55,10 +55,10 @@ npm install nodemailer ^6.9.4
 
 Debe tener estas 4 variables:
 ```
-EMAILJS_PUBLIC_KEY = y9GCD4RwWJbp-dnRO
-EMAILJS_SERVICE_ID = service_yapkcmx
-EMAILJS_TEMPLATE_ID = template_o9khfnz
-EMAILJS_CLIENT_TEMPLATE_ID = template_h72ctck
+EMAILJS_PUBLIC_KEY = EMAILJS_PUBLIC_KEY_PLACEHOLDER
+EMAILJS_SERVICE_ID = EMAILJS_SERVICE_ID_PLACEHOLDER
+EMAILJS_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_PLACEHOLDER
+EMAILJS_CLIENT_TEMPLATE_ID = EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER
 ```
 
 **✅ Si ya las tiene → OK**
@@ -91,7 +91,7 @@ En Netlify Dashboard:
 https://midominio.netlify.app
 
 # Abrir DevTools (F12 → Console)
-# Buscar: Ctrl+F por "y9GCD4RwWJbp-dnRO"
+# Buscar: Ctrl+F por "EMAILJS_PUBLIC_KEY_PLACEHOLDER"
 # Resultado esperado: NO encontrada en código
 ```
 
