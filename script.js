@@ -3404,6 +3404,25 @@ console.log('%c✨ Enhanced with testimonials, calculator, and filters!', 'color
 let unsubscribeTestimonios = null;
 let currentUserId = null;
 
+function obtenerUserId() {
+  const key = 'devicesf2_user_id';
+
+  try {
+    const existingId = localStorage.getItem(key);
+    if (existingId && typeof existingId === 'string') {
+      return existingId;
+    }
+
+    const randomPart = Math.random().toString(36).slice(2, 10);
+    const newId = `user_${Date.now().toString(36)}_${randomPart}`;
+    localStorage.setItem(key, newId);
+    return newId;
+  } catch (error) {
+    const randomPart = Math.random().toString(36).slice(2, 10);
+    return `user_${Date.now().toString(36)}_${randomPart}`;
+  }
+}
+
 // Inicializar sistema de testimonios
 function initializeRealtimeTestimonials() {
   // Obtener o generar ID de usuario

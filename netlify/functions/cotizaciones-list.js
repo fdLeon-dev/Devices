@@ -7,6 +7,39 @@ const {
 } = require('./_shared/security');
 const { getFirestore } = require('./_shared/firebase-admin');
 
+function asTimestampMillis(value) {
+  if (!value) return 0;
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    const parsed = new Date(value).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  if (typeof value.toDate === 'function') {
+    return value.toDate().getTime();
+  }
+
+  if (value.seconds !== undefined) {
+    return Number(value.seconds) * 1000;
+  }
+
+  if (value._seconds !== undefined) {
+    return Number(value._seconds) * 1000;
+  }
+
+  return 0;
+}
+
+function resolveListError(error) {
+  const message = String((error && error.message) || '').toLowerCase();
+
+  if (message.includes('firebase_service_account_json') || message.includes('serviceaccountkey.json')) {
+    return 'Firebase no esta configurado en el servidor';
+  }
+
+  return 'No se pudieron obtener cotizaciones';
+}
+
 function serializeValue(value) {
   if (!value) return value;
 
@@ -55,13 +88,22 @@ exports.handler = async (event) => {
 
   try {
     const db = getFirestore();
-    const snapshot = await db.collection('cotizaciones').orderBy('fechaCreacion', 'desc').limit(100).get();
+    let snapshot;
+
+    try {
+      snapshot = await db.collection('cotizaciones').orderBy('fechaCreacion', 'desc').limit(100).get();
+    } catch (queryError) {
+      snapshot = await db.collection('cotizaciones').limit(100).get();
+    }
+
     const data = [];
     snapshot.forEach((doc) => {
       data.push({ id: doc.id, ...serializeValue(doc.data()) });
     });
+
+    data.sort((a, b) => asTimestampMillis(b.fechaCreacion) - asTimestampMillis(a.fechaCreacion));
     return jsonResponse(200, { success: true, data }, origin);
   } catch (error) {
-    return jsonResponse(500, { success: false, error: 'No se pudieron obtener cotizaciones' }, origin);
+    return jsonResponse(500, { success: false, error: resolveListError(error) }, origin);
   }
 };
