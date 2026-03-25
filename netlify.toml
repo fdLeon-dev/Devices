@@ -3,7 +3,7 @@
 
 # Build settings
 [build]
-  base = "/"
+  base = "."
   command = "npm run build || echo 'No build script needed - static site'"
   publish = "."
 
@@ -21,6 +21,7 @@
   # Use Netlify Dashboard: Site settings → Build & deploy → Environment
   # Variables: ADMIN_USER, ADMIN_PASS
   NODE_ENV = "production"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
   # Defensive flag: this repository is a static site, not Next.js.
   # If @netlify/plugin-nextjs is still attached from Netlify UI,
   # this avoids Next runtime prebuild checks from breaking deploys.
