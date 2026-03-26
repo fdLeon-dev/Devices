@@ -1,5 +1,7 @@
 # Firebase
 serviceAccountKey.json
+*adminsdk*.json
+*-firebase-adminsdk-*.json
 firebase-debug.log
 firestore-debug.log
 

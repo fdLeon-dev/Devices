@@ -44,11 +44,21 @@ self.addEventListener('activate', function (event) {
 
 // Interceptar requests - SOLO recursos locales
 self.addEventListener('fetch', function (event) {
+  // Nunca cachear metodos no idempotentes (POST/PUT/PATCH/DELETE).
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   // No interceptar requests a dominios externos (dejar que el navegador las maneje libremente)
   try {
     const url = new URL(event.request.url);
     if (url.origin !== self.location.origin) {
       return; // Dejar pasar requests externas sin interceptar
+    }
+
+    // Evitar cache de endpoints dinamicos (funciones/API).
+    if (url.pathname.startsWith('/.netlify/functions/')) {
+      return;
     }
   } catch (e) {
     return; // Si hay problemas parseando URL, dejar pasar

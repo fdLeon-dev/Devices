@@ -9,6 +9,24 @@ const {
   getClientIp
 } = require('./_shared/security');
 
+function normalizeCredential(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .trim()
+    .replace(/^['\"]+|['\"]+$/g, '');
+}
+
+function firstNonEmptyEnv(...values) {
+  for (const value of values) {
+    const normalized = normalizeCredential(value);
+    if (normalized) {
+      return normalized;
+    }
+  }
+  return '';
+}
+
 exports.handler = async (event) => {
   const origin = resolveOrigin(event);
 
@@ -36,11 +54,12 @@ exports.handler = async (event) => {
     return jsonResponse(400, { success: false, error: 'JSON invalido' }, origin);
   }
 
-  const user = String(body.username || '').trim();
-  const pass = String(body.password || '').trim();
+  const user = normalizeCredential(body.username);
+  const pass = normalizeCredential(body.password);
 
-  const expectedUser = String(process.env.ADMIN_USER || process.env.ADMIN_USERNAME || '').trim();
-  const expectedPass = String(process.env.ADMIN_PASS || process.env.ADMIN_PASSWORD || '').trim();
+  // Prefer new variable names to avoid collisions with stale legacy values.
+  const expectedUser = firstNonEmptyEnv(process.env.ADMIN_USERNAME, process.env.ADMIN_USER);
+  const expectedPass = firstNonEmptyEnv(process.env.ADMIN_PASSWORD, process.env.ADMIN_PASS);
 
   if (!expectedUser || !expectedPass) {
     return jsonResponse(500, { success: false, error: 'Credenciales admin no configuradas en servidor' }, origin);
