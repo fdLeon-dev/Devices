@@ -39,8 +39,8 @@ exports.handler = async (event) => {
   const user = String(body.username || '').trim();
   const pass = String(body.password || '').trim();
 
-  const expectedUser = String(process.env.ADMIN_USER || '').trim();
-  const expectedPass = String(process.env.ADMIN_PASS || '').trim();
+  const expectedUser = String(process.env.ADMIN_USER || process.env.ADMIN_USERNAME || '').trim();
+  const expectedPass = String(process.env.ADMIN_PASS || process.env.ADMIN_PASSWORD || '').trim();
 
   if (!expectedUser || !expectedPass) {
     return jsonResponse(500, { success: false, error: 'Credenciales admin no configuradas en servidor' }, origin);

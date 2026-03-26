@@ -976,8 +976,12 @@
         }
 
         // Mostrar error
+        const backendMsg = (error && error.message ? String(error.message) : '').trim();
+        const isInvalidCreds = backendMsg.toLowerCase().includes('credenciales invalidas');
         const errorDiv = document.getElementById('login-error');
-        errorDiv.textContent = `❌ Credenciales inválidas (${loginAttempts}/${RATE_LIMIT_CONFIG.maxAttempts})`;
+        errorDiv.textContent = isInvalidCreds || !backendMsg
+          ? `❌ Credenciales inválidas (${loginAttempts}/${RATE_LIMIT_CONFIG.maxAttempts})`
+          : `❌ ${backendMsg}`;
         errorDiv.classList.add('show');
 
         setTimeout(() => {
