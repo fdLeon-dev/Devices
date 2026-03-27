@@ -3,48 +3,6 @@
 // Usa la API REST de EmailJS directamente (no requiere dependencia)
 
 const { checkRateLimit, getClientIp } = require('./_shared/security');
-const nodemailer = require('nodemailer');
-
-async function sendViaNodemailer(data, folio) {
-  const gmailUser = process.env.GMAIL_USER || 'devices.f02@gmail.com';
-  const gmailPass = process.env.GMAIL_PASSWORD || process.env.GMAIL_APP_PASSWORD;
-
-  if (!gmailPass) {
-    throw new Error('Fallback Nodemailer no disponible: faltan GMAIL_PASSWORD/GMAIL_APP_PASSWORD');
-  }
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: gmailUser,
-      pass: gmailPass
-    }
-  });
-
-  const subject = `[COTIZACION] ${folio} - ${data.userName}`;
-  const textBody = [
-    `Folio: ${folio}`,
-    `Nombre: ${data.userName}`,
-    `Email: ${data.userEmail || 'no-reply@devices.f2'}`,
-    `Telefono: ${data.userPhone || 'No proporcionado'}`,
-    `Servicios: ${data.servicesList}`,
-    `Urgencia: ${data.urgencyText || 'Normal (3-5 dias)'}`,
-    `Garantia: ${data.warrantyText || '30 dias'}`,
-    `Total: ${data.total || 0}`,
-    '',
-    `Mensaje: ${data.message || 'Cotizacion desde formulario'}`
-  ].join('\n');
-
-  await transporter.sendMail({
-    from: gmailUser,
-    to: 'devices.f02@gmail.com',
-    replyTo: data.userEmail || gmailUser,
-    subject,
-    text: textBody
-  });
-
-  return { success: true, method: 'nodemailer' };
-}
 
 exports.handler = async (event, context) => {
   // CORS - Solo aceptar desde tu dominio
@@ -173,81 +131,85 @@ exports.handler = async (event, context) => {
       reply_to: data.userEmail || 'devices.f02@gmail.com'
     };
 
-    const isEmailJsConfigured = !!(emailjsPublicKey && emailjsServiceId && emailjsTemplateId);
-    let sendMethod = 'emailjs';
+    if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
+      const missing = [];
+      if (!emailjsPublicKey) missing.push('EMAILJS_PUBLIC_KEY');
+      if (!emailjsServiceId) missing.push('EMAILJS_SERVICE_ID');
+      if (!emailjsTemplateId) missing.push('EMAILJS_TEMPLATE_ID');
 
-    try {
-      if (!isEmailJsConfigured) {
-        throw new Error('Configuracion EmailJS no disponible en servidor');
-      }
-
-      // Enviar al negocio via API REST de EmailJS
-      const businessPayload = {
-        service_id: emailjsServiceId,
-        template_id: emailjsTemplateId,
-        user_id: emailjsPublicKey,
-        template_params: {
-          ...templateParams,
-          to_email: 'devices.f02@gmail.com'
-        }
-      };
-
-      console.log('📧 [send-email] Enviando email al negocio...');
-      console.log('📧 [send-email] Payload:', JSON.stringify(businessPayload).substring(0, 200) + '...');
-
-      const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
+      return {
+        statusCode: 500,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(businessPayload)
-      });
+        body: JSON.stringify({
+          success: false,
+          error: `Configuracion EmailJS incompleta: ${missing.join(', ')}`,
+          details: 'Configura las variables en Netlify Site Settings > Environment Variables'
+        })
+      };
+    }
 
-      console.log('📧 [send-email] Respuesta de EmailJS:', businessResponse.status);
-
-      if (!businessResponse.ok) {
-        const error = await businessResponse.text();
-        throw new Error(`EmailJS error: ${businessResponse.status} - ${error}`);
+    // Enviar al negocio via API REST de EmailJS
+    const businessPayload = {
+      service_id: emailjsServiceId,
+      template_id: emailjsTemplateId,
+      user_id: emailjsPublicKey,
+      template_params: {
+        ...templateParams,
+        to_email: 'devices.f02@gmail.com'
       }
+    };
 
-      console.log('✅ [send-email] Email al negocio enviado exitosamente');
+    console.log('📧 [send-email] Enviando email al negocio...');
+    console.log('📧 [send-email] Payload:', JSON.stringify(businessPayload).substring(0, 200) + '...');
 
-      // Si viene un email de cliente válido, enviar confirmación (no es crítico si falla)
-      if (data.userEmail && data.userEmail.includes('@') && emailRegex.test(data.userEmail)) {
-        try {
-          console.log('📧 Enviando email de confirmación al cliente:', data.userEmail);
-          const clientPayload = {
-            service_id: emailjsServiceId,
-            template_id: emailjsClientTemplateId || emailjsTemplateId,
-            user_id: emailjsPublicKey,
-            template_params: {
-              ...templateParams,
-              to_email: data.userEmail,
-              message: `Gracias por tu cotización. Los servicios solicitados fueron: ${data.servicesList}`
-            }
-          };
+    const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(businessPayload)
+    });
 
-          const clientResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(clientPayload)
-          });
+    console.log('📧 [send-email] Respuesta de EmailJS:', businessResponse.status);
 
-          if (clientResponse.ok) {
-            console.log('✅ Email de confirmación enviado al cliente:', data.userEmail);
-          } else {
-            console.warn('⚠️ No se pudo enviar email de confirmación (status:', clientResponse.status + ')');
+    if (!businessResponse.ok) {
+      const error = await businessResponse.text();
+      throw new Error(`EmailJS business error: ${businessResponse.status} - ${error}`);
+    }
+
+    console.log('✅ [send-email] Email al negocio enviado exitosamente');
+
+    // Si viene un email de cliente válido, enviar confirmación (no es crítico si falla)
+    if (data.userEmail && data.userEmail.includes('@') && emailRegex.test(data.userEmail)) {
+      try {
+        console.log('📧 Enviando email de confirmación al cliente:', data.userEmail);
+        const clientPayload = {
+          service_id: emailjsServiceId,
+          template_id: emailjsClientTemplateId || emailjsTemplateId,
+          user_id: emailjsPublicKey,
+          template_params: {
+            ...templateParams,
+            to_email: data.userEmail,
+            message: `Gracias por tu cotización. Los servicios solicitados fueron: ${data.servicesList}`
           }
-        } catch (clientErr) {
-          console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr?.message || 'Unknown error');
-          // No es error crítico, continuar igual
+        };
+
+        const clientResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clientPayload)
+        });
+
+        if (clientResponse.ok) {
+          console.log('✅ Email de confirmación enviado al cliente:', data.userEmail);
+        } else {
+          const clientError = await clientResponse.text();
+          console.warn('⚠️ No se pudo enviar email de confirmación:', clientResponse.status, clientError);
         }
-      } else {
-        console.log('📌 [send-email] No se envía email de confirmación (email no válido o no proporcionado)');
+      } catch (clientErr) {
+        console.warn('⚠️ No se pudo enviar email de confirmación:', clientErr?.message || 'Unknown error');
+        // No es error crítico, continuar igual
       }
-    } catch (emailJsErr) {
-      console.warn('⚠️ [send-email] EmailJS falló, intentando fallback Nodemailer:', emailJsErr.message);
-      await sendViaNodemailer(data, templateParams.folio);
-      sendMethod = 'nodemailer';
-      console.log('✅ [send-email] Fallback Nodemailer exitoso');
+    } else {
+      console.log('📌 [send-email] No se envía email de confirmación (email no válido o no proporcionado)');
     }
 
     return {
@@ -262,7 +224,7 @@ exports.handler = async (event, context) => {
         success: true,
         message: 'Email enviado correctamente',
         folio: templateParams.folio,
-        method: sendMethod
+        method: 'emailjs'
       })
     };
 

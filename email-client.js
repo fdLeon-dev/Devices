@@ -67,15 +67,8 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
     console.log('   📌 servicesList:', emailData.servicesList);
 
     // Llamar función serverless principal (EmailJS)
-    let endpointUsed = '/.netlify/functions/send-email';
-    let sendResult = await callEmailEndpoint(endpointUsed, emailData);
-
-    // Fallback automático si EmailJS falla con error de servidor
-    if (!sendResult.ok && sendResult.status >= 500) {
-      console.warn(`⚠️ Falla endpoint principal (${sendResult.status}). Reintentando con nodemailer...`);
-      endpointUsed = '/.netlify/functions/send-email-nodemailer';
-      sendResult = await callEmailEndpoint(endpointUsed, emailData);
-    }
+    const endpointUsed = '/.netlify/functions/send-email';
+    const sendResult = await callEmailEndpoint(endpointUsed, emailData);
 
     if (!sendResult.ok) {
       const errorMessage = sendResult.payload?.error || `Error ${sendResult.status}`;
