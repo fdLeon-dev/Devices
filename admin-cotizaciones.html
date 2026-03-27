@@ -1610,6 +1610,17 @@
         cotizacionEditando.notas = notas;
         cotizacionEditando.devolucionFactura = devolucionFactura;
         const confirmacion = document.createElement('div');
+        const emailNotification = result.emailNotification || null;
+        let confirmacionTexto = '✅ Cambios guardados correctamente';
+        if (emailNotification && emailNotification.triggered && nuevoEstado === 'completado') {
+          if (emailNotification.sent) {
+            confirmacionTexto = '✅ Cambios guardados y email de devolución enviado';
+          } else {
+            const detalleEmail = emailNotification.details ? ` (${emailNotification.details})` : '';
+            confirmacionTexto = `⚠️ Cambios guardados, pero no se pudo enviar email${detalleEmail}`;
+          }
+        }
+
         confirmacion.style.cssText = `
           position: fixed;
           top: 50%;
@@ -1624,7 +1635,7 @@
           z-index: 9999;
           box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         `;
-        confirmacion.textContent = '✅ Cambios guardados correctamente';
+        confirmacion.textContent = confirmacionTexto;
         document.body.appendChild(confirmacion);
 
         setTimeout(() => {

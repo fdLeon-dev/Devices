@@ -12,9 +12,7 @@ function detectarCliente(datos) {
 
 // Función helper para detectar template
 function detectarTemplate(datos) {
-  const isFromCalculator = datos.servicio && datos.servicio.includes(',') ||
-                          (datos.selectedServices && datos.selectedServices > 1);
-  return isFromCalculator ? 'calculatorTemplateId' : 'templateId';
+  return 'templateId';
 }
 
 // Pruebas

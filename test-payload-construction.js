@@ -21,18 +21,11 @@ const datosFormulario = {
   }
 };
 
-// escenario adicional: mismo formulario pero indicando "fromCalculator" para forzar el template de calculadora
-const datosFormularioCalcFlag = {
-  ...datosFormulario,
-  fromCalculator: true
-};
-
 // Configuración
 const EMAILJS_CONFIG = {
   publicKey: 'EMAILJS_PUBLIC_KEY_PLACEHOLDER',
   serviceId: 'EMAILJS_SERVICE_ID_PLACEHOLDER',
   templateId: 'EMAILJS_TEMPLATE_ID_PLACEHOLDER',
-  calculatorTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER',
   clientTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER'
 };
 
@@ -55,10 +48,6 @@ function getWarrantyText(warrantyValue) {
   };
   return warrantyTexts[warrantyValue] || '30 días';
 }
-
-// Lógica de detección
-const isFromCalculator = datosFormulario.servicio && datosFormulario.servicio.includes(',') ||
-                        (datosFormulario.selectedServices && datosFormulario.selectedServices > 1);
 
 const isClientEmail = (() => {
   if (!datosFormulario.email) return false;
@@ -92,8 +81,8 @@ const templateParams = {
 };
 
 // Seleccionar templates
-const templateId = isFromCalculator ? EMAILJS_CONFIG.calculatorTemplateId : EMAILJS_CONFIG.templateId;
-const clientTemplateId = isFromCalculator ? EMAILJS_CONFIG.clientTemplateId : EMAILJS_CONFIG.templateId;
+const templateId = EMAILJS_CONFIG.templateId;
+const clientTemplateId = EMAILJS_CONFIG.clientTemplateId;
 
 // Construir payload para el negocio
 const businessPayload = {
@@ -123,19 +112,9 @@ if (isClientEmail) {
 }
 
 console.log('🔍 Información de detección para datosFormulario:');
-console.log('• isFromCalculator:', isFromCalculator);
 console.log('• isClientEmail:', isClientEmail);
 console.log('• templateId:', templateId);
 console.log('• clientTemplateId:', clientTemplateId);
-
-// ahora repetir el ejercicio forzando el flag fromCalculator
-const isFromCalculator2 = datosFormularioCalcFlag.fromCalculator === true ||
-                        (datosFormularioCalcFlag.servicio && datosFormularioCalcFlag.servicio.includes(',')) ||
-                        (datosFormularioCalcFlag.selectedServices && datosFormularioCalcFlag.selectedServices > 1);
-const templateId2 = isFromCalculator2 ? EMAILJS_CONFIG.calculatorTemplateId : EMAILJS_CONFIG.templateId;
-console.log('\n🔍 Revisión con fromCalculator=true:');
-console.log('• isFromCalculator (esperado true):', isFromCalculator2);
-console.log('• templateId (esperado calculator):', templateId2);
 
 console.log('\n📧 BUSINESS PAYLOAD:');
 console.log(JSON.stringify(businessPayload, null, 2));

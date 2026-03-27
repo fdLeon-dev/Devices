@@ -1,5 +1,5 @@
-// Script de prueba para verificar selección de templates
-console.log('🧪 PRUEBA: Selección de templates para formulario vs calculadora');
+// Script de prueba para verificar uso de template único
+console.log('🧪 PRUEBA: Uso de template único para formulario y calculadora');
 console.log('=====================================');
 
 // Simular datos del formulario quote-form
@@ -30,19 +30,17 @@ const datosCalculadora = {
 
 // Configuración de EmailJS
 const EMAILJS_CONFIG = {
-  templateId: 'EMAILJS_TEMPLATE_ID_PLACEHOLDER',    // Template para formulario
-  calculatorTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER', // Template para calculadora
+  templateId: 'EMAILJS_TEMPLATE_ID_PLACEHOLDER',    // Template único
   clientTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER' // Template para cliente (calculadora)
 };
 
 // Función de detección
 function detectarTemplates(datos) {
-  const isFromCalculator = datos.fromCalculator === true ||
-                          (datos.servicio && datos.servicio.includes(',')) ||
-                          (datos.selectedServices && datos.selectedServices > 1);
+  const isFromCalculator = (datos.servicio && datos.servicio.includes(',')) ||
+                           (datos.selectedServices && datos.selectedServices > 1);
 
-  const templateId = isFromCalculator ? EMAILJS_CONFIG.calculatorTemplateId : EMAILJS_CONFIG.templateId;
-  const clientTemplateId = isFromCalculator ? EMAILJS_CONFIG.clientTemplateId : EMAILJS_CONFIG.templateId;
+  const templateId = EMAILJS_CONFIG.templateId;
+  const clientTemplateId = EMAILJS_CONFIG.clientTemplateId;
 
   return {
     isFromCalculator,
@@ -68,23 +66,21 @@ console.log('selectedServices:', datosCalculadora.selectedServices);
 const resultadoCalculadora = detectarTemplates(datosCalculadora);
 console.log('Resultado:', resultadoCalculadora);
 
-// Prueba extra: simulación de calculadora con un solo servicio pero flag explícito
+// Prueba extra: simulación de calculadora con un solo servicio
 const datosCalcUno = {
   nombre: 'Carlos López',
   email: 'carlos@email.com',
   telefono: '099000111',
   servicio: 'Mantenimiento preventivo', // un solo servicio
   selectedServices: 1,
-  fromCalculator: true, // indicamos que viene de la calculadora
   urgency: 'normal',
   warranty: '30',
   mensaje: 'Solo un servicio',
   fechaPreferida: '2024-01-20'
 };
-console.log('\n🧪 PRUEBA ADICIONAL - Calculadora con 1 servicio y flag explícito:');
+console.log('\n🧪 PRUEBA ADICIONAL - Calculadora con 1 servicio:');
 console.log('Servicio:', datosCalcUno.servicio);
-console.log('fromCalculator?:', datosCalcUno.fromCalculator);
 const resultadoCalcUno = detectarTemplates(datosCalcUno);
 console.log('Resultado:', resultadoCalcUno);
 
-console.log('\n✅ Si el formulario usa EMAILJS_TEMPLATE_ID_PLACEHOLDER y la calculadora usa EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER, está correcto.');
+console.log('\n✅ Si ambos orígenes usan EMAILJS_TEMPLATE_ID_PLACEHOLDER, está correcto.');

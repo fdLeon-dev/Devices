@@ -3020,9 +3020,7 @@ function downloadQuotePdf() {
 
 // Enhanced WhatsApp Quote Function
 // Envío de cotización desde la calculadora
-// esta función construye los datos y, al usar enviarEmailCotizacion,
-// se marca `fromCalculator: true` para que EmailJS utilice
-// el template identificado como EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER (EMAILJS_CONFIG.calculatorTemplateId).
+// esta función construye los datos y envía usando el template principal configurado.
 function openWhatsAppQuote() {
   const datos = getCalculatorQuoteData();
   const userEmail = document.getElementById('quote-email')?.value || '';
@@ -3085,7 +3083,6 @@ function openWhatsAppQuote() {
 
       // Enviar email con EmailJS directamente (legacy) -- evita dependencias serverless para este flujo
       console.log('📧 Enviando cotización de calculadora via EmailJS...');
-      datosFormulario.fromCalculator = true;
 
       // Convertir PDF Blob a data URL para que enviarEmailCotizacion lo use (adjunto opcional)
       let pdfDataUrl = null;

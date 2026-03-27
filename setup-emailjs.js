@@ -6,18 +6,16 @@ console.log('==========================================');
 console.log('\n📋 PASOS PARA CONFIGURAR EMAILJS:');
 console.log('1. Ve a https://www.emailjs.com/ y crea una cuenta gratis');
 console.log('2. Crea un servicio de email (Gmail, Outlook, etc.)');
-console.log('3. Crea TRES plantillas de email:');
-console.log('   a) Template para el negocio (cotizaciones de formulario)');
-console.log('   b) Template para la calculadora (cotizaciones múltiples servicios)');
-console.log('   c) Template para el cliente (confirmaciones)');
+console.log('3. Crea DOS plantillas de email:');
+console.log('   a) Template principal (negocio y calculadora)');
+console.log('   b) Template para el cliente (confirmaciones)');
 console.log('4. Copia los IDs de las plantillas aquí abajo');
 
 // Configuración actual
 const config = {
   publicKey: 'EMAILJS_PUBLIC_KEY_PLACEHOLDER',
   serviceId: 'EMAILJS_SERVICE_ID_PLACEHOLDER',
-  templateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER', // Para el negocio (formulario y calculadora)
-  calculatorTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER', // Mismo template que formulario
+  templateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER', // Para el negocio y calculadora
   clientTemplateId: 'EMAILJS_TEMPLATE_ID_ALT_PLACEHOLDER' // Mismo template para cliente
 };
 

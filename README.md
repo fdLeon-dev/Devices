@@ -350,13 +350,9 @@ Para usar los templates con EmailJS:
 3. Configura todos los campos dinámicos listados arriba
 4. El `templateId` en `emailjs-config.js` apunta a esta plantilla
 
-#### Template de la Calculadora (`calculator-template.html`):
-1. Copia el contenido de `calculator-template.html`
-2. Crea una plantilla en EmailJS llamada "Cotización Calculadora"
-3. Configura todos los campos dinámicos listados arriba
-4. Actualiza `calculatorTemplateId` en `emailjs-config.js` con el ID real de EmailJS
-
-**Nota**: Ambos templates usan los mismos campos dinámicos, pero el de calculadora está optimizado para mostrar múltiples servicios.
+#### Template de la Calculadora:
+La calculadora utiliza el mismo `templateId` principal de EmailJS.
+No requiere un template separado.
 
 ### Envío Automático de Emails
 
