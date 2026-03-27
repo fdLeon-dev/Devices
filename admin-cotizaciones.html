@@ -1335,6 +1335,7 @@
       const warrantyPrice = (cotizacionEditando.warrantyPrice || 0).toFixed(2);
       const totalPrice = (cotizacionEditando.totalPrice || 0).toFixed(2);
       const notas = sanitizeHTML(cotizacionEditando.notas || '');
+      const devolucionFactura = sanitizeHTML(cotizacionEditando.devolucionFactura || '');
 
       let html = `
         <!-- SECCIÓN 1: DATOS DEL CLIENTE (Compacto) -->
@@ -1419,6 +1420,13 @@
           <textarea id="edit-notas" placeholder="Agrega notas sobre el seguimiento, acciones tomadas, resultado final, etc..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.95em;">${notas}</textarea>
           <small id="notas-count" style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.85em;">0 caracteres</small>
         </div>
+
+        <!-- SECCIÓN 6: DEVOLUCIÓN FACTURA SELLADA/CONFIRMADA -->
+        <div class="modal-field" style="margin-bottom: 20px;">
+          <label style="font-size: 1em; margin-bottom: 8px; display: block;">🧾 Devolución / observación de factura confirmada o sellada</label>
+          <textarea id="edit-devolucion-factura" placeholder="Ejemplo: Se confirma factura sellada, observaciones del equipo, ajustes aplicados, pendientes..." style="width: 100%; min-height: 110px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.95em;">${devolucionFactura}</textarea>
+          <small id="devolucion-factura-count" style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.85em;">0 caracteres</small>
+        </div>
       `;
 
       document.getElementById('modal-body').innerHTML = html;
@@ -1431,6 +1439,17 @@
         notasInput.addEventListener('input', () => {
           notasCount.textContent = `${notasInput.value.length} caracteres`;
         });
+        notasCount.textContent = `${notasInput.value.length} caracteres`;
+      }
+
+      // Contador de caracteres para devolución de factura
+      const devolucionFacturaInput = document.getElementById('edit-devolucion-factura');
+      const devolucionFacturaCount = document.getElementById('devolucion-factura-count');
+      if (devolucionFacturaInput && devolucionFacturaCount) {
+        devolucionFacturaInput.addEventListener('input', () => {
+          devolucionFacturaCount.textContent = `${devolucionFacturaInput.value.length} caracteres`;
+        });
+        devolucionFacturaCount.textContent = `${devolucionFacturaInput.value.length} caracteres`;
       }
       
       console.log(`📖 Modal abierto para cotización: ${cotizacionId} (${nombre})`);
@@ -1499,6 +1518,7 @@
 
       const nuevoEstado = sanitizeHTML(document.getElementById('edit-status').value).trim();
       const notas = sanitizeHTML(document.getElementById('edit-notas').value).trim();
+      const devolucionFactura = sanitizeHTML((document.getElementById('edit-devolucion-factura')?.value || '')).trim();
       cotizacionId = sanitizeHTML(cotizacionEditando.id).trim();
 
       // Validar que el estado es uno de los valores permitidos
@@ -1522,6 +1542,12 @@
         return;
       }
 
+      // Validar que la devolución no sea excesivamente larga (máximo 5000 caracteres)
+      if (devolucionFactura.length > 5000) {
+        alert('❌ La devolución de factura no puede superar 5000 caracteres.');
+        return;
+      }
+
       // Validar transición
       const validacion = esTransicionValida(cotizacionEditando.status, nuevoEstado);
       if (!validacion.valid) {
@@ -1532,8 +1558,9 @@
       // Validar que haya cambios reales
       const hayEstadoNuevo = nuevoEstado !== cotizacionEditando.status;
       const hayNotasNuevas = notas !== (cotizacionEditando.notas || '');
+      const hayDevolucionNueva = devolucionFactura !== (cotizacionEditando.devolucionFactura || '');
 
-      if (!hayEstadoNuevo && !hayNotasNuevas) {
+      if (!hayEstadoNuevo && !hayNotasNuevas && !hayDevolucionNueva) {
         alert('ℹ️ No hay cambios que guardar');
         return;
       }
@@ -1554,6 +1581,7 @@
         cotizacionId,
         nuevoEstado,
         notas,
+        devolucionFactura,
         csrfToken
       );
 
@@ -1573,12 +1601,14 @@
           estadoAnterior: cotizacionEditando.status,
           estadoNuevo: nuevoEstado,
           notasActualizadas: hayNotasNuevas,
+          devolucionFacturaActualizada: hayDevolucionNueva,
           csrfTokenValidado: true
         }, 'success');
         
         // Actualizar a nivel local para no recargar todo
         cotizacionEditando.status = nuevoEstado;
         cotizacionEditando.notas = notas;
+        cotizacionEditando.devolucionFactura = devolucionFactura;
         const confirmacion = document.createElement('div');
         confirmacion.style.cssText = `
           position: fixed;

@@ -45,11 +45,11 @@
     }
   }
 
-  async function actualizarEstadoCotizacion(id, status, notas) {
+  async function actualizarEstadoCotizacion(id, status, notas, devolucionFactura) {
     try {
       return await request('/.netlify/functions/cotizaciones-update', {
         method: 'POST',
-        body: JSON.stringify({ id, status, notas })
+        body: JSON.stringify({ id, status, notas, devolucionFactura })
       });
     } catch (error) {
       return { success: false, error: error.message || 'No se pudo actualizar la cotizacion' };

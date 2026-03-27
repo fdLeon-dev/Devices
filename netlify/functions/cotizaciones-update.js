@@ -43,6 +43,7 @@ exports.handler = async (event) => {
   const id = String(body.id || '').trim();
   const estado = String(body.status || '').trim();
   const notas = String(body.notas || '').trim().slice(0, 5000);
+  const devolucionFactura = String(body.devolucionFactura || '').trim().slice(0, 5000);
   const validStatuses = ['pendiente', 'contactado', 'completado', 'cancelado'];
 
   if (!id || !validStatuses.includes(estado)) {
@@ -54,6 +55,7 @@ exports.handler = async (event) => {
     await db.collection('cotizaciones').doc(id).update({
       status: estado,
       notas,
+      devolucionFactura,
       fechaActualizacion: admin.firestore.FieldValue.serverTimestamp(),
       ultimaActualizacionPor: session.payload.username || 'admin'
     });

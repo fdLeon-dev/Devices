@@ -77,6 +77,7 @@ exports.handler = async (event) => {
       fechaCreacion: admin.firestore.FieldValue.serverTimestamp(),
       status: 'pendiente',
       notas: '',
+      devolucionFactura: '',
       source: 'web-form',
       createdIp: ip
     };
