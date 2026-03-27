@@ -1118,9 +1118,43 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="/.netlify/functions/firebase-web-config"></script>
   <script src="firebase-config.js?v=20260325-1"></script>
-  <script src="emailjs-config.js"></script>
-  <!-- Email Client Seguro - Envia emails via servidor (no expone Public Key) -->
-  <script src="email-client.js?v=20260327-2"></script>
+  
+  <!-- EmailJS Library - Direct browser API calls -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/index.min.js"></script>
+  <script>
+    // Initialize EmailJS by fetching public config from backend
+    async function initializeEmailJS() {
+      try {
+        const response = await fetch('/.netlify/functions/emailjs-config-public');
+        const config = await response.json();
+        
+        if (!response.ok) {
+          console.error('❌ Failed to load EmailJS config:', config.error || config.details);
+          return;
+        }
+        
+        if (typeof emailjs !== 'undefined' && config.publicKey) {
+          emailjs.init(config.publicKey);
+          console.log('✅ EmailJS initialized with public key');
+          // Store config globally for use in emailjs-config.js
+          window.EMAILJS_CONFIG = config;
+        }
+      } catch (error) {
+        console.error('❌ Error initializing EmailJS:', error.message);
+      }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeEmailJS);
+    } else {
+      initializeEmailJS();
+    }
+  </script>
+  
+  <script src="emailjs-config.js?v=20260327-3"></script>
+
+
   <!-- jsPDF (client-side PDF generation) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous"></script>
   <!-- Using EmailJS for all cotizaciones; remove webhook by default. -->
