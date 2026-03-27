@@ -512,12 +512,9 @@ function buildServiceItems(servicesInput, urgency, warranty, problemDescription 
     .map(normalizeServiceCode)
     .filter(Boolean);
 
-  const detailText = String(problemDescription || '').trim();
-
   return flatServices.map(code => ({
     code,
     name: getServiceLabel(code),
-    description: detailText || 'Sin descripción adicional',
     price: calcularPrecios(code, urgency, warranty).basePrice
   }));
 }
@@ -1236,7 +1233,7 @@ async function handleFormSubmit(e) {
       userPhone: data.telefono,
       servicios: servicios.length
         ? servicios
-        : [{ name: 'Servicio personalizado', description: data.mensaje || 'Sin descripción adicional', price: precios.basePrice }],
+        : [{ name: 'Servicio personalizado', price: precios.basePrice }],
       urgency: getUrgencyText(data.urgency),
       warranty: getWarrantyText(data.warranty),
       basePrice: precios.basePrice,
@@ -3282,20 +3279,17 @@ async function generarPdfCotizacion(datos) {
     if (typeof item === 'string' || typeof item === 'number') {
       return {
         name: getServiceLabel(String(item)),
-        description: datos.descripcion || 'Sin descripción adicional',
         price: 0
       };
     }
     if (item && typeof item === 'object') {
       return {
         name: item.name || item.label || 'Servicio',
-        description: item.description || datos.descripcion || 'Sin descripción adicional',
         price: parseFloat(item.price) || 0
       };
     }
     return {
       name: 'Servicio',
-      description: datos.descripcion || 'Sin descripción adicional',
       price: 0
     };
   });
@@ -3326,17 +3320,7 @@ async function generarPdfCotizacion(datos) {
       const serviceLines = doc.splitTextToSize(servicio.name, usableWidth * 0.7);
       doc.text(serviceLines, margin, y);
       doc.text(`$${(servicio.price || 0).toLocaleString('es-UY')}`, rightX, y, { align: 'right' });
-
-      let localY = y + Math.max(1, serviceLines.length) * lineHeight;
-      if (servicio.description) {
-        const descriptionLines = doc.splitTextToSize(`Descripción: ${servicio.description}`, usableWidth * 0.68);
-        doc.setFontSize(9);
-        doc.text(descriptionLines, margin + 8, localY);
-        doc.setFontSize(10);
-        localY += Math.max(1, descriptionLines.length) * 12;
-      }
-
-      y = localY + 8;
+      y += Math.max(1, serviceLines.length) * lineHeight + 10;
     });
   }
 
