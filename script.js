@@ -2957,11 +2957,11 @@ function downloadQuotePdf() {
     showToast('Por favor ingresa un nombre válido (2-100 caracteres)', 'error');
     return;
   }
-  if (!validateEmail(emailInput)) {
+  if (emailInput && !validateEmail(emailInput)) {
     showToast('Por favor ingresa un email válido', 'error');
     return;
   }
-  if (!validatePhone(phoneInput)) {
+  if (phoneInput && !validatePhone(phoneInput)) {
     showToast('Por favor ingresa un teléfono válido (7-20 caracteres)', 'error');
     return;
   }
