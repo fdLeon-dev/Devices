@@ -28,6 +28,7 @@ exports.handler = async (event, context) => {
   const emailjsServiceId = process.env.EMAILJS_SERVICE_ID;
   const emailjsTemplateId = process.env.EMAILJS_TEMPLATE_ID;
   const emailjsClientTemplateId = process.env.EMAILJS_CLIENT_TEMPLATE_ID;
+  const emailjsCompletionTemplateId = process.env.EMAILJS_COMPLETION_TEMPLATE_ID;
 
   // Validate that at least the required config is present
   if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
@@ -54,7 +55,8 @@ exports.handler = async (event, context) => {
       publicKey: emailjsPublicKey,
       serviceId: emailjsServiceId,
       templateId: emailjsTemplateId,
-      clientTemplateId: emailjsClientTemplateId || emailjsTemplateId
+      clientTemplateId: emailjsClientTemplateId || emailjsTemplateId,
+      completionTemplateId: emailjsCompletionTemplateId || emailjsClientTemplateId || emailjsTemplateId
     })
   };
 };
