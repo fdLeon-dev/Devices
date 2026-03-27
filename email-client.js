@@ -8,6 +8,29 @@
  *   sendEmailViaServer(...) ← Llama servidor, credenciales seguras
  */
 
+async function callEmailEndpoint(endpoint, emailData) {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(emailData)
+  });
+
+  let payload = {};
+  try {
+    payload = await response.json();
+  } catch (parseErr) {
+    payload = { error: `Respuesta no JSON (${response.status})` };
+  }
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    payload
+  };
+}
+
 async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
   // Rate limiting en cliente
   if (!checkRateLimit('email')) {
@@ -43,24 +66,28 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
     console.log('   📌 userName:', emailData.userName);
     console.log('   📌 servicesList:', emailData.servicesList);
 
-    // Llamar función serverless en Netlify (usando EmailJS)
-    const response = await fetch('/.netlify/functions/send-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(emailData)
-    });
+    // Llamar función serverless principal (EmailJS)
+    let endpointUsed = '/.netlify/functions/send-email';
+    let sendResult = await callEmailEndpoint(endpointUsed, emailData);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || `Error ${response.status}`);
+    // Fallback automático si EmailJS falla con error de servidor
+    if (!sendResult.ok && sendResult.status >= 500) {
+      console.warn(`⚠️ Falla endpoint principal (${sendResult.status}). Reintentando con nodemailer...`);
+      endpointUsed = '/.netlify/functions/send-email-nodemailer';
+      sendResult = await callEmailEndpoint(endpointUsed, emailData);
     }
 
-    const result = await response.json();
+    if (!sendResult.ok) {
+      const errorMessage = sendResult.payload?.error || `Error ${sendResult.status}`;
+      const detailMessage = sendResult.payload?.details ? ` | ${sendResult.payload.details}` : '';
+      throw new Error(`${errorMessage}${detailMessage}`);
+    }
+
+    const result = sendResult.payload || {};
 
     if (result.success) {
       console.log('✅ Email enviado exitosamente via servidor');
+      console.log('📮 Endpoint usado:', endpointUsed);
       console.log('📎 Folio:', result.folio);
       return {
         success: true,
