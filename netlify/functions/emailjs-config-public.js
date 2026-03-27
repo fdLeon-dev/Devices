@@ -2,20 +2,25 @@
 // Only serves PUBLIC_KEY, SERVICE_ID, and TEMPLATE_ID (no secrets)
 
 exports.handler = async (event, context) => {
-  const origin = event.headers.origin;
-  const allowedOrigins = [
-    'https://devices-f2.com',
-    'https://www.devices-f2.com',
-    'https://devicesf2.netlify.app',
-    'http://localhost:8000',
-    'http://localhost:3000'
-  ];
+  const origin = event.headers.origin || '*';
 
-  if (!allowedOrigins.includes(origin)) {
+  if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 403,
+      statusCode: 204,
+      headers: {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      },
+      body: ''
+    };
+  }
+
+  if (event.httpMethod !== 'GET') {
+    return {
+      statusCode: 405,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'CORS error: Origin not allowed' })
+      body: JSON.stringify({ error: 'Method not allowed' })
     };
   }
 

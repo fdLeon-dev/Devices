@@ -1,31 +1,43 @@
-// EmailJS configuration - Direct browser calls
-// Credentials loaded from /.netlify/functions/emailjs-config-public endpoint
+// EmailJS configuration - Direct browser REST calls (no external SDK required)
+
+const EMAILJS_CONFIG_ENDPOINT = '/.netlify/functions/emailjs-config-public';
+let emailJsConfigPromise = null;
+
+async function loadEmailJsConfig() {
+  if (window.EMAILJS_CONFIG) {
+    return window.EMAILJS_CONFIG;
+  }
+
+  if (!emailJsConfigPromise) {
+    emailJsConfigPromise = fetch(EMAILJS_CONFIG_ENDPOINT)
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(data.error || data.details || `Error ${response.status}`);
+        }
+        window.EMAILJS_CONFIG = data;
+        return data;
+      })
+      .catch((error) => {
+        emailJsConfigPromise = null;
+        throw error;
+      });
+  }
+
+  return emailJsConfigPromise;
+}
 
 function initEmailJS() {
-  // EmailJS initialized by HTML script before this loads
-  if (typeof emailjs !== 'undefined' && window.EMAILJS_CONFIG) {
-    console.log('✅ EmailJS ready (initialized from config endpoint)');
-    return true;
-  } else if (typeof emailjs !== 'undefined') {
-    console.warn('⚠️ EmailJS library loaded but config not yet available');
-    return true;
-  } else {
-    console.warn('⚠️ EmailJS library not loaded');
-    return false;
-  }
+  loadEmailJsConfig()
+    .then(() => console.log('✅ EmailJS config cargada (REST browser mode)'))
+    .catch((err) => console.warn('⚠️ No se pudo precargar EmailJS config:', err.message));
+  return true;
 }
 
 async function enviarEmailCotizacion(datosFormulario) {
-  if (typeof emailjs === 'undefined') {
-    return { success: false, error: 'EmailJS library no cargada' };
-  }
-
-  if (!window.EMAILJS_CONFIG) {
-    return { success: false, error: 'EmailJS config no disponible - espera a que cargue' };
-  }
 
   try {
-    const { serviceId, templateId } = window.EMAILJS_CONFIG;
+    const { serviceId, templateId, publicKey } = await loadEmailJsConfig();
 
     // Prepare template parameters
     const folio = 'COT-' + Math.floor(Math.random() * 900000 + 100000);
@@ -50,23 +62,37 @@ async function enviarEmailCotizacion(datosFormulario) {
       reply_to: datosFormulario.email || 'devices.f02@gmail.com'
     };
 
-    console.log('📧 Enviando email directo via EmailJS (browser)...');
+    console.log('📧 Enviando email directo via EmailJS REST (browser)...');
     console.log('   📌 to_email:', templateParams.to_email);
     console.log('   📌 folio:', folio);
 
-    // Send directly via EmailJS browser API
-    const response = await emailjs.send(serviceId, templateId, templateParams);
+    const payload = {
+      service_id: serviceId,
+      template_id: templateId,
+      user_id: publicKey,
+      template_params: templateParams
+    };
 
-    console.log('✅ Email enviado exitosamente via EmailJS');
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`EmailJS error ${response.status}: ${errorText}`);
+    }
+
+    console.log('✅ Email enviado exitosamente via EmailJS REST');
     console.log('📮 Folio:', folio);
-    console.log('📧 Respuesta:', response);
 
     return {
       success: true,
       response: {
         success: true,
         folio: folio,
-        method: 'emailjs-browser'
+        method: 'emailjs-rest-browser'
       }
     };
 
