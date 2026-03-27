@@ -74,6 +74,7 @@ async function sendCompletionEmail(templateParams) {
     return {
       triggered: true,
       sent: false,
+      recipient: templateParams.to_email || '',
       reason: 'missing_emailjs_config',
       details: 'Faltan variables EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID o EMAILJS_COMPLETION_TEMPLATE_ID'
     };
@@ -97,6 +98,7 @@ async function sendCompletionEmail(templateParams) {
     return {
       triggered: true,
       sent: false,
+      recipient: templateParams.to_email || '',
       reason: 'email_provider_error',
       details: `EmailJS ${response.status}: ${providerError}`.slice(0, 300)
     };
@@ -105,6 +107,7 @@ async function sendCompletionEmail(templateParams) {
   return {
     triggered: true,
     sent: true,
+    recipient: templateParams.to_email || '',
     reason: 'sent'
   };
 }
@@ -180,8 +183,9 @@ exports.handler = async (event) => {
         emailNotification = {
           triggered: true,
           sent: false,
+          recipient: emailCliente,
           reason: 'invalid_customer_email',
-          details: 'La cotizacion no tiene un email de cliente valido'
+          details: 'La cotizacion no tiene un email valido en el campo EMAIL asociado'
         };
       } else {
         const templateParams = buildCompletionTemplateParams(cotizacionActual, {

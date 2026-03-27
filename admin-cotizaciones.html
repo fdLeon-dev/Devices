@@ -1613,11 +1613,12 @@
         const emailNotification = result.emailNotification || null;
         let confirmacionTexto = '✅ Cambios guardados correctamente';
         if (emailNotification && emailNotification.triggered && nuevoEstado === 'completado') {
+          const destinatario = emailNotification.recipient ? ` a ${emailNotification.recipient}` : '';
           if (emailNotification.sent) {
-            confirmacionTexto = '✅ Cambios guardados y email de devolución enviado';
+            confirmacionTexto = `✅ Cambios guardados y email de devolución enviado${destinatario}`;
           } else {
             const detalleEmail = emailNotification.details ? ` (${emailNotification.details})` : '';
-            confirmacionTexto = `⚠️ Cambios guardados, pero no se pudo enviar email${detalleEmail}`;
+            confirmacionTexto = `⚠️ Cambios guardados, pero no se pudo enviar email${destinatario}${detalleEmail}`;
           }
         }
 
