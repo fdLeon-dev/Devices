@@ -475,6 +475,53 @@ function getUrgencyMultiplier(urgencyValue) {
   return multipliers[urgencyValue] || 1;
 }
 
+function normalizeServiceCode(serviceCode) {
+  return String(serviceCode || '').trim();
+}
+
+function prettifyServiceCode(serviceCode) {
+  const code = normalizeServiceCode(serviceCode);
+  if (!code) return 'Servicio personalizado';
+
+  return code
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function getServiceLabel(serviceCode) {
+  const normalizedCode = normalizeServiceCode(serviceCode);
+  if (!normalizedCode) return 'Servicio personalizado';
+
+  const serviceSelect = document.getElementById('service');
+  if (serviceSelect && serviceSelect.options) {
+    const matchingOption = Array.from(serviceSelect.options).find(opt => opt.value === normalizedCode);
+    if (matchingOption && matchingOption.textContent) {
+      return matchingOption.textContent.trim();
+    }
+  }
+
+  return prettifyServiceCode(normalizedCode);
+}
+
+function buildServiceItems(servicesInput, urgency, warranty, problemDescription = '') {
+  const serviceList = Array.isArray(servicesInput) ? servicesInput : [servicesInput];
+  const flatServices = serviceList
+    .flat()
+    .map(normalizeServiceCode)
+    .filter(Boolean);
+
+  const detailText = String(problemDescription || '').trim();
+
+  return flatServices.map(code => ({
+    code,
+    name: getServiceLabel(code),
+    description: detailText || 'Sin descripción adicional',
+    price: calcularPrecios(code, urgency, warranty).basePrice
+  }));
+}
+
 function getQuoteFormPdfData() {
   if (!quoteForm) return null;
   const formData = new FormData(quoteForm);
@@ -486,12 +533,13 @@ function getQuoteFormPdfData() {
   const prices = calcularPrecios(services, urgency, warranty);
   const urgencyText = getUrgencyText(urgency);
   const warrantyText = getWarrantyText(warranty);
+  const serviceItems = buildServiceItems(services, urgency, warranty, message);
 
   return {
     userName: formData.get('name') || 'Cliente Web',
     userEmail: formData.get('email') || 'no proporcionado',
     userPhone: formData.get('phone') || 'no proporcionado',
-    servicios: services.map(s => ({ name: s, price: calcularPrecios(s, urgency, warranty).basePrice })),
+    servicios: serviceItems,
     urgency: urgencyText,
     warranty: warrantyText,
     basePrice: prices.basePrice,
@@ -1112,11 +1160,7 @@ async function handleFormSubmit(e) {
   const precios = calcularPrecios(data.servicio, data.urgency, data.warranty); // ahora `servicio` puede ser array
 
   // Crear array de servicios con nombres y precios individuales
-  const serviciosArray = Array.isArray(data.servicio) ? data.servicio : [data.servicio];
-  const servicios = serviciosArray.map(servicio => ({
-    name: servicio,
-    price: calcularPrecios(servicio, data.urgency, data.warranty).basePrice
-  }));
+  const servicios = buildServiceItems(data.servicio, data.urgency, data.warranty, data.mensaje);
 
   // Agregar servicios al objeto precios
   precios.servicios = servicios;
@@ -1190,7 +1234,9 @@ async function handleFormSubmit(e) {
       userName: data.nombre,
       userEmail: data.email,
       userPhone: data.telefono,
-      servicios: data.servicio ? [data.servicio] : ['Servicio personalizado'],
+      servicios: servicios.length
+        ? servicios
+        : [{ name: 'Servicio personalizado', description: data.mensaje || 'Sin descripción adicional', price: precios.basePrice }],
       urgency: getUrgencyText(data.urgency),
       warranty: getWarrantyText(data.warranty),
       basePrice: precios.basePrice,
@@ -3234,12 +3280,24 @@ async function generarPdfCotizacion(datos) {
   const servicesRaw = Array.isArray(datos.servicios) ? datos.servicios : [];
   let services = servicesRaw.map(item => {
     if (typeof item === 'string' || typeof item === 'number') {
-      return { name: String(item), price: 0 };
+      return {
+        name: getServiceLabel(String(item)),
+        description: datos.descripcion || 'Sin descripción adicional',
+        price: 0
+      };
     }
     if (item && typeof item === 'object') {
-      return { name: item.name || item.label || 'Servicio', price: parseFloat(item.price) || 0 };
+      return {
+        name: item.name || item.label || 'Servicio',
+        description: item.description || datos.descripcion || 'Sin descripción adicional',
+        price: parseFloat(item.price) || 0
+      };
     }
-    return { name: 'Servicio', price: 0 };
+    return {
+      name: 'Servicio',
+      description: datos.descripcion || 'Sin descripción adicional',
+      price: 0
+    };
   });
 
   let totalServicePrice = services.reduce((sum, s) => sum + s.price, 0);
@@ -3268,7 +3326,17 @@ async function generarPdfCotizacion(datos) {
       const serviceLines = doc.splitTextToSize(servicio.name, usableWidth * 0.7);
       doc.text(serviceLines, margin, y);
       doc.text(`$${(servicio.price || 0).toLocaleString('es-UY')}`, rightX, y, { align: 'right' });
-      y += Math.max(1, serviceLines.length) * lineHeight + 10;
+
+      let localY = y + Math.max(1, serviceLines.length) * lineHeight;
+      if (servicio.description) {
+        const descriptionLines = doc.splitTextToSize(`Descripción: ${servicio.description}`, usableWidth * 0.68);
+        doc.setFontSize(9);
+        doc.text(descriptionLines, margin + 8, localY);
+        doc.setFontSize(10);
+        localY += Math.max(1, descriptionLines.length) * 12;
+      }
+
+      y = localY + 8;
     });
   }
 
