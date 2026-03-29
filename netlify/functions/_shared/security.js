@@ -1,9 +1,6 @@
 const crypto = require('crypto');
 
 const allowedOrigins = [
-  'https://devices-f2.com',
-  'https://www.devices-f2.com',
-  'https://www.devicesf2.com/admin-cotizaciones',
   'https://devicesf2.com',
   'https://www.devicesf2.com',
   'https://devicesf2.netlify.app',

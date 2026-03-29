@@ -8,8 +8,8 @@ exports.handler = async (event, context) => {
   // CORS - Solo aceptar desde tu dominio
   const origin = event.headers.origin;
   const allowedOrigins = [
-    'https://devices-f2.com',
-    'https://www.devices-f2.com',
+    'https://devicesf2.com',
+    'https://www.devicesf2.com',
     'https://devicesf2.netlify.app',  // Netlify preview
     'http://localhost:8000',  // Para desarrollo
     'http://localhost:3000'
