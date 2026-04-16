@@ -5,7 +5,8 @@ const {
   jsonResponse,
   parseJsonBody,
   checkRateLimit,
-  getClientIp
+  getClientIp,
+  buildRateLimitKey
 } = require('./_shared/security');
 const { getFirestore } = require('./_shared/firebase-admin');
 
@@ -29,7 +30,7 @@ exports.handler = async (event) => {
   }
 
   const ip = getClientIp(event);
-  if (!checkRateLimit(`quote-create:${ip}`, 20, 60 * 60 * 1000)) {
+  if (!checkRateLimit(buildRateLimitKey('quote-create', event), 12, 60 * 60 * 1000)) {
     return jsonResponse(429, { success: false, error: 'Demasiadas solicitudes. Intenta mas tarde.' }, origin);
   }
 
@@ -55,6 +56,14 @@ exports.handler = async (event) => {
 
   if ((!email || email === 'No proporcionado') && (!telefono || telefono === 'No proporcionado')) {
     return jsonResponse(400, { success: false, error: 'Se requiere email o telefono' }, origin);
+  }
+
+  if (email && email !== 'No proporcionado' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return jsonResponse(400, { success: false, error: 'Email invalido' }, origin);
+  }
+
+  if (telefono && telefono !== 'No proporcionado' && !/^[\d+\-\s()]{7,30}$/.test(telefono)) {
+    return jsonResponse(400, { success: false, error: 'Telefono invalido' }, origin);
   }
 
   try {

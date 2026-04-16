@@ -3,10 +3,38 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /testimonios/{id} {
       allow read: if true;
-      allow create: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly(['nombre', 'comentario', 'imagen', 'likes', 'likedBy', 'fecha', 'userId']) &&
+        ('nombre' in request.resource.data) &&
+        (request.resource.data.nombre is string) &&
+        (request.resource.data.nombre.size() >= 2) &&
+        (request.resource.data.nombre.size() <= 80) &&
+        ('comentario' in request.resource.data) &&
+        (request.resource.data.comentario is string) &&
+        (request.resource.data.comentario.size() >= 3) &&
+        (request.resource.data.comentario.size() <= 800) &&
+        (!('imagen' in request.resource.data) || (request.resource.data.imagen is string && request.resource.data.imagen.size() <= 2048)) &&
+        ('likes' in request.resource.data) &&
+        (request.resource.data.likes is int) &&
+        (request.resource.data.likes == 0) &&
+        ('likedBy' in request.resource.data) &&
+        (request.resource.data.likedBy is list) &&
+        (request.resource.data.likedBy.size() == 0) &&
+        ('userId' in request.resource.data) &&
+        (request.resource.data.userId is string) &&
+        (request.resource.data.userId.size() >= 8) &&
+        (request.resource.data.userId.size() <= 120);
       // Permitir updates anónimos solo cuando modifican exclusivamente los campos
       // `likes` y `likedBy`. Corregimos `request.data` -> `request.resource.data`.
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy']) || (request.auth != null && request.auth.token.admin == true);
+      allow update: if
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likedBy']) &&
+          (request.resource.data.likes is int) &&
+          (request.resource.data.likes >= 0) &&
+          (request.resource.data.likes <= 100000) &&
+          (request.resource.data.likedBy is list) &&
+          (request.resource.data.likedBy.size() <= 2000)
+        ) || (request.auth != null && request.auth.token.admin == true);
       allow delete: if request.auth != null && request.auth.token.admin == true;
     }
 

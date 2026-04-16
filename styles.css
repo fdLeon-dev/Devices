@@ -2054,6 +2054,176 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
   margin-bottom: 20px;
 }
 
+/* PC Health Section */
+.pc-health {
+  padding: 80px 0;
+  background:
+    radial-gradient(circle at 5% 0%, rgba(var(--primary-rgb), 0.18), transparent 36%),
+    radial-gradient(circle at 95% 100%, rgba(var(--whatsapp-rgb), 0.13), transparent 34%),
+    var(--bg-secondary);
+}
+
+.health-layout {
+  display: grid;
+  grid-template-columns: 1.25fr 0.95fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.health-lab,
+.health-result {
+  border-radius: 22px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+  background: var(--bg-primary);
+  padding: 28px;
+}
+
+.health-lab h3,
+.health-result h4 {
+  color: var(--text-primary);
+}
+
+.health-lab p {
+  color: var(--text-secondary);
+  margin: 8px 0 18px;
+}
+
+.health-controls {
+  display: grid;
+  gap: 16px;
+}
+
+.health-control {
+  display: grid;
+  gap: 8px;
+}
+
+.health-control span {
+  color: var(--text-primary);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+
+.health-control strong {
+  color: var(--primary-color);
+  font-size: 0.95rem;
+}
+
+.health-control input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+.health-toggles {
+  margin-top: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.health-toggles label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.health-toggles input[type="checkbox"] {
+  accent-color: var(--primary-color);
+}
+
+.health-actions {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.health-result {
+  position: relative;
+  overflow: hidden;
+}
+
+.health-result::after {
+  content: '';
+  position: absolute;
+  right: -55px;
+  top: -55px;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--primary-rgb), 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  margin-bottom: 10px;
+}
+
+.health-badge.level-good {
+  color: #0a7d32;
+  background: rgba(var(--whatsapp-rgb), 0.15);
+  border-color: rgba(var(--whatsapp-rgb), 0.5);
+}
+
+.health-badge.level-warning {
+  color: #8a5200;
+  background: rgba(243, 156, 18, 0.15);
+  border-color: rgba(243, 156, 18, 0.45);
+}
+
+.health-badge.level-critical {
+  color: #8f2a1b;
+  background: rgba(231, 76, 60, 0.14);
+  border-color: rgba(231, 76, 60, 0.45);
+}
+
+.health-score-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.health-score-wrap strong {
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.health-score-wrap span {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.health-result > p {
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.health-recommendations {
+  margin: 10px 0 18px;
+  padding-left: 18px;
+  color: var(--text-primary);
+}
+
+.health-recommendations li {
+  margin-bottom: 6px;
+}
+
 /* Works Section */
 .works {
   padding: 80px 0;
@@ -3036,6 +3206,21 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); }
 
   .hero-graphic i:nth-child(2) {
     font-size: 2rem;
+  }
+
+  .health-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .health-lab,
+  .health-result {
+    padding: 22px;
+  }
+
+  .health-actions .btn,
+  .health-result .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .hero-graphic i:nth-child(3) {

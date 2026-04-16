@@ -1,13 +1,14 @@
 const {
-  isAllowedOrigin,
+  isStrictAllowedOrigin,
   resolveOrigin,
   jsonResponse,
   parseJsonBody,
   createSignedToken,
   buildSessionCookie,
   checkRateLimit,
-  getClientIp
+  buildRateLimitKey
 } = require('./_shared/security');
+const crypto = require('crypto');
 
 function normalizeCredential(value) {
   return String(value || '')
@@ -27,10 +28,17 @@ function firstNonEmptyEnv(...values) {
   return '';
 }
 
+function secureTextEquals(a, b) {
+  const left = Buffer.from(String(a || ''), 'utf8');
+  const right = Buffer.from(String(b || ''), 'utf8');
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
+}
+
 exports.handler = async (event) => {
   const origin = resolveOrigin(event);
 
-  if (!isAllowedOrigin(origin)) {
+  if (!isStrictAllowedOrigin(origin)) {
     return jsonResponse(403, { success: false, error: 'Origen no permitido' }, origin);
   }
 
@@ -42,8 +50,7 @@ exports.handler = async (event) => {
     return jsonResponse(405, { success: false, error: 'Metodo no permitido' }, origin);
   }
 
-  const ip = getClientIp(event);
-  if (!checkRateLimit(`admin-login:${ip}`, 8, 10 * 60 * 1000)) {
+  if (!checkRateLimit(buildRateLimitKey('admin-login', event), 6, 10 * 60 * 1000)) {
     return jsonResponse(429, { success: false, error: 'Demasiados intentos. Espera unos minutos.' }, origin);
   }
 
@@ -65,11 +72,15 @@ exports.handler = async (event) => {
     return jsonResponse(500, { success: false, error: 'Credenciales admin no configuradas en servidor' }, origin);
   }
 
-  if (user !== expectedUser || pass !== expectedPass) {
+  if (!secureTextEquals(user, expectedUser) || !secureTextEquals(pass, expectedPass)) {
     return jsonResponse(401, { success: false, error: 'Credenciales invalidas' }, origin);
   }
 
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASS;
+  const secret = firstNonEmptyEnv(process.env.ADMIN_SESSION_SECRET);
+  if (!secret || secret.length < 32) {
+    return jsonResponse(500, { success: false, error: 'ADMIN_SESSION_SECRET no configurado correctamente' }, origin);
+  }
+
   const token = createSignedToken({ username: user, role: 'admin' }, secret, 8 * 60 * 60 * 1000);
 
   return {

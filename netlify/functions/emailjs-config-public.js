@@ -1,27 +1,25 @@
 // Safely expose non-secret EmailJS configuration
 // Only serves PUBLIC_KEY, SERVICE_ID, and TEMPLATE_ID (no secrets)
 
+const {
+  isStrictAllowedOrigin,
+  resolveOrigin,
+  jsonResponse
+} = require('./_shared/security');
+
 exports.handler = async (event, context) => {
-  const origin = event.headers.origin || '*';
+  const origin = resolveOrigin(event);
+
+  if (!isStrictAllowedOrigin(origin)) {
+    return jsonResponse(403, { error: 'Origen no permitido' }, origin);
+  }
 
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 204,
-      headers: {
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      },
-      body: ''
-    };
+    return jsonResponse(200, { ok: true }, origin);
   }
 
   if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'Method not allowed' })
-    };
+    return jsonResponse(405, { error: 'Metodo no permitido' }, origin);
   }
 
   const emailjsPublicKey = process.env.EMAILJS_PUBLIC_KEY;
@@ -32,23 +30,15 @@ exports.handler = async (event, context) => {
 
   // Validate that at least the required config is present
   if (!emailjsPublicKey || !emailjsServiceId || !emailjsTemplateId) {
-    return {
-      statusCode: 500,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        error: 'EmailJS configuration incomplete',
-        details: 'Missing EMAILJS_PUBLIC_KEY, EMAILJS_SERVICE_ID, or EMAILJS_TEMPLATE_ID in environment variables'
-      })
-    };
+    return jsonResponse(500, {
+      error: 'Configuracion EmailJS incompleta'
+    }, origin);
   }
 
   return {
     statusCode: 200,
     headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      ...jsonResponse(200, {}, origin).headers,
       'Cache-Control': 'public, max-age=3600' // Cache for 1 hour
     },
     body: JSON.stringify({

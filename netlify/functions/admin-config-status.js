@@ -1,4 +1,10 @@
-const { isAllowedOrigin, resolveOrigin, jsonResponse } = require('./_shared/security');
+const {
+  isStrictAllowedOrigin,
+  resolveOrigin,
+  jsonResponse,
+  parseCookies,
+  verifySignedToken
+} = require('./_shared/security');
 
 function hasValue(value) {
   return String(value || '').trim().length > 0;
@@ -7,7 +13,7 @@ function hasValue(value) {
 exports.handler = async (event) => {
   const origin = resolveOrigin(event);
 
-  if (!isAllowedOrigin(origin)) {
+  if (!isStrictAllowedOrigin(origin)) {
     return jsonResponse(403, { ok: false, error: 'Origen no permitido' }, origin);
   }
 
@@ -17,6 +23,21 @@ exports.handler = async (event) => {
 
   if (event.httpMethod !== 'GET') {
     return jsonResponse(405, { ok: false, error: 'Metodo no permitido' }, origin);
+  }
+
+  if (String(process.env.NODE_ENV || '').toLowerCase() === 'production') {
+    return jsonResponse(404, { ok: false, error: 'No encontrado' }, origin);
+  }
+
+  const secret = String(process.env.ADMIN_SESSION_SECRET || '').trim();
+  if (!secret || secret.length < 32) {
+    return jsonResponse(500, { ok: false, error: 'ADMIN_SESSION_SECRET no configurado correctamente' }, origin);
+  }
+
+  const cookies = parseCookies(event.headers.cookie || event.headers.Cookie || '');
+  const session = verifySignedToken(cookies.admin_session, secret);
+  if (!session.valid || session.payload.role !== 'admin') {
+    return jsonResponse(401, { ok: false, error: 'No autorizado' }, origin);
   }
 
   const status = {

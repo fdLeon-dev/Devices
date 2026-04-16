@@ -1,5 +1,5 @@
 const {
-  isAllowedOrigin,
+  isStrictAllowedOrigin,
   resolveOrigin,
   jsonResponse,
   parseCookies,
@@ -65,7 +65,7 @@ function serializeValue(value) {
 exports.handler = async (event) => {
   const origin = resolveOrigin(event);
 
-  if (!isAllowedOrigin(origin)) {
+  if (!isStrictAllowedOrigin(origin)) {
     return jsonResponse(403, { success: false, error: 'Origen no permitido' }, origin);
   }
 
@@ -79,7 +79,10 @@ exports.handler = async (event) => {
 
   const cookies = parseCookies(event.headers.cookie || event.headers.Cookie || '');
   const token = cookies.admin_session;
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASS;
+  const secret = String(process.env.ADMIN_SESSION_SECRET || '').trim();
+  if (!secret || secret.length < 32) {
+    return jsonResponse(500, { success: false, error: 'ADMIN_SESSION_SECRET no configurado correctamente' }, origin);
+  }
   const session = verifySignedToken(token, secret);
 
   if (!session.valid) {

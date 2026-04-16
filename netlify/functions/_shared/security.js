@@ -14,6 +14,14 @@ function resolveOrigin(event) {
   return (event && event.headers && (event.headers.origin || event.headers.Origin)) || '';
 }
 
+function resolveHost(event) {
+  return (event && event.headers && (event.headers.host || event.headers.Host) || '').toLowerCase();
+}
+
+function resolveUserAgent(event) {
+  return (event && event.headers && (event.headers['user-agent'] || event.headers['User-Agent']) || '').slice(0, 180);
+}
+
 function buildCorsHeaders(origin) {
   const safeOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return {
@@ -27,6 +35,17 @@ function buildCorsHeaders(origin) {
 
 function isAllowedOrigin(origin) {
   return !origin || allowedOrigins.includes(origin);
+}
+
+function isStrictAllowedOrigin(origin) {
+  return Boolean(origin) && allowedOrigins.includes(origin);
+}
+
+function buildRateLimitKey(prefix, event) {
+  const ip = getClientIp(event);
+  const ua = resolveUserAgent(event);
+  const fingerprint = crypto.createHash('sha256').update(`${ip}|${ua}`).digest('hex').slice(0, 16);
+  return `${prefix}:${fingerprint}`;
 }
 
 function jsonResponse(statusCode, payload, origin = '') {
@@ -80,12 +99,22 @@ function verifySignedToken(token, secret) {
   }
 
   const [encoded, signature] = token.split('.');
+  if (!encoded || !signature) {
+    return { valid: false };
+  }
+
   const expected = crypto
     .createHmac('sha256', secret)
     .update(encoded)
     .digest('base64url');
 
-  if (signature !== expected) {
+  const signatureBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (signatureBuffer.length !== expectedBuffer.length) {
+    return { valid: false };
+  }
+
+  if (!crypto.timingSafeEqual(signatureBuffer, expectedBuffer)) {
     return { valid: false };
   }
 
@@ -134,7 +163,9 @@ function getClientIp(event) {
 
 module.exports = {
   isAllowedOrigin,
+  isStrictAllowedOrigin,
   resolveOrigin,
+  resolveHost,
   jsonResponse,
   parseJsonBody,
   parseCookies,
@@ -143,5 +174,6 @@ module.exports = {
   buildSessionCookie,
   clearSessionCookie,
   checkRateLimit,
-  getClientIp
+  getClientIp,
+  buildRateLimitKey
 };

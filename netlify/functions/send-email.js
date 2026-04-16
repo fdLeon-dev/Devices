@@ -2,35 +2,28 @@
 // El cliente NO tiene acceso a las credenciales de EmailJS
 // Usa la API REST de EmailJS directamente (no requiere dependencia)
 
-const { checkRateLimit, getClientIp } = require('./_shared/security');
+const {
+  checkRateLimit,
+  isStrictAllowedOrigin,
+  resolveOrigin,
+  jsonResponse,
+  buildRateLimitKey
+} = require('./_shared/security');
 
 exports.handler = async (event, context) => {
-  // CORS - Solo aceptar desde tu dominio
-  const origin = event.headers.origin;
-  const allowedOrigins = [
-    'https://devicesf2.com',
-    'https://www.devicesf2.com',
-    'https://devicesf2.netlify.app',  // Netlify preview
-    'http://localhost:8000',  // Para desarrollo
-    'http://localhost:3000'
-  ];
+  const origin = resolveOrigin(event);
 
-  if (!allowedOrigins.includes(origin)) {
-    return {
-      statusCode: 403,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'CORS Error: Origen no permitido' })
-    };
+  if (!isStrictAllowedOrigin(origin)) {
+    return jsonResponse(403, { error: 'Origen no permitido' }, origin);
+  }
+
+  if (event.httpMethod === 'OPTIONS') {
+    return jsonResponse(200, { ok: true }, origin);
   }
 
   try {
-        const ip = getClientIp(event);
-        if (!checkRateLimit(`send-email:${ip}`, 10, 60 * 60 * 1000)) {
-          return {
-            statusCode: 429,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: 'Demasiadas solicitudes. Intenta mas tarde.' })
-          };
+        if (!checkRateLimit(buildRateLimitKey('send-email', event), 8, 60 * 60 * 1000)) {
+          return jsonResponse(429, { error: 'Demasiadas solicitudes. Intenta mas tarde.' }, origin);
         }
 
     console.log('📨 [send-email] Función iniciada');
@@ -40,11 +33,7 @@ exports.handler = async (event, context) => {
     // Solo aceptar POST
     if (event.httpMethod !== 'POST') {
       console.error('❌ [send-email] Method no es POST:', event.httpMethod);
-      return {
-        statusCode: 405,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Método no permitido' })
-      };
+      return jsonResponse(405, { error: 'Metodo no permitido' }, origin);
     }
 
     let data;
@@ -52,22 +41,14 @@ exports.handler = async (event, context) => {
       // Netlify podría no incluir body si está vacío - verificar
       if (!event.body) {
         console.error('❌ [send-email] event.body está vacío');
-        return {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ error: 'Request body no puede estar vacío' })
-        };
+        return jsonResponse(400, { error: 'Request body no puede estar vacio' }, origin);
       }
       
       data = JSON.parse(event.body);
       console.log('📨 [send-email] Datos recibidos bien');
     } catch (parseErr) {
       console.error('❌ [send-email] Error parseando JSON:', parseErr?.message || 'Unknown parse error');
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'JSON inválido' })
-      };
+      return jsonResponse(400, { error: 'JSON invalido' }, origin);
     }
 
     // Validar campos requeridos
@@ -77,18 +58,7 @@ exports.handler = async (event, context) => {
         userName: !!data.userName,
         servicesList: !!data.servicesList
       });
-      return {
-        statusCode: 400,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          error: 'Campos requeridos faltantes',
-          received: { 
-            to_email: data.to_email, 
-            userName: data.userName, 
-            servicesList: data.servicesList 
-          }
-        })
-      };
+      return jsonResponse(400, { error: 'Campos requeridos faltantes' }, origin);
     }
 
     // Validar que el email sea válido (si se proporcionó)
@@ -100,10 +70,7 @@ exports.handler = async (event, context) => {
     // Validar límite de caracteres
     if (data.userName.length > 100 || data.servicesList.length > 1000) {
       console.error('❌ [send-email] Datos demasiado largos');
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Datos exceden límite permitido' })
-      };
+      return jsonResponse(400, { error: 'Datos exceden limite permitido' }, origin);
     }
 
     // Las credenciales vienen de variables de entorno (NUNCA expuestas)
@@ -137,15 +104,10 @@ exports.handler = async (event, context) => {
       if (!emailjsServiceId) missing.push('EMAILJS_SERVICE_ID');
       if (!emailjsTemplateId) missing.push('EMAILJS_TEMPLATE_ID');
 
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          success: false,
-          error: `Configuracion EmailJS incompleta: ${missing.join(', ')}`,
-          details: 'Configura las variables en Netlify Site Settings > Environment Variables'
-        })
-      };
+      return jsonResponse(500, {
+        success: false,
+        error: `Configuracion EmailJS incompleta: ${missing.join(', ')}`
+      }, origin);
     }
 
     // Enviar al negocio via API REST de EmailJS
@@ -160,7 +122,7 @@ exports.handler = async (event, context) => {
     };
 
     console.log('📧 [send-email] Enviando email al negocio...');
-    console.log('📧 [send-email] Payload:', JSON.stringify(businessPayload).substring(0, 200) + '...');
+    console.log('📧 [send-email] Payload listo para enviar');
 
     const businessResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
@@ -212,21 +174,12 @@ exports.handler = async (event, context) => {
       console.log('📌 [send-email] No se envía email de confirmación (email no válido o no proporcionado)');
     }
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type'
-      },
-      body: JSON.stringify({
-        success: true,
-        message: 'Email enviado correctamente',
-        folio: templateParams.folio,
-        method: 'emailjs'
-      })
-    };
+    return jsonResponse(200, {
+      success: true,
+      message: 'Email enviado correctamente',
+      folio: templateParams.folio,
+      method: 'emailjs'
+    }, origin);
 
   } catch (error) {
     console.error('❌ [send-email] ERROR CRÍTICO:', error?.message || 'Unknown error');
@@ -234,18 +187,9 @@ exports.handler = async (event, context) => {
       console.error('❌ [send-email] Stack:', error.stack.substring(0, 500));
     }
 
-    const errorMessage = error?.message || 'Error desconocido';
-    const errorDetails = errorMessage.substring(0, 200);
-
-    return {
-      statusCode: 502,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        success: false,
-        error: `Error al enviar email: ${errorDetails}`,
-        details: errorDetails,
-        timestamp: new Date().toISOString()
-      })
-    };
+    return jsonResponse(502, {
+      success: false,
+      error: 'No se pudo enviar el email. Intenta nuevamente.'
+    }, origin);
   }
 };
