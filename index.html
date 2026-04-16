@@ -126,7 +126,6 @@
         </a>
         <div class="nav-menu" id="nav-menu">
           <a href="#servicios" class="nav-link">Servicios</a>
-          <a href="#guia-mantenimiento" class="nav-link">Diagnostico PC</a>
           <a href="#trabajos" class="nav-link">Trabajos</a>
           <a href="#cotizar" class="nav-link">Cotizar</a>
           <a href="#contacto" class="nav-link">Contacto</a>
@@ -173,75 +172,6 @@
               <img src="public/images/avatars/avatar.png" alt="Avatar">
             </video>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="guia-mantenimiento" class="pc-health">
-      <div class="container">
-        <div class="section-header">
-          <h2>Diagnostico Express de Rendimiento</h2>
-          <p>Evalua en 60 segundos el estado de tu PC y recibe acciones concretas para mantenerla rapida, estable y segura.</p>
-        </div>
-
-        <div class="health-layout">
-          <article class="health-lab" aria-labelledby="health-lab-title">
-            <h3 id="health-lab-title">Panel de Diagnostico</h3>
-            <p>Ajusta estos valores segun tu experiencia de uso. El puntaje se actualiza en tiempo real.</p>
-
-            <div class="health-controls">
-              <label class="health-control" for="health-startup">
-                <span>Tiempo de arranque <strong id="health-startup-value">90s</strong></span>
-                <input id="health-startup" type="range" min="20" max="240" value="90" step="5">
-              </label>
-
-              <label class="health-control" for="health-temperature">
-                <span>Temperatura promedio <strong id="health-temperature-value">72C</strong></span>
-                <input id="health-temperature" type="range" min="35" max="95" value="72" step="1">
-              </label>
-
-              <label class="health-control" for="health-storage">
-                <span>Espacio libre en disco <strong id="health-storage-value">28%</strong></span>
-                <input id="health-storage" type="range" min="5" max="80" value="28" step="1">
-              </label>
-
-              <label class="health-control" for="health-maintenance">
-                <span>Meses sin mantenimiento <strong id="health-maintenance-value">7</strong></span>
-                <input id="health-maintenance" type="range" min="0" max="24" value="7" step="1">
-              </label>
-            </div>
-
-            <div class="health-toggles">
-              <label><input id="health-noise" type="checkbox"> Se escuchan ventiladores fuertes o ruidos raros</label>
-              <label><input id="health-freeze" type="checkbox"> La PC se congela o reinicia sola</label>
-              <label><input id="health-popups" type="checkbox"> Aparecen anuncios o ventanas sospechosas</label>
-            </div>
-
-            <div class="health-actions">
-              <button type="button" class="btn btn-secondary" id="health-reset-btn">Reiniciar diagnostico</button>
-              <a href="#cotizar" class="btn btn-primary">Solicitar mantenimiento</a>
-            </div>
-          </article>
-
-          <aside class="health-result" aria-live="polite">
-            <p class="health-badge" id="health-level">Estado: Atencion</p>
-            <div class="health-score-wrap">
-              <strong id="health-score">68</strong>
-              <span>/100</span>
-            </div>
-            <p id="health-summary">Tu PC todavia responde, pero ya muestra sintomas de desgaste. Un mantenimiento preventivo a tiempo evita problemas mas costosos.</p>
-
-            <h4>Plan recomendado</h4>
-            <ul id="health-recommendations" class="health-recommendations">
-              <li>Limpiar programas de inicio para mejorar arranque y fluidez.</li>
-              <li>Revisar temperaturas internas y estado de pasta termica.</li>
-              <li>Dejar al menos 20% de disco libre para evitar lentitud.</li>
-            </ul>
-
-            <a href="https://wa.me/59892803418?text=Hola!%20Quiero%20un%20diagnostico%20y%20mantenimiento%20de%20mi%20PC" class="btn btn-whatsapp" target="_blank" rel="noopener" aria-label="Consultar diagnostico por WhatsApp" title="Abrir en WhatsApp">
-              <img src="public/images/icons/whatsapp.png" alt="WhatsApp" class="icon-whatsapp-img" aria-hidden="true"> Consultar por WhatsApp
-            </a>
-          </aside>
         </div>
       </div>
     </section>
