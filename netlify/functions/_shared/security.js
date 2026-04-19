@@ -11,7 +11,16 @@ const allowedOrigins = [
 const RATE_LIMIT_STORE = new Map();
 
 function resolveOrigin(event) {
-  return (event && event.headers && (event.headers.origin || event.headers.Origin)) || '';
+  const headers = (event && event.headers) || {};
+  const explicitOrigin = headers.origin || headers.Origin;
+  if (explicitOrigin) return explicitOrigin;
+
+  const host = (headers.host || headers.Host || '').toLowerCase();
+  if (!host) return '';
+
+  const forwardedProto = String(headers['x-forwarded-proto'] || '').toLowerCase();
+  const protocol = forwardedProto === 'http' ? 'http' : 'https';
+  return `${protocol}://${host}`;
 }
 
 function resolveHost(event) {
