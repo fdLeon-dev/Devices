@@ -5,7 +5,14 @@ const allowedOrigins = [
   'https://www.devicesf2.com',
   'https://devicesf2.netlify.app',
   'http://localhost:8000',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'http://localhost:8888',
+  'http://localhost:8080',
+  'http://localhost:4000',
+  'http://localhost:3999',
+  'https://localhost:8888',
+  'https://localhost:8080',
+  'https://localhost:3000'
 ];
 
 const RATE_LIMIT_STORE = new Map();
@@ -19,7 +26,8 @@ function resolveOrigin(event) {
   if (!host) return '';
 
   const forwardedProto = String(headers['x-forwarded-proto'] || '').toLowerCase();
-  const protocol = forwardedProto === 'http' ? 'http' : 'https';
+  const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1') || host.startsWith('::1');
+  const protocol = forwardedProto === 'https' ? 'https' : (forwardedProto === 'http' || isLocalhost ? 'http' : 'https');
   return `${protocol}://${host}`;
 }
 
