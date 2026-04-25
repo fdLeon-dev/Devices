@@ -1279,6 +1279,8 @@
           devolucionFactura: devolucionFactura || 'Sin observaciones de devolucion.',
           message: devolucionFactura || 'Tu servicio fue marcado como completado.',
           notas: notas || '',
+          notasAdicionalesTecnico: notas || '',
+          notas_adicionales_tecnico: notas || '',
           currentDate: new Date().toLocaleString('es-ES'),
           reply_to: 'devices.f02@gmail.com'
         }
@@ -1620,11 +1622,12 @@
           <small id="transiciones-info" style="color: white; opacity: 0.9; margin-top: 12px; display: block; font-size: 0.95em;">Transiciones válidas: ${(transicionesValidas[cotizacionEditando.status] || []).join(', ') || 'Ninguna disponible'}</small>
         </div>
 
-        <!-- SECCIÓN 5: NOTAS INTERNAS -->
+        <!-- SECCIÓN 5: NOTAS ADICIONALES DEL TÉCNICO (EMAILJS) -->
         <div class="modal-field" style="margin-bottom: 20px;">
-          <label style="font-size: 1em; margin-bottom: 8px; display: block;">✍️ Notas Internas</label>
-          <textarea id="edit-notas" placeholder="Agrega notas sobre el seguimiento, acciones tomadas, resultado final, etc..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.95em;">${notas}</textarea>
-          <small id="notas-count" style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.85em;">0 caracteres</small>
+          <label style="font-size: 1em; margin-bottom: 8px; display: block;">✍️ Notas adicionales del técnico (EmailJS)</label>
+          <textarea id="edit-notas" placeholder="Agrega notas adicionales del técnico para el cliente (aparecen en el template de EmailJS)..." style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-family: inherit; font-size: 0.95em;">${notas}</textarea>
+          <small style="color: var(--text-muted); margin-top: 6px; display: block; font-size: 0.85em;">Se envía en el campo <strong>{{notas}}</strong> del template de EmailJS</small>
+          <small id="notas-count" style="color: var(--text-muted); margin-top: 4px; display: block; font-size: 0.85em;">0 caracteres</small>
         </div>
 
         <!-- SECCIÓN 6: DEVOLUCIÓN FACTURA SELLADA/CONFIRMADA -->
