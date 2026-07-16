@@ -3459,6 +3459,162 @@ a:focus {
   }
 }
 
+/* SaaS visual refresh layer (non-breaking) */
+:root {
+  --primary-color: #6C4CF1;
+  --primary-dark: #5A3FE0;
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #F1F5F9;
+  --card-radius: 16px;
+}
+
+body {
+  color: #0F172A;
+  background:
+    radial-gradient(1200px 600px at 90% -10%, rgba(108, 76, 241, 0.14), transparent 52%),
+    radial-gradient(900px 500px at -10% 10%, rgba(14, 165, 233, 0.08), transparent 48%),
+    #F8FAFC;
+}
+
+.navbar,
+.navbar.scrolled {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.06);
+}
+
+.hero {
+  min-height: auto;
+  padding: 140px 0 92px;
+  background: transparent;
+}
+
+.hero-title {
+  font-size: clamp(2.3rem, 6vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.hero-subtitle {
+  max-width: 56ch;
+  color: #475569;
+}
+
+.btn,
+.theme-toggle,
+.service-card,
+.work-card,
+.quote-form,
+.contact-item,
+.contact-map,
+.result-card,
+.testimonial-content {
+  transition: all 0.2s ease;
+}
+
+.btn {
+  border-radius: 14px;
+  padding: 13px 22px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6C4CF1, #5A3FE0);
+  box-shadow: 0 12px 28px rgba(108, 76, 241, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 34px rgba(108, 76, 241, 0.34);
+}
+
+.services,
+.works,
+.calculator,
+.contact {
+  padding: 92px 0;
+}
+
+.section-header {
+  margin-bottom: 52px;
+}
+
+.section-header h2 {
+  letter-spacing: -0.02em;
+}
+
+.service-card,
+.work-card,
+.contact-item,
+.contact-map,
+.quote-form,
+.calculator-form,
+.result-card,
+.testimonial-form-card,
+.featured-testimonials {
+  border-radius: var(--card-radius);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.07);
+}
+
+.service-card:hover,
+.work-card:hover,
+.contact-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+
+.works-filters {
+  gap: 10px;
+}
+
+.filter-btn {
+  border-radius: 999px;
+  padding: 9px 16px;
+  border: 1px solid #CBD5E1;
+  background: #fff;
+  color: #475569;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+  background: #6C4CF1;
+  border-color: #6C4CF1;
+  color: #fff;
+}
+
+.quote-container,
+.calculator-container,
+.contact-grid {
+  gap: 32px;
+}
+
+.quote-form .form-group input,
+.quote-form .form-group textarea,
+.quote-form .form-group select,
+.calculator-form .form-group input,
+.calculator-form .form-group textarea,
+.calculator-form .form-group select {
+  border-radius: 12px;
+  border: 1px solid #CBD5E1;
+  background: #fff;
+}
+
+.quote-form .form-group input:focus,
+.quote-form .form-group textarea:focus,
+.quote-form .form-group select:focus,
+.calculator-form .form-group input:focus,
+.calculator-form .form-group textarea:focus,
+.calculator-form .form-group select:focus {
+  border-color: #6C4CF1;
+  box-shadow: 0 0 0 3px rgba(108, 76, 241, 0.14);
+}
+
+.footer {
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(6px);
+}
+
 /* Font Awesome fallback (emoji icons) 🔧 */
 .fas { font-style: normal; display: inline-block; line-height: 1; vertical-align: middle; }
 .fas[class*="fa-"]::before { font-style: normal; display: inline-block; }

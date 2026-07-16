@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Admin - Cotizaciones | Devices F2</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="ui-components.css">
   <style>
     /* Login Screen */
     .login-container {
@@ -715,6 +716,390 @@
         flex-direction: column;
       }
     }
+
+    :root {
+      --primary-color: #6C4CF1;
+      --accent-color: #5A3FE0;
+      --bg-color: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-color: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --success-color: #22C55E;
+      --warning-color: #F59E0B;
+      --danger-color: #EF4444;
+      --primary-rgb: 108, 76, 241;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .crm-shell {
+      display: grid;
+      grid-template-columns: 264px 1fr;
+      min-height: 100vh;
+    }
+
+    .crm-sidebar {
+      background: #ffffff;
+      border-right: 1px solid var(--border-color);
+      padding: 24px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+
+    .crm-logo {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-color);
+      margin-bottom: 24px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1), rgba(var(--primary-rgb), 0.04));
+    }
+
+    .crm-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .crm-nav-item {
+      text-decoration: none;
+      color: var(--text-muted);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      transition: all 0.2s ease;
+    }
+
+    .crm-nav-item:hover,
+    .crm-nav-item.active {
+      background: rgba(var(--primary-rgb), 0.1);
+      color: var(--primary-color);
+    }
+
+    .crm-main {
+      min-width: 0;
+      padding: 20px 24px;
+    }
+
+    .crm-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      margin-bottom: 18px;
+    }
+
+    .crm-header-copy h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 650;
+      color: var(--text-color);
+    }
+
+    .crm-header-copy p {
+      margin: 4px 0 0;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .crm-header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .crm-search,
+    .crm-select {
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-color);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .crm-search {
+      min-width: 290px;
+    }
+
+    .crm-search:focus,
+    .crm-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+    }
+
+    .btn-refresh,
+    .logout-btn {
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      transform: translateY(0);
+    }
+
+    .btn-refresh {
+      background: var(--primary-color);
+    }
+
+    .btn-refresh:hover {
+      background: var(--accent-color);
+      transform: translateY(-1px);
+    }
+
+    .logout-btn {
+      background: #fff;
+      color: var(--danger-color);
+      border: 1px solid #fecaca;
+    }
+
+    .logout-btn:hover {
+      background: #fee2e2;
+      box-shadow: none;
+    }
+
+    .admin-container {
+      max-width: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .admin-header {
+      margin-bottom: 18px;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .admin-header h2 {
+      margin: 0;
+      font-size: 1.28rem;
+      font-weight: 650;
+    }
+
+    .admin-header p {
+      margin-top: 6px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .stats-grid {
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      border-left: none;
+      text-align: left;
+      padding: 18px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .stat-number {
+      font-size: 1.85rem;
+      color: var(--text-color);
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      margin-top: 8px;
+    }
+
+    #cotizaciones-container {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+    }
+
+    .cotizaciones-table {
+      box-shadow: none;
+      border-radius: 0;
+    }
+
+    .cotizaciones-table thead {
+      background: #f8fafc;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cotizaciones-table th,
+    .cotizaciones-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    .cotizaciones-table tr:hover {
+      background: rgba(var(--primary-rgb), 0.04);
+    }
+
+    .table-sort {
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0;
+    }
+
+    .table-sort-indicator {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .status-badge {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      text-transform: none;
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      justify-content: flex-start;
+    }
+
+    .btn-sm {
+      border-radius: 10px;
+      padding: 7px 9px;
+      font-size: 0.8rem;
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-color);
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pagination button {
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-color);
+      border-radius: 10px;
+      padding: 7px 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .pagination button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .modal-overlay {
+      justify-content: flex-end;
+      align-items: stretch;
+      padding: 0;
+      background: rgba(15, 23, 42, 0.35);
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+      max-width: 640px;
+      width: min(640px, 100%);
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      animation: drawerEnter 0.2s ease-out;
+    }
+
+    @keyframes drawerEnter {
+      from {
+        opacity: 0.8;
+        transform: translateX(22px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .modal-header,
+    .modal-actions {
+      border-radius: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .crm-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .crm-sidebar {
+        display: none;
+      }
+
+      .crm-main {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .crm-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .crm-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .crm-search,
+      .crm-select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .modal-content {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -758,58 +1143,77 @@
   </div>
 
   <!-- Admin Panel -->
-  <div id="panel-container">
-    <div class="admin-container">
-      <!-- Header -->
-      <div class="admin-header">
-        <div>
-          <h1>📊 Panel de Cotizaciones</h1>
-          <p style="margin: 5px 0 0 0; color: var(--text-muted);">Devices F2 - Administrador</p>
-        </div>
-        <div class="admin-controls">
-          <div class="filter-group">
-            <input type="text" id="search-input" placeholder="🔍 Buscar por nombre, email o teléfono..." style="padding: 10px; border: 2px solid var(--border-color); border-radius: 6px; font-size: 0.95em; flex: 1; max-width: 300px;">
-          </div>
-          <div class="filter-group">
-            <label for="filter-status">Estado:</label>
-            <select id="filter-status">
-              <option value="">Todos</option>
-              <option value="pendiente">📋 Pendiente</option>
-              <option value="contactado">📞 Contactado</option>
-              <option value="completado">✅ Completado</option>
-              <option value="cancelado">❌ Cancelado</option>
-            </select>
-          </div>
-          <button class="btn-refresh" onclick="cargarCotizaciones()">🔄 Actualizar</button>
-          <button class="logout-btn" onclick="cerrarSesion()">🚪 Salir</button>
-        </div>
-      </div>
+  <div id="panel-container" class="crm-shell">
+    <aside class="crm-sidebar">
+      <div class="crm-logo">Devices F2 CRM</div>
+      <nav class="crm-nav">
+        <a href="#" class="crm-nav-item active">Dashboard</a>
+        <a href="#" class="crm-nav-item">Cotizaciones</a>
+        <a href="#" class="crm-nav-item">Clientes</a>
+        <a href="#" class="crm-nav-item">Equipos</a>
+        <a href="#" class="crm-nav-item">Reparaciones</a>
+        <a href="#" class="crm-nav-item">Facturas</a>
+        <a href="#" class="crm-nav-item">Servicios</a>
+        <a href="#" class="crm-nav-item">Estadísticas</a>
+        <a href="#" class="crm-nav-item">Configuración</a>
+      </nav>
+    </aside>
 
-      <!-- Estadísticas -->
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" id="total-count">0</div>
-          <div class="stat-label">Total de Cotizaciones</div>
+    <main class="crm-main">
+      <header class="crm-header">
+        <div class="crm-header-copy">
+          <h1>Bienvenido al panel de administración</h1>
+          <p id="admin-current-date">-</p>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" id="pendiente-count">0</div>
-          <div class="stat-label">Pendientes</div>
+        <div class="crm-header-actions">
+          <input type="text" id="search-input" class="crm-search" placeholder="Buscar por nombre, email o teléfono..." aria-label="Buscar cotizaciones">
+          <select id="filter-status" class="crm-select" aria-label="Filtrar por estado">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="contactado">Contactado</option>
+            <option value="completado">Completado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+          <button class="btn-refresh" onclick="cargarCotizaciones()">Actualizar</button>
+          <button class="logout-btn" onclick="cerrarSesion()">Salir</button>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" id="contactado-count">0</div>
-          <div class="stat-label">Contactados</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="completado-count">0</div>
-          <div class="stat-label">Completados</div>
-        </div>
-      </div>
+      </header>
 
-      <!-- Tabla de Cotizaciones -->
-      <div id="cotizaciones-container">
-        <div class="loading">Cargando cotizaciones...</div>
+      <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+          <div>
+            <h2>Cotizaciones</h2>
+            <p>Seguimiento de solicitudes, estado y actividad comercial.</p>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-grid c-stat-grid" id="stats-grid">
+          <div class="stat-card c-stat-card">
+            <div class="stat-number" id="total-count">0</div>
+            <div class="stat-label c-stat-label">Total de Cotizaciones</div>
+          </div>
+          <div class="stat-card c-stat-card">
+            <div class="stat-number" id="pendiente-count">0</div>
+            <div class="stat-label c-stat-label">Pendientes</div>
+          </div>
+          <div class="stat-card c-stat-card">
+            <div class="stat-number" id="contactado-count">0</div>
+            <div class="stat-label c-stat-label">Contactados</div>
+          </div>
+          <div class="stat-card c-stat-card">
+            <div class="stat-number" id="completado-count">0</div>
+            <div class="stat-label c-stat-label">Completados</div>
+          </div>
+        </div>
+
+        <!-- Tabla de Cotizaciones -->
+        <div id="cotizaciones-container" class="c-card">
+          <div class="loading">Cargando cotizaciones...</div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <!-- Modal de Detalles -->
@@ -1194,6 +1598,10 @@
     let cotizacionesData = [];
     let cotizacionEditando = null;
     let adminEmailJsConfigPromise = null;
+    let currentPage = 1;
+    const pageSize = 8;
+    let sortBy = 'fecha';
+    let sortDirection = 'desc';
 
     function normalizeEmailForDelivery(email) {
       const normalized = String(email || '').trim().toLowerCase();
@@ -1327,14 +1735,45 @@
       return includeTime ? dateObj.toLocaleString('es-ES') : dateObj.toLocaleDateString('es-ES');
     }
 
+    function getTimestamp(fechaValor) {
+      if (!fechaValor) return 0;
+
+      if (typeof fechaValor === 'string' || typeof fechaValor === 'number') {
+        const parsed = new Date(fechaValor).getTime();
+        return Number.isNaN(parsed) ? 0 : parsed;
+      }
+
+      if (fechaValor.seconds !== undefined) {
+        return Number(fechaValor.seconds) * 1000;
+      }
+
+      if (fechaValor._seconds !== undefined) {
+        return Number(fechaValor._seconds) * 1000;
+      }
+
+      return 0;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+      const dateEl = document.getElementById('admin-current-date');
+      if (dateEl) {
+        dateEl.textContent = new Date().toLocaleString('es-ES', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
+
       // Filtrar por estado
       document.getElementById('filter-status').addEventListener('change', () => {
+        currentPage = 1;
         mostrarCotizaciones();
       });
       
       // Búsqueda en tiempo real
       document.getElementById('search-input').addEventListener('input', () => {
+        currentPage = 1;
         mostrarCotizaciones();
       });
     });
@@ -1363,6 +1802,7 @@
       if (result.success) {
         console.log(`✅ Cotizaciones cargadas: ${result.data.length} registros`);
         cotizacionesData = result.data || [];
+        currentPage = 1;
         mostrarCotizaciones();
         actualizarEstadisticas();
       } else {
@@ -1403,6 +1843,32 @@
         });
       }
 
+      cotizacionesFiltradas = cotizacionesFiltradas.sort((a, b) => {
+        const direction = sortDirection === 'asc' ? 1 : -1;
+
+        if (sortBy === 'nombre') {
+          const valueA = String(a.nombre || '').toLowerCase();
+          const valueB = String(b.nombre || '').toLowerCase();
+          return valueA.localeCompare(valueB) * direction;
+        }
+
+        if (sortBy === 'total') {
+          const valueA = Number(a.totalPrice || 0);
+          const valueB = Number(b.totalPrice || 0);
+          return (valueA - valueB) * direction;
+        }
+
+        if (sortBy === 'estado') {
+          const valueA = String(a.status || '').toLowerCase();
+          const valueB = String(b.status || '').toLowerCase();
+          return valueA.localeCompare(valueB) * direction;
+        }
+
+        const dateA = getTimestamp(a.fechaCreacion);
+        const dateB = getTimestamp(b.fechaCreacion);
+        return (dateA - dateB) * direction;
+      });
+
       if (cotizacionesFiltradas.length === 0) {
         const mensajeSearch = sanitizeHTML(searchTerm);
         const mensaje = searchTerm ? `📭 No hay resultados para "${mensajeSearch}"` : '📭 No hay cotizaciones para mostrar';
@@ -1414,23 +1880,35 @@
         return;
       }
 
+      const totalItems = cotizacionesFiltradas.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageItems = cotizacionesFiltradas.slice(start, end);
+
+      const getSortIndicator = (columnKey) => {
+        if (sortBy !== columnKey) return '';
+        return sortDirection === 'asc' ? '▲' : '▼';
+      };
+
       let html = `
         <table class="cotizaciones-table">
           <thead>
             <tr>
-              <th>Nombre</th>
+              <th><button class="table-sort" onclick="changeSort('nombre')">Nombre <span class="table-sort-indicator">${getSortIndicator('nombre')}</span></button></th>
               <th>Contacto</th>
               <th>Servicios</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Fecha</th>
+              <th><button class="table-sort" onclick="changeSort('total')">Total <span class="table-sort-indicator">${getSortIndicator('total')}</span></button></th>
+              <th><button class="table-sort" onclick="changeSort('estado')">Estado <span class="table-sort-indicator">${getSortIndicator('estado')}</span></button></th>
+              <th><button class="table-sort" onclick="changeSort('fecha')">Fecha <span class="table-sort-indicator">${getSortIndicator('fecha')}</span></button></th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
       `;
 
-      cotizacionesFiltradas.forEach(cot => {
+      pageItems.forEach(cot => {
         // SANITIZATION: All user-controlled data is escaped
         const nombreSafe = sanitizeHTML(cot.nombre || '-');
         const fecha = formatFecha(cot.fechaCreacion, false);
@@ -1468,12 +1946,35 @@
       html += `
           </tbody>
         </table>
-        <div style="padding: 15px; background: var(--border-color); text-align: center; color: var(--text-muted); font-size: 0.9em;">
-          Mostrando ${cotizacionesFiltradas.length} de ${cotizacionesData.length} cotizaciones
+        <div class="table-footer">
+          <div>
+            Mostrando ${start + 1}-${Math.min(end, totalItems)} de ${totalItems} cotizaciones
+          </div>
+          <div class="pagination">
+            <button onclick="changePage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>Anterior</button>
+            <span>Página ${currentPage} de ${totalPages}</span>
+            <button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Siguiente</button>
+          </div>
         </div>
       `;
 
       container.innerHTML = html;
+    }
+
+    function changeSort(column) {
+      if (sortBy === column) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortBy = column;
+        sortDirection = column === 'fecha' ? 'desc' : 'asc';
+      }
+      mostrarCotizaciones();
+    }
+
+    function changePage(nextPage) {
+      if (nextPage < 1) return;
+      currentPage = nextPage;
+      mostrarCotizaciones();
     }
 
     function actualizarEstadisticas() {

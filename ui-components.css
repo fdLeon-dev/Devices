@@ -1,0 +1,237 @@
+:root {
+  --ui-primary: #6C4CF1;
+  --ui-primary-hover: #5A3FE0;
+  --ui-bg: #F8FAFC;
+  --ui-card: #FFFFFF;
+  --ui-text: #0F172A;
+  --ui-text-secondary: #64748B;
+  --ui-success: #22C55E;
+  --ui-warning: #F59E0B;
+  --ui-error: #EF4444;
+  --ui-border: #E2E8F0;
+  --ui-radius: 16px;
+  --ui-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+}
+
+.c-card {
+  background: var(--ui-card);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  box-shadow: var(--ui-shadow);
+}
+
+.c-card-body {
+  padding: 20px;
+}
+
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.c-badge-success {
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.c-badge-warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: #92400E;
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.c-badge-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #991B1B;
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.c-input,
+.c-select,
+.c-textarea,
+.c-search {
+  width: 100%;
+  border: 1px solid var(--ui-border);
+  background: #fff;
+  color: var(--ui-text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.c-input:focus,
+.c-select:focus,
+.c-textarea:focus,
+.c-search:focus {
+  outline: none;
+  border-color: var(--ui-primary);
+  box-shadow: 0 0 0 3px rgba(108, 76, 241, 0.14);
+}
+
+.c-btn {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.c-btn-primary {
+  background: var(--ui-primary);
+  color: #fff;
+}
+
+.c-btn-primary:hover {
+  background: var(--ui-primary-hover);
+}
+
+.c-btn-ghost {
+  background: #fff;
+  border-color: var(--ui-border);
+  color: var(--ui-text);
+}
+
+.c-btn-ghost:hover {
+  border-color: var(--ui-primary);
+  color: var(--ui-primary);
+}
+
+.c-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.c-stat-card {
+  background: #fff;
+  border: 1px solid var(--ui-border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.c-stat-number {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--ui-text);
+  line-height: 1;
+}
+
+.c-stat-label {
+  color: var(--ui-text-secondary);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.c-section-shell {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--ui-border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.c-empty-state {
+  text-align: center;
+  color: var(--ui-text-secondary);
+  padding: 28px 18px;
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.process-item {
+  position: relative;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--ui-border);
+  background: #fff;
+}
+
+.process-item::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 18px;
+  height: 1px;
+  background: #cbd5e1;
+}
+
+.process-item:last-child::after {
+  display: none;
+}
+
+.process-step {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(108, 76, 241, 0.12);
+  color: var(--ui-primary);
+  margin-bottom: 10px;
+}
+
+.process-item h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.process-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ui-text-secondary);
+  line-height: 1.5;
+}
+
+.faq-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-item {
+  border: 1px solid var(--ui-border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 16px;
+}
+
+.faq-item h3 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.faq-item p {
+  margin: 0;
+  color: var(--ui-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 768px) {
+  .c-section-shell {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .process-item::after {
+    display: none;
+  }
+}
