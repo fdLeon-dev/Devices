@@ -31,6 +31,62 @@ async function callEmailEndpoint(endpoint, emailData) {
   };
 }
 
+function mapServiceDetails(rawServices) {
+  const catalog = {
+    'reparacion-basica': { label: 'Reparación Básica', price: 1500 },
+    'reparacion-avanzada': { label: 'Reparación Avanzada', price: 2500 },
+    'upgrade-ram': { label: 'Upgrade de RAM', price: 800 },
+    'upgrade-gpu': { label: 'Upgrade de GPU', price: 2000 },
+    'upgrade-motherboard': { label: 'Upgrade de Motherboard', price: 1600 },
+    'upgrade-ssd': { label: 'Upgrade de SSD', price: 1200 },
+    'upgrade-cpu': { label: 'Upgrade de CPU', price: 2500 },
+    'upgrade-completo': { label: 'Upgrade Completo', price: 3500 },
+    'ensamblaje-basico': { label: 'Ensamblaje Básico', price: 1500 },
+    'ensamblaje-gaming': { label: 'Ensamblaje Gaming', price: 2500 },
+    'ensamblaje-personalizado': { label: 'Ensamblaje Personalizado', price: 3000 },
+    'mantenimiento': { label: 'Mantenimiento', price: 1000 },
+    'asesoramiento': { label: 'Asesoramiento Técnico', price: 200 },
+    'soporte-remoto': { label: 'Soporte Técnico Remoto', price: 400 },
+    'instalacion-software': { label: 'Instalación de Software', price: 150 },
+    'instalacion-software-personalizado': { label: 'Instalación de Software Personalizado', price: 300 },
+    'recuperacion-datos': { label: 'Recuperación de Datos', price: 800 },
+    'recuperacion-datos-avanzada': { label: 'Recuperación de Datos Avanzada', price: 1500 },
+    'configuracion-red': { label: 'Configuración de Red', price: 300 },
+    'configuracion-red-avanzada': { label: 'Configuración de Red Avanzada', price: 500 },
+    'limpieza-profunda': { label: 'Limpieza Profunda', price: 300 },
+    'diagnostico-completo': { label: 'Diagnóstico Completo', price: 100 },
+    'diagnostico-hardware': { label: 'Diagnóstico de Hardware', price: 200 },
+    'optimizacion-sistema': { label: 'Optimización de Sistema', price: 350 },
+    'backup-datos': { label: 'Backup de Datos', price: 200 },
+    'configuracion-backup': { label: 'Configuración de Backup', price: 400 },
+    'limpieza-malware': { label: 'Limpieza de Malware', price: 550 },
+    'reemplazo-pantalla': { label: 'Reemplazo de Pantalla', price: 1800 },
+    'instalacion-antivirus': { label: 'Instalación de Antivirus', price: 250 },
+    'sistema-enfriamiento': { label: 'Sistema de Enfriamiento', price: 600 }
+  };
+
+  const serviceCodes = Array.isArray(rawServices)
+    ? rawServices.map((item) => String(item || '').trim()).filter(Boolean)
+    : String(rawServices || '').split(',').map((item) => item.trim()).filter(Boolean);
+
+  return serviceCodes.map((code) => {
+    const item = catalog[code];
+    return {
+      label: item?.label || code || 'Servicio personalizado',
+      price: Number(item?.price || 0)
+    };
+  });
+}
+
+function getUrgencyMultiplierText(urgencyValue) {
+  const multipliers = {
+    normal: '1x',
+    urgente: '1.3x',
+    express: '1.5x'
+  };
+  return multipliers[urgencyValue] || '1x';
+}
+
 async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
   // Rate limiting en cliente
   if (!checkRateLimit('email')) {
@@ -42,23 +98,37 @@ async function sendEmailViaServer(datosFormulario, pdfBlob = null) {
   }
 
   try {
+    const serviceItems = mapServiceDetails(datosFormulario.servicio);
+    const servicePrice = Number(datosFormulario.precios?.basePrice || serviceItems.reduce((sum, item) => sum + item.price, 0));
+    const urgencyCost = Number(datosFormulario.precios?.urgencyPrice || 0);
+    const warrantyPrice = Number(datosFormulario.precios?.warrantyPrice || 0);
+    const total = Number(datosFormulario.precios?.totalPrice || datosFormulario.total || (servicePrice + urgencyCost + warrantyPrice));
+
     // Preparar datos para enviar al servidor
     const emailData = {
       to_email: datosFormulario.email && datosFormulario.email !== 'No proporcionado' ? datosFormulario.email : 'devices.f02@gmail.com',
       userName: datosFormulario.nombre,
       userEmail: datosFormulario.email && datosFormulario.email !== 'No proporcionado' ? datosFormulario.email : 'no-reply@devices.f2',
       userPhone: datosFormulario.telefono || 'No proporcionado',
-      servicesList: Array.isArray(datosFormulario.servicio) 
-        ? datosFormulario.servicio.join(', ') 
-        : datosFormulario.servicio || '',
+      servicesList: serviceItems.length ? serviceItems.map((item) => item.label).join(', ') : 'Servicio personalizado',
+      servicesBreakdown: serviceItems.length
+        ? serviceItems.map((item) => `<tr><td>${item.label}</td><td style="text-align:right;">$ ${item.price.toLocaleString('es-UY')}</td></tr>`).join('')
+        : `<tr><td>Servicio personalizado</td><td style="text-align:right;">$ ${servicePrice.toLocaleString('es-UY')}</td></tr>`,
+      selectedServices: serviceItems.length,
       message: datosFormulario.mensaje || '',
+      problemDescription: datosFormulario.mensaje || '',
       urgencyText: datosFormulario.urgency 
         ? getUrgencyText(datosFormulario.urgency) 
         : 'Normal (3-5 días)',
+      urgencyMultiplier: datosFormulario.urgencyMultiplier || getUrgencyMultiplierText(datosFormulario.urgency),
       warrantyText: datosFormulario.warranty 
         ? getWarrantyText(datosFormulario.warranty) 
         : '30 días',
-      total: datosFormulario.precios?.totalPrice || datosFormulario.total || 0
+      servicePrice,
+      urgencyCost,
+      warrantyPrice,
+      total,
+      preferred_date: datosFormulario.fechaPreferida || ''
     };
 
     console.log('📧 Enviando email via servidor seguro...');
