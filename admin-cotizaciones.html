@@ -931,6 +931,12 @@
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
     }
 
+    .table-scroll {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
     .cotizaciones-table {
       box-shadow: none;
       border-radius: 0;
@@ -1094,6 +1100,10 @@
       .table-footer {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .cotizaciones-table {
+        min-width: 760px;
       }
 
       .modal-content {
@@ -1428,7 +1438,7 @@
 
         // Mostrar panel
         document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('panel-container').style.display = 'block';
+        document.getElementById('panel-container').style.display = 'grid';
 
         // Limpiar formulario
         document.getElementById('login-form').reset();
@@ -1581,7 +1591,7 @@
         if (session.authenticated) {
           sessionStorage.setItem('admin_user', session.user || 'admin');
           document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('panel-container').style.display = 'block';
+          document.getElementById('panel-container').style.display = 'grid';
           cargarCotizaciones();
           iniciarSessionTimeout();
           return;
@@ -1893,6 +1903,7 @@
       };
 
       let html = `
+        <div class="table-scroll">
         <table class="cotizaciones-table">
           <thead>
             <tr>
@@ -1946,6 +1957,7 @@
       html += `
           </tbody>
         </table>
+        </div>
         <div class="table-footer">
           <div>
             Mostrando ${start + 1}-${Math.min(end, totalItems)} de ${totalItems} cotizaciones
