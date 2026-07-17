@@ -3695,32 +3695,6 @@ body {
   background: #fff;
 }
 
-.hero-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.hero-metric-item {
-  border: 1px solid #dbe3ef;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 14px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hero-metric-item strong {
-  font-size: 1.06rem;
-  line-height: 1;
-}
-
-.hero-metric-item span {
-  color: #64748b;
-  font-size: 0.78rem;
-}
 
 .hero-graphic {
   border-radius: 26px;
@@ -3771,9 +3745,6 @@ body {
     height: 380px;
   }
 
-  .hero-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 768px) {
@@ -3783,10 +3754,6 @@ body {
 
   .hero-kicker {
     margin-inline: auto;
-  }
-
-  .hero-metrics {
-    grid-template-columns: 1fr;
   }
 
   .hero-graphic {
