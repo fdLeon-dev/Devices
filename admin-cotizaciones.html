@@ -1668,8 +1668,37 @@
       return 'Servicio tecnico';
     }
 
-    async function enviarDevolucionCompletado(cotizacion, notas, devolucionFactura) {
+    function buildEstadoEmailText(statusValue) {
+      const status = String(statusValue || '').trim().toLowerCase();
+      const map = {
+        pendiente: {
+          estado: 'pendiente',
+          servicio: 'Servicio pendiente'
+        },
+        contactado: {
+          estado: 'procesado',
+          servicio: 'Servicio procesado'
+        },
+        completado: {
+          estado: 'completado',
+          servicio: 'Servicio completado'
+        },
+        cancelado: {
+          estado: 'cancelado',
+          servicio: 'Servicio cancelado'
+        }
+      };
+
+      return map[status] || {
+        estado: status || 'pendiente',
+        servicio: `Servicio ${status || 'pendiente'}`
+      };
+    }
+
+    async function enviarDevolucionCompletado(cotizacion, notas, devolucionFactura, estadoOverride = '') {
       const recipient = normalizeEmailForDelivery(cotizacion.email);
+      const estadoActual = String(estadoOverride || cotizacion.status || 'pendiente').trim().toLowerCase();
+      const estadoInfo = buildEstadoEmailText(estadoActual);
 
       if (!validateEmail(recipient)) {
         return {
@@ -1691,11 +1720,11 @@
           userName: String(cotizacion.nombre || 'Cliente').trim() || 'Cliente',
           quoteId: String(cotizacion.id || '').trim(),
           folio: String(cotizacion.folio || cotizacion.id || '').trim(),
-          estado: 'completado',
+          estado: estadoInfo.estado,
           servicesList: normalizeServicesForEmail(cotizacion),
           total: Number(cotizacion.totalPrice || 0).toFixed(2),
-          devolucionFactura: devolucionFactura || 'Sin observaciones de devolucion.',
-          message: devolucionFactura || 'Tu servicio fue marcado como completado.',
+          devolucionFactura: devolucionFactura || `${estadoInfo.servicio}. Sin observaciones de devolución.`,
+          message: devolucionFactura || `${estadoInfo.servicio}.`,
           notas: notas || '',
           notasAdicionalesTecnico: notas || '',
           notas_adicionales_tecnico: notas || '',
@@ -2414,6 +2443,8 @@
 
       const notas = sanitizeHTML((document.getElementById('edit-notas')?.value || '')).trim();
       const devolucionFactura = sanitizeHTML((document.getElementById('edit-devolucion-factura')?.value || '')).trim();
+      const estadoSeleccionado = String(document.getElementById('edit-status')?.value || cotizacionEditando.status || 'pendiente').trim().toLowerCase();
+      const estadoInfo = buildEstadoEmailText(estadoSeleccionado);
 
       if (!devolucionFactura && !notas) {
         alert('⚠️ Por favor, agrega una nota u observación de devolución antes de enviar el email.');
@@ -2427,20 +2458,21 @@
         return;
       }
 
-      if (!confirm(`¿Enviar email de devolución/factura final a ${emailDestino}?`)) return;
+      if (!confirm(`¿Enviar email de devolución (${estadoInfo.servicio}) a ${emailDestino}?`)) return;
 
       const btn = document.getElementById('btn-enviar-devolucion');
       if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
 
       try {
-        const result = await enviarDevolucionCompletado(cotizacionEditando, notas, devolucionFactura);
+        const result = await enviarDevolucionCompletado(cotizacionEditando, notas, devolucionFactura, estadoSeleccionado);
 
         if (result.sent) {
-          mostrarToast(`✅ Email enviado correctamente a ${result.recipient}`, '#16a34a');
+          mostrarToast(`✅ ${estadoInfo.servicio}: email enviado a ${result.recipient}`, '#16a34a');
           registrarAuditoria('EMAIL_DEVOLUCION_ENVIADO', {
             cotizacionId: cotizacionEditando.id,
             cliente: cotizacionEditando.nombre,
             destinatario: result.recipient,
+            estado: estadoInfo.estado,
             template: 'EMAILJS_COMPLETION_TEMPLATE_ID'
           }, 'success');
         } else {
